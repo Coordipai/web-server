@@ -1,19 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
-
-
-class GitHubUser(BaseModel):
-    login: str
-    id: int
-    html_url: str
-    email: Optional[str] = None
-
-
-class RepoInfo(BaseModel):
-    name: str
-    private: bool
-    url: str
-    description: str | None
+from pydantic import BaseModel
 
 
 class User(BaseModel):
@@ -26,3 +12,9 @@ class User(BaseModel):
     career: str
 
     model_config = {"from_attributes": True}
+
+
+class AuthUser(BaseModel):
+    user: Optional[User] = None
+    access_token: str
+    refresh_token: str
