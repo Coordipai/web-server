@@ -1,20 +1,16 @@
-from typing import Optional
 from pydantic import BaseModel
 
+from src.user.schemas import UserRes
 
-class User(BaseModel):
+
+class AuthReq(BaseModel):
     name: str
-    email: Optional[str] = None
     discord_id: int
-    github_id: int
-    github_name: str
     category: str
     career: str
 
-    model_config = {"from_attributes": True}
 
-
-class AuthUser(BaseModel):
-    user: Optional[User] = None
+class AuthRes(BaseModel):
+    user: UserRes
     access_token: str
     refresh_token: str

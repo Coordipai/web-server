@@ -1,21 +1,29 @@
-from database import get_db
-from sqlalchemy.orm import Session
-from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.models import User
+from user.schemas import UserReq, UserRes
+from user import repository
+from auth.util.redis import get_token_from_redis
 
-from auth.models import User
 
-
-def find_user_by_user_id(user_id: str, db: Session = Depends(get_db)):
+async def create_user(db: AsyncSession, user_req: UserReq) -> User:
     """
-    Find User by User ID
+    Create new user
     """
-    user = db.query(User).filter(User.user_id == user_id).first()
-    return user
+    existing_user = await repository.find_user_by_github_id(db, user_req.github_id)
+    if existing_user:
+        # TODO Add Error (User already exists)
+        return
 
+    github_access_token = await get_token_from_redis("github_oauth", user_req.github_id)
 
-def find_user_by_github_id(github_id: str, db: Session = Depends(get_db)):
-    """
-    Find User by GitHub ID
-    """
-    user = db.query(User).filter(User.github_id == github_id).first()
-    return user
+    user = User(
+        name=user_req.name,
+        discord_id=user_req.discord_id,
+        github_id=user_req.github_id,
+        github_name=user_req.github_name,
+        github_access_token=github_access_token,
+        category=user_req.category,
+        career=user_req.career,
+    )
+
+    return await repository.create_user(db, user)

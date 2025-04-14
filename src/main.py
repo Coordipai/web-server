@@ -27,13 +27,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[FRONTEND_URL],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Register Global Exception Handler
 register_exception_handlers(app)
@@ -51,3 +44,12 @@ def read_root():
 @app.get("/oh-no")
 def app_exception_handler():
     raise TestException("Oh no")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[FRONTEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

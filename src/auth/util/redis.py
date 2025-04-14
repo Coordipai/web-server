@@ -2,25 +2,33 @@ import redis.asyncio as redis
 from src import config
 
 redis_client = redis.Redis(
-    host=config.REDIS_HOST,
+    host="localhost",
     port=config.REDIS_PORT,
     db=0,
+    password="1234",
     decode_responses=True,
 )
 
 
-def save_token_to_redis(token_type: str, id: int, token: str):
+async def save_token_to_redis(token_type: str, id: int, token: str):
     """
     Save Token in Redis
     """
-    redis_client.set(f"{token_type}:{id}", token)
+    await redis_client.set(f"{token_type}:{id}", token)
 
 
-def get_token_from_redis(token_type: str, id: int):
+async def get_token_from_redis(token_type: str, id: int):
     """
     Get Token from Redis
     """
-    return redis_client.get(f"{token_type}:{id}")
+    return await redis_client.get(f"{token_type}:{id}")
+
+
+async def delete_token_from_redis(token: str):
+    """
+    Delete Token from Redis
+    """
+    return await redis_client.delete(token)
 
 
 # TODO Refresh accessToken
