@@ -1,14 +1,13 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Identity, Integer, String
 from src.database import Base
 
 
 class User(Base):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, Identity(), primary_key=True, index=True)
     name = Column(String(255))
-    email = Column(String(255))
     discord_id = Column(Integer, unique=True, index=True)
     github_id = Column(Integer, unique=True, index=True)
     github_name = Column(String(255))
