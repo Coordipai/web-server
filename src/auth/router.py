@@ -13,7 +13,7 @@ GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
 router = APIRouter(prefix="/auth", tags=["GitHub OAuth"])
 
 
-@router.get("/login", summary="Redirect to GitHub login page")
+@router.get("/github/login", summary="Redirect to GitHub login page")
 def login_with_github():
     """
     Redirect to GitHub OAuth
@@ -32,6 +32,14 @@ async def github_callback(request: Request, db: AsyncSession = Depends(get_db)):
     return await service.github_callback(request, db)
 
 
+@router.post("/login", summary="Login existing user")
+async def login(
+    db: AsyncSession = Depends(get_db),
+    access_token: Optional[str] = Cookie(None),
+) -> AuthRes:
+    return await service.login(db, access_token)
+
+
 @router.post("/register", summary="Register new user")
 async def register(
     auth_req: AuthReq,
@@ -41,6 +49,14 @@ async def register(
     return await service.register(db, auth_req, access_token)
 
 
-# TODO Refresh token
-# TODO Logout
+@router.post("/refresh", summary="Get new token using refresh token")
+async def refresh(refresh_token: str, db: AsyncSession = Depends(get_db)):
+    return await service.refresh(db, refresh_token)
+
+
+@router.post("/logout", summary="Get new token using refresh token")
+async def logout(access_token: str):
+    return await service.logout(access_token)
+
+
 # TODO Unregister

@@ -11,7 +11,7 @@ from auth.util.redis import (
 )
 from auth.util.github import get_github_access_token, get_github_user_info
 from auth.schemas import AuthReq, AuthRes
-from src.user.repository import find_user_by_github_id
+from src.user.repository import find_user_by_github_id, find_user_by_user_id
 from src.user.schemas import UserReq, UserRes
 from src.user.service import create_user
 import logging
@@ -53,6 +53,9 @@ async def github_callback(
     existing_user = await find_user_by_github_id(db, github_id)
 
     if existing_user:
+        """
+        Redirect to Login Page
+        """
         access_token = create_access_token(github_id)
         redirect = RedirectResponse(url=f"{FRONTEND_URL}/")
         redirect.set_cookie(
@@ -66,6 +69,9 @@ async def github_callback(
             path="/",
         )
     else:
+        """
+        Redirect to Register Page
+        """
         # Save GitHub AccessToken in redis temporary
         await save_token_to_redis(GITHUB_OAUTH_REDIS, github_id, github_access_token)
         access_token = create_access_token(github_id)
@@ -88,12 +94,24 @@ async def github_callback(
 async def register(
     db: AsyncSession, auth_req: AuthReq, access_token: Optional[str] = Cookie(None)
 ):
+    """
+    Register new user
+
+    Returns user data and access & refresh token
+    """
     if not access_token:
         # TODO Raise custom exception
         raise HTTPException(status_code=404, detail="GitHub credential info not found")
 
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
+
+    existing_user = await find_user_by_github_id(db, github_id)
+
+    if existing_user:
+        # TODO Raise custom exception
+        raise HTTPException(status_code=409, detail="User already exists")
+
     github_user = await get_github_user_info(github_access_token)
 
     new_user = UserReq(
@@ -118,3 +136,83 @@ async def register(
     return AuthRes(
         user=user_res, access_token=access_token, refresh_token=refresh_token
     )
+
+
+async def login(db: AsyncSession, access_token: Optional[str] = Cookie(None)):
+    """
+    Login existing user
+
+    Returns user data and access & refresh token
+    """
+    if not access_token:
+        # TODO Raise custom exception
+        raise HTTPException(status_code=404, detail="GitHub credential info not found")
+
+    github_id = parse_token(access_token)
+    github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
+
+    existing_user = await find_user_by_github_id(db, github_id)
+
+    if not existing_user:
+        # TODO Raise custom exception
+        raise HTTPException(status_code=404, detail="User data not found")
+
+    # Delete github access token stored in redis
+    await delete_token_from_redis(github_access_token)
+
+    access_token = create_access_token(existing_user.id)
+    refresh_token = create_refresh_token(existing_user.id)
+
+    # Save refresh token in redis
+    await save_token_to_redis(REFRESH_TOKEN_REDIS, existing_user.id, refresh_token)
+
+    user_res = UserRes.model_validate(existing_user)
+
+    return AuthRes(
+        user=user_res, access_token=access_token, refresh_token=refresh_token
+    )
+
+
+async def refresh(db: AsyncSession, refresh_token: str):
+    """
+    Return new access & refresh token
+
+    Validate existing refresh token and reissue new tokens
+    """
+    # redis compoare for validation
+    user_id = parse_token(refresh_token)
+    redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
+
+    if refresh_token != redis_refresh_token:
+        # TODO Raise custom Exceptions
+        raise HTTPException(status_code=401, detail="Refresh token invalid")
+
+    user = find_user_by_user_id(db, user_id)
+
+    if not user:
+        # TODO Raise custom Exceptions
+        raise HTTPException(status_code=404, detail="No matching user data")
+
+    # Delete existing refresh token stored in redis
+    await delete_token_from_redis(refresh_token)
+
+    access_token = create_access_token(user.id)
+    refresh_token = create_refresh_token(user.id)
+
+    # Save refresh token in redis
+    await save_token_to_redis(REFRESH_TOKEN_REDIS, user.id, refresh_token)
+
+    return AuthRes(user=user, access_token=access_token, refresh_token=refresh_token)
+
+
+async def logout(access_token: str):
+    """
+    Logout user
+
+    Deleting refresh token stored in redis
+    """
+    user_id = parse_token(access_token)
+
+    # Delete existing refresh token stored in redis
+    redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
+    await delete_token_from_redis(redis_refresh_token)
