@@ -1,19 +1,16 @@
-from typing import List
 from pydantic import BaseModel
 
-class GitHubUser(BaseModel):
-    login: str
-    id: int
-    html_url: str
-    notification_email: str
+from src.user.schemas import UserRes
 
-class RepoInfo(BaseModel):
+
+class AuthReq(BaseModel):
     name: str
-    private: bool
-    url: str
-    description: str | None
+    discord_id: int
+    category: str
+    career: str
 
-class GitHubAuthResponse(BaseModel):
-    user: GitHubUser
-    repositories: List[RepoInfo]
-    
+
+class AuthRes(BaseModel):
+    user: UserRes
+    access_token: str
+    refresh_token: str
