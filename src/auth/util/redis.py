@@ -2,10 +2,10 @@ import redis.asyncio as redis
 from src import config
 
 redis_client = redis.Redis(
-    host="localhost",
+    host=config.REDIS_HOST,
     port=config.REDIS_PORT,
     db=0,
-    password="1234",
+    password=config.REDIS_PASSWORD,
     decode_responses=True,
 )
 
@@ -29,6 +29,3 @@ async def delete_token_from_redis(token: str):
     Delete Token from Redis
     """
     return await redis_client.delete(token)
-
-
-# TODO Refresh accessToken

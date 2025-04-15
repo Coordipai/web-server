@@ -20,6 +20,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Redis
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 # FastAPI
 FRONTEND_URL = os.getenv("FRONTEND_URL")
