@@ -16,7 +16,7 @@ from exceptions.definitions import TestException
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await initialize_database()
+    initialize_database()
     yield
 
 
