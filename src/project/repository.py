@@ -47,3 +47,24 @@ def find_project_by_name(db: Session, project_name: str) -> Project | None:
         logger.error(f"Database error: {e}")
         db.rollback()
         raise SQLError()
+
+
+def update_project(db: Session, project: Project) -> Project:
+    try:
+        db.commit()
+        db.refresh(project)
+        return project
+    except SQLAlchemyError as e:
+        logger.error(f"Database error during project creation: {e}")
+        db.rollback()
+        raise SQLError()
+
+
+def delete_project(db: Session, project: Project):
+    try:
+        db.delete(project)
+        db.commit()
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
