@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from src.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
 from auth import service
-from auth.schemas import AuthReq, AuthRes
+from auth.schemas import AuthReq, AuthRes, LogoutReq, RefreshReq
 from src.database import get_db
 
 GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
@@ -50,13 +50,13 @@ async def register(
 
 
 @router.post("/refresh", summary="Get new token using refresh token")
-async def refresh(refresh_token: str, db: Session = Depends(get_db)):
-    return await service.refresh(db, refresh_token)
+async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
+    return await service.refresh(db, refresh_token.refresh_token)
 
 
 @router.post("/logout", summary="Get new token using refresh token")
-async def logout(access_token: str):
-    return await service.logout(access_token)
+async def logout(access_token: LogoutReq):
+    return await service.logout(access_token.access_token)
 
 
 # TODO Unregister
