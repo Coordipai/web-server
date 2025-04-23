@@ -1,26 +1,25 @@
 import logging
 from datetime import datetime
-from exceptions.definitions import TestException
 from exceptions.schemas import ErrorResponse
-from fastapi import FastAPI, Request, status
+from exceptions.definitions import BaseAppException
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
 
-def create_error_response(message):
+
+async def base_app_exception_handler(
+    request: Request, exc: BaseAppException
+) -> JSONResponse:
     now = datetime.now().isoformat()
+    logger.warning(f"{exc.status_code} - {exc.message}")
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=ErrorResponse(message=message, timestamp=now).model_dump()
+        status_code=exc.status_code,
+        content=ErrorResponse(message=exc.message, timestamp=now).model_dump(),
     )
 
-# TODO Remove TestExeption
-async def test_exception_handler(request: Request, exc: TestException) -> JSONResponse:
-    """Handles ResourceNotFoundException."""
-    logger.warning("Test Exception")
-    return create_error_response(exc.message)
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Adds exception handlers to the FastAPI application."""
-    app.add_exception_handler(TestException, test_exception_handler)
+    print("✅ Global Error Handler Initializing complete!")
+    app.add_exception_handler(BaseAppException, base_app_exception_handler)
