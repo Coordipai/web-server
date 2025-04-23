@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import Cookie, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from src.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
 from auth.util.jwt import create_access_token, create_refresh_token, parse_token
 from auth.util.redis import (
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 async def github_callback(
     request: Request,
-    db: AsyncSession,
+    db: Session,
 ):
     """
     Callback function for GitHub OAuth
@@ -50,7 +50,7 @@ async def github_callback(
     github_id = github_user["id"]
 
     # Check if there is user data in db
-    existing_user = await find_user_by_github_id(db, github_id)
+    existing_user = find_user_by_github_id(db, github_id)
 
     if existing_user:
         """
@@ -92,7 +92,7 @@ async def github_callback(
 
 
 async def register(
-    db: AsyncSession, auth_req: AuthReq, access_token: Optional[str] = Cookie(None)
+    db: Session, auth_req: AuthReq, access_token: Optional[str] = Cookie(None)
 ):
     """
     Register new user
@@ -106,7 +106,7 @@ async def register(
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
 
-    existing_user = await find_user_by_github_id(db, github_id)
+    existing_user = find_user_by_github_id(db, github_id)
 
     if existing_user:
         # TODO Raise custom exception
@@ -138,7 +138,7 @@ async def register(
     )
 
 
-async def login(db: AsyncSession, access_token: Optional[str] = Cookie(None)):
+async def login(db: Session, access_token: Optional[str] = Cookie(None)):
     """
     Login existing user
 
@@ -151,7 +151,7 @@ async def login(db: AsyncSession, access_token: Optional[str] = Cookie(None)):
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
 
-    existing_user = await find_user_by_github_id(db, github_id)
+    existing_user = find_user_by_github_id(db, github_id)
 
     if not existing_user:
         # TODO Raise custom exception
@@ -173,7 +173,7 @@ async def login(db: AsyncSession, access_token: Optional[str] = Cookie(None)):
     )
 
 
-async def refresh(db: AsyncSession, refresh_token: str):
+async def refresh(db: Session, refresh_token: str):
     """
     Return new access & refresh token
 
