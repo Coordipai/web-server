@@ -10,9 +10,6 @@ from src.config import FRONTEND_URL
 # Import routers
 from auth.router import router as auth_router
 
-# TODO Remove TestExeption
-from exceptions.definitions import TestException
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,12 +35,6 @@ app.include_router(auth_router)
 @app.get("/", summary="Test API")
 def read_root():
     return {"message": "Hello World"}
-
-
-# TODO Remove TestExeption
-@app.get("/oh-no")
-def app_exception_handler():
-    raise TestException("Oh no")
 
 
 app.add_middleware(

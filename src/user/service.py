@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from src.exceptions.definitions import UserAlreadyExist
 from src.models import User
 from user.schemas import UserReq, UserRes
 from user import repository
@@ -11,8 +12,7 @@ async def create_user(db: Session, user_req: UserReq) -> User:
     """
     existing_user = repository.find_user_by_github_id(db, user_req.github_id)
     if existing_user:
-        # TODO Add Error (User already exists)
-        return
+        raise UserAlreadyExist()
 
     github_access_token = await get_token_from_redis("github_oauth", user_req.github_id)
 
