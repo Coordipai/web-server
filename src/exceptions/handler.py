@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from exceptions.definitions import *
 from exceptions.schemas import ErrorResponse
-from fastapi import FastAPI, Request, status
+from exceptions.definitions import BaseAppException
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,4 +21,5 @@ async def base_app_exception_handler(
 
 
 def register_exception_handlers(app: FastAPI) -> None:
+    print("✅ Global Error Handler Initializing complete!")
     app.add_exception_handler(BaseAppException, base_app_exception_handler)
