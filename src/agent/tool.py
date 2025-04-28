@@ -1,74 +1,77 @@
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain
+from langchain.agents import Tool, initialize_agent, AgentType
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.schema import HumanMessage, SystemMessage
+from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import Qdrant
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.agents import Tool
+from langchain.chains import LLMChain
+from langchain_core.tools import tool
+from src.agent import prompts
 
-# LLM 및 임베딩 초기화 (각자의 API 키로 변경)
-llm = OpenAI(api_key="YOUR_OPENAI_API_KEY", temperature=0.7)
-embeddings = OpenAIEmbeddings(api_key="YOUR_OPENAI_API_KEY")
-
-# 메모리 내 벡터 DB 생성
-vector_db = Qdrant.from_texts([], embeddings)
-
-# 작업 분해를 위한 프롬프트 템플릿 및 체인 생성
-decomposition_template = PromptTemplate(
-    input_variables=["prompt"],
-    template=(
-        "당신은 프로젝트 매니저 역할의 AI 에이전트입니다. "
-        "아래의 작업을 실행 가능한 단계들로 분해하세요.\n\n"
-        "작업: {prompt}\n\n"
-        "단계:"
-    )
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    temperature=0,
+    max_output_tokens=200,
+    google_api_key="AIzaSyAXsfG3E5aiC51KUeUvxkf0vrmyeTfo5yA"
 )
-decomposition_chain = LLMChain(llm=llm, prompt=decomposition_template)
+# embeddings = OpenAIEmbeddings(api_key="YOUR_OPENAI_API_KEY")
 
-# Tool 1: 데이터를 벡터 DB에 추가하는 도구
-def add_data_tool(data: list[str]) -> str:
+# vector_db = Qdrant.from_texts([], embeddings)
+
+decomposition_chain = llm | prompts.decomposition_prompt_template
+
+@tool
+async def add_data_tool(data: list[str]) -> str:
+    """
+    Add data to the vector database.
+    """
     return 0
 
-# Tool 2: 벡터 DB에서 관련 데이터를 검색하는 도구
-def search_data_tool(query: str, k: int = 3) -> str:
+@tool
+async def search_data_tool(query: str, k: int = 3) -> str:
+    """
+    Search the vector database for relevant data.
+    """
     return 0
 
-# Tool 3: 입력 프롬프트를 실행 가능한 단계로 분해하는 도구
-def decompose_task_tool(prompt: str) -> str:
-    return 0
+@tool
+async def decompose_task_tool(prompt: str) -> list:
+    """
+    Decomposes the input prompt into actionable steps.
+    """
+    # 벡터 DB에 쿼리 추가
+    # vector_db.add_texts([prompt])
+    
+    # 작업 분해 체인 실행
+    steps_str = str(decomposition_chain.invoke(prompt))
 
-# Tool 4: 원본 프롬프트와 검색된 컨텍스트를 결합하여 RAG 프롬프트 생성 도구
-def create_rag_prompt_tool(original_prompt: str, context: str) -> str:
-    return 0
+    steps_list = [line.strip() for line in steps_str.split("\n") if line.strip()]
+    return steps_list
 
-# Tool 5: LLM과 통신하여 응답을 받아오는 도구
-def communicate_with_llm_tool(prompt: str) -> str:
-    return 0
-
-# LangChain 에이전트가 사용할 수 있도록 Tool 객체로 등록할 수 있습니다.
-tools = [
-    Tool(
-        name="AddData",
-        func=add_data_tool,
-        description="벡터 DB에 데이터를 추가합니다. 입력은 문자열 리스트입니다."
-    ),
-    Tool(
-        name="SearchData",
-        func=search_data_tool,
-        description="벡터 DB에서 쿼리와 관련된 데이터를 검색합니다. 입력은 검색 쿼리와 (선택적으로) 반환할 결과 수입니다."
-    ),
-    Tool(
-        name="DecomposeTask",
-        func=decompose_task_tool,
-        description="입력 프롬프트를 실행 가능한 단계들로 분해합니다."
-    ),
-    Tool(
-        name="CreateRAGPrompt",
-        func=create_rag_prompt_tool,
-        description="원본 프롬프트와 검색된 컨텍스트를 결합하여 RAG 프롬프트를 생성합니다."
-    ),
-    Tool(
-        name="CommunicateLLM",
-        func=communicate_with_llm_tool,
-        description="LLM에게 프롬프트를 전달하여 응답을 받아옵니다."
+@tool
+async def create_rag_prompt_tool(original_prompt: str, context: str) -> str:
+    """
+    Create a RAG (Retrieval-Augmented Generation) prompt using the original prompt and context.
+    """
+    rag_prompt = prompts.rag_prompt_template.format(
+        original_prompt=original_prompt,
+        context=context
     )
-]
+    
+    return rag_prompt
+
+@tool
+async def communicate_with_llm_tool(prompt: str) -> str:
+    """
+    Communicates with the LLM using the provided prompt.
+    """
+
+    message = [
+        SystemMessage(content="You are a professional assistant."),
+        HumanMessage(content=prompt)
+    ]
+    response = await llm.agenerate([message])
+    
+    return response.generations[0][0].text
+
+tools = [add_data_tool, search_data_tool, decompose_task_tool, create_rag_prompt_tool, communicate_with_llm_tool]
