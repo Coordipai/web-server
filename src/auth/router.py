@@ -1,43 +1,62 @@
-from fastapi import APIRouter, Request
+from typing import Optional
 from fastapi.responses import RedirectResponse
-from src.auth import service, config, schemas
-
-router = APIRouter(prefix="/auth/github", tags=["GitHub OAuth"])
+from fastapi import APIRouter, Cookie, Request, Response
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from src.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
+from auth import service
+from auth.schemas import AuthReq, AuthRes, LogoutReq, RefreshReq
+from src.database import get_db
 
 GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
 
-@router.get("/login", summary="Redirect to GitHub login page")
+router = APIRouter(prefix="/auth", tags=["GitHub OAuth"])
+
+
+@router.get("/github/login", summary="Redirect to GitHub login page")
 def login_with_github():
+    """
+    Redirect to GitHub OAuth
+    """
     github_url = (
         f"{GITHUB_OAUTH_AUTHORIZE_URL}"
-        f"?client_id={config.GITHUB_CLIENT_ID}"
-        f"&redirect_uri={config.REDIRECT_URI}"
+        f"?client_id={GITHUB_CLIENT_ID}"
+        f"&redirect_uri={GITHUB_REDIRECT_URI}"
         "&scope=repo user"
     )
-    return RedirectResponse(github_url)
+    return RedirectResponse(github_url, status_code=302)
 
-@router.get("/callback", response_model=schemas.GitHubAuthResponse, summary="Callback for GitHub login")
-async def github_callback(request: Request):
-    code = request.query_params.get("code")
-    if not code:
-        return {"error": "No code provided"}
 
-    access_token = await service.exchange_code_for_token(code)
-    if not access_token:
-        return {"error": "Failed to get access token"}
+@router.get("/github/callback", summary="Callback for GitHub login")
+async def github_callback(request: Request, db: Session = Depends(get_db)):
+    return await service.github_callback(request, db)
 
-    user = await service.get_github_user(access_token)
-    repos = await service.get_user_repos(access_token)
 
-    return schemas.GitHubAuthResponse(
-        user=user,
-        repositories=[
-            schemas.RepoInfo(
-                name=repo["name"],
-                private=repo["private"],
-                url=repo["html_url"],
-                description=repo.get("description"),
-            )
-            for repo in repos
-        ]
-    )
+@router.post("/login", summary="Login existing user")
+async def login(
+    db: Session = Depends(get_db),
+    access_token: Optional[str] = Cookie(None),
+) -> AuthRes:
+    return await service.login(db, access_token)
+
+
+@router.post("/register", summary="Register new user")
+async def register(
+    auth_req: AuthReq,
+    db: Session = Depends(get_db),
+    access_token: Optional[str] = Cookie(None),
+) -> AuthRes:
+    return await service.register(db, auth_req, access_token)
+
+
+@router.post("/refresh", summary="Get new token using refresh token")
+async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
+    return await service.refresh(db, refresh_token.refresh_token)
+
+
+@router.post("/logout", summary="Get new token using refresh token")
+async def logout(access_token: LogoutReq):
+    return await service.logout(access_token.access_token)
+
+
+# TODO Unregister

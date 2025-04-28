@@ -13,10 +13,16 @@ dependencies = [
     "dotenv (>=0.9.9,<0.10.0)",
     "httpx (>=0.28.1,<0.29.0)",
     "langchain"
-]
+    "python-jose (>=3.4.0,<4.0.0)",
+    "sqlalchemy (>=2.0.40,<3.0.0)",
+    "redis (>=5.2.1,<6.0.0)",
+    "pymysql (>=1.1.1,<2.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "colorlog (>=6.9.0,<7.0.0)",
+
 
 [tool.poetry]
-packages = [{include = "web_server", from = "src"}]
+packages = [{include = "src"}]
 
 
 [build-system]
