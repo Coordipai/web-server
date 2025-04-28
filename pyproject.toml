@@ -19,6 +19,7 @@ dependencies = [
     "pymysql (>=1.1.1,<2.0.0)",
     "python-multipart (>=0.0.20,<0.0.21)",
     "colorlog (>=6.9.0,<7.0.0)",
+]
 
 
 [tool.poetry]
