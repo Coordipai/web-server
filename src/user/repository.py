@@ -36,7 +36,7 @@ def find_user_by_github_id(db: Session, github_id: str) -> User | None:
 
 def find_user_by_user_id(db: Session, user_id: str) -> User | None:
     try:
-        result = db.execute(select(User).filter(User.user_id == user_id))
+        result = db.execute(select(User).filter(User.id == user_id))
         return result.scalars().first()
     except NoResultFound:
         return None

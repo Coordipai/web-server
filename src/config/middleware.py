@@ -29,6 +29,9 @@ async def jwt_authentication_middleware(request: Request, call_next):
     if any(request.url.path.startswith(path) for path in api_docs_allow_paths):
         return await call_next(request)
 
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     try:
         # Extract Authorization header
         auth_header = request.headers.get("Authorization")

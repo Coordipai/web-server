@@ -25,7 +25,7 @@ def create_project(db: Session, project: Project) -> Project:
 
 def find_project_by_id(db: Session, project_id: int) -> Project | None:
     try:
-        result = db.execute(select(Project).filter(Project.project_id == project_id))
+        result = db.execute(select(Project).filter(Project.id == project_id))
         return result.scalars().first()
     except NoResultFound:
         return None
@@ -37,9 +37,7 @@ def find_project_by_id(db: Session, project_id: int) -> Project | None:
 
 def find_project_by_name(db: Session, project_name: str) -> Project | None:
     try:
-        result = db.execute(
-            select(Project).filter(Project.project_name == project_name)
-        )
+        result = db.execute(select(Project).filter(Project.name == project_name))
         return result.scalars().first()
     except NoResultFound:
         return None
