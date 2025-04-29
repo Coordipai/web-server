@@ -36,5 +36,4 @@ async def get_github_user_info(access_token: str) -> dict:
         headers = {"Authorization": f"Bearer {access_token}"}
 
         res = await client.get(GITHUB_API_USER_URL, headers=headers)
-        print(res.json())
         return res.json()

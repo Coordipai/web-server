@@ -27,10 +27,8 @@ async def create_user(db: Session, user_req: UserReq) -> UserRes:
         career=user_req.career,
     )
 
-    saved_user = await create_user(db, new_user)
-    user_res = UserRes.model_validate(saved_user)
-
-    return user_res
+    saved_user = repository.create_user(db, new_user)
+    return saved_user
 
 
 def search_users_by_name(db: Session, user_name: str):

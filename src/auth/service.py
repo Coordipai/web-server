@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import Cookie, HTTPException, Request
+from fastapi import Cookie, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
@@ -116,7 +116,6 @@ async def register(
         github_name=github_user["login"],
         github_access_token=github_access_token,
     )
-
     saved_user = await create_user(db, new_user)
     user_res = UserRes.model_validate(saved_user)
 

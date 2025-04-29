@@ -3,8 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.config.config import DATABASE_URL
 from src.config.logger_config import setup_logger, add_daily_file_handler
+from src.exceptions.definitions import SQLError
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 session = sessionmaker(bind=engine)
 
 Base = declarative_base()
@@ -31,4 +32,6 @@ async def get_db():
     try:
         yield db
     except:
+        raise SQLError()
+    finally:
         db.close()

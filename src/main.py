@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config.middleware import jwt_authentification_middleware
+from src.config.middleware import jwt_authentication_middleware
 from src.exceptions.definitions import BaseAppException
 import src.models  # noqa: F401
 from src.config.database import initialize_database
@@ -32,11 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def jwt_middleware(request: Request, call_next):
-    return jwt_authentification_middleware(request, call_next)
+app.middleware("http")(jwt_authentication_middleware)
 
 
 @app.get("/", summary="Test API")

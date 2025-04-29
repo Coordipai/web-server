@@ -3,11 +3,15 @@ from src.auth.util.jwt import parse_token
 from src.exceptions.definitions import InvalidJwtToken, JwtTokenNotFound
 
 
-async def jwt_authentification_middleware(self, request: Request, call_next):
-    # Allow paths
-    open_paths = ["/auth/login", "/auth/register"]
+async def jwt_authentication_middleware(request: Request, call_next):
+    allow_paths = [
+        "/auth/github/login",
+        "/auth/github/callback",
+        "/auth/login",
+        "/auth/register",
+    ]
 
-    if any(request.url.path.startswith(path) for path in open_paths):
+    if any(request.url.path.startswith(path) for path in allow_paths):
         return await call_next(request)
 
     # Extract Authorization header
