@@ -62,6 +62,11 @@ class AccessTokenNotFound(UnauthorizedException):
         super().__init__("AccessToken을 찾을 수 없습니다.")
 
 
+class ProjectOwnerMismatched(UnauthorizedException):
+    def __init__(self):
+        super().__init__("프로젝트 소유권자만 프로젝트를 삭제시킬 수 있습니다.")
+
+
 """
 404 NOT_FOUND
 """

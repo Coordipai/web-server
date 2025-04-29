@@ -5,7 +5,11 @@ from sqlalchemy.orm import Session
 from src.models import Project
 from project.schemas import ProjectReq, ProjectRes
 from project import repository
-from src.exceptions.definitions import ProjectAlreadyExist, ProjectNotFound
+from src.exceptions.definitions import (
+    ProjectAlreadyExist,
+    ProjectNotFound,
+    ProjectOwnerMismatched,
+)
 from src.user.repository import find_user_by_user_id
 from src.user.schemas import UserRes
 
@@ -38,7 +42,7 @@ def create_project(
 
     saved_project = repository.create_project(db, project)
     owner_user = find_user_by_user_id(db, user_id)
-    print(owner_user)
+
     project_res = ProjectRes(
         id=saved_project.id,
         name=saved_project.name,
@@ -67,7 +71,18 @@ def get_project(project_id: int, db: Session):
     if not existing_project:
         raise ProjectNotFound()
 
-    project_res = ProjectRes.model_validate(existing_project)
+    owner_user = find_user_by_user_id(db, existing_project.owner)
+
+    project_res = ProjectRes(
+        id=existing_project.id,
+        name=existing_project.name,
+        owner=UserRes.model_validate(owner_user),
+        repo_name=existing_project.repo_name,
+        start_date=existing_project.start_date,
+        end_date=existing_project.end_date,
+        sprint_unit=existing_project.sprint_unit,
+        discord_channel_id=existing_project.discord_channel_id,
+    )
 
     return project_res
 
@@ -100,7 +115,7 @@ def update_project(
     return project_res
 
 
-def delete_project(project_id: int, db: Session):
+def delete_project(user_id: int, project_id: int, db: Session):
     """
     Delete the existing project by project id
     """
@@ -108,7 +123,10 @@ def delete_project(project_id: int, db: Session):
     if not existing_project:
         raise ProjectNotFound()
 
-    repository.delete_project(db, existing_project)
+    if existing_project.owner == user_id:
+        repository.delete_project(db, existing_project)
+    else:
+        raise ProjectOwnerMismatched()
 
 
 async def upload_file(project_name: str, files: List[UploadFile]):

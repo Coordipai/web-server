@@ -45,10 +45,12 @@ def update_project(
 
 @router.delete("/{project_id}", summary="Delete existing project")
 def delete_project(
+    request: Request,
     project_id: int,
     db: Session = Depends(get_db),
 ):
-    return service.delete_project(project_id, db)
+    user_id = request.state.user_id
+    return service.delete_project(user_id, project_id, db)
 
 
 def parse_project_req_str(project_req: str = Form(...)):
