@@ -1,9 +1,11 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
+from src.user.schemas import UserRes
+
 
 class ProjectReq(BaseModel):
-    project_name: str
+    name: str
     repo_name: str
     start_date: datetime
     end_date: datetime
@@ -12,8 +14,9 @@ class ProjectReq(BaseModel):
 
 
 class ProjectRes(BaseModel):
-    project_id: int
-    project_name: str
+    id: int
+    name: str
+    owner: UserRes
     repo_name: str
     start_date: datetime
     end_date: datetime

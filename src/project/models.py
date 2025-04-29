@@ -6,8 +6,9 @@ from src.config.database import Base
 class Project(Base):
     __tablename__ = "project"
 
-    project_id = Column(Integer, Identity(), primary_key=True, index=True)
-    project_name = Column(String(255), unique=True, index=True)
+    id = Column(Integer, Identity(), primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True)
+    owner = Column(Integer, index=True)
     repo_name = Column(String(255))
     start_date = Column(DateTime)
     end_date = Column(DateTime)

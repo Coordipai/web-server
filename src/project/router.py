@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
-from typing import List
-from fastapi import APIRouter, File, Form, UploadFile
+from typing import List, Optional
+from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -15,11 +15,15 @@ router = APIRouter(prefix="/project", tags=["Project"])
 
 @router.post("/", summary="Create a new project")
 def create_project(
+    request: Request,
     project_req: str = Form(...),
-    files: List[UploadFile] = File(...),
+    files: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db),
 ):
-    return service.create_project(parse_project_req_str(project_req), files, db)
+    user_id = request.state.user_id
+    return service.create_project(
+        user_id, parse_project_req_str(project_req), db, files
+    )
 
 
 @router.get("/{project_id}", summary="Get existing project")
