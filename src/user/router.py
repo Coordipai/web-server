@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from user import service
 
-from src.database import get_db
+from src.config.database import get_db
 
 router = APIRouter(prefix="/user", tags=["User"])
 

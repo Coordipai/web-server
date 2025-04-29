@@ -1,8 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.config import DATABASE_URL
-from src.logger_config import setup_logger, add_daily_file_handler
+from src.config.config import DATABASE_URL
+from src.config.logger_config import setup_logger, add_daily_file_handler
 
 engine = create_engine(DATABASE_URL, echo=True)
 session = sessionmaker(bind=engine)

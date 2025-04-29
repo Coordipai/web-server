@@ -3,10 +3,10 @@ from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, Cookie, Request, Response
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from src.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
+from src.config.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
 from auth import service
-from auth.schemas import AuthReq, AuthRes, LogoutReq, RefreshReq
-from src.database import get_db
+from auth.schemas import AuthReq, AuthRes, RefreshReq
+from src.config.database import get_db
 
 GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
 
@@ -55,8 +55,9 @@ async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
 
 
 @router.post("/logout", summary="Get new token using refresh token")
-async def logout(access_token: LogoutReq):
-    return await service.logout(access_token.access_token)
+async def logout(request: Request):
+    user_id = request.state.user_id
+    return await service.logout(user_id)
 
 
 # TODO Unregister

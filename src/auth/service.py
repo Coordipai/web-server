@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import Cookie, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from src.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
+from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
 from auth.util.jwt import create_access_token, create_refresh_token, parse_token
 from auth.util.redis import (
     delete_token_from_redis,
@@ -197,14 +197,12 @@ async def refresh(db: Session, refresh_token: str):
     return AuthRes(user=user, access_token=access_token, refresh_token=refresh_token)
 
 
-async def logout(access_token: str):
+async def logout(user_id: int):
     """
     Logout user
 
     Deleting refresh token stored in redis
     """
-    user_id = parse_token(access_token)
-
     # Delete existing refresh token stored in redis
     redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
     await delete_token_from_redis(redis_refresh_token)
