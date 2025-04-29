@@ -1,12 +1,13 @@
-import logging
 from datetime import datetime
 from exceptions.schemas import ErrorResponse
 from exceptions.definitions import BaseAppException
-from fastapi import FastAPI, Request
+from fastapi import Request
 from fastapi.responses import JSONResponse
+from src.config.logger_config import setup_logger, add_daily_file_handler
 
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
+add_daily_file_handler(logger)
 
 
 async def base_app_exception_handler(
@@ -18,8 +19,3 @@ async def base_app_exception_handler(
         status_code=exc.status_code,
         content=ErrorResponse(message=exc.message, timestamp=now).model_dump(),
     )
-
-
-def register_exception_handlers(app: FastAPI) -> None:
-    print("✅ Global Error Handler Initializing complete!")
-    app.add_exception_handler(BaseAppException, base_app_exception_handler)
