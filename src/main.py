@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.middleware import jwt_authentication_middleware
-from src.exceptions.definitions import BaseAppException, InvalidJsonDataFormat
+from src.exceptions.definitions import BaseAppException
 import src.models  # noqa: F401
 from src.config.database import initialize_database
 from exceptions.handler import base_app_exception_handler
@@ -30,11 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.middleware("http")(jwt_authentication_middleware)
-
-
-@app.get("/", summary="Test API")
-def read_root():
-    return {"message": "Hello World"}
 
 
 # Include routers
