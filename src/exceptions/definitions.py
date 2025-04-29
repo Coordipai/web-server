@@ -37,6 +37,21 @@ class UnauthorizedException(BaseAppException):
         super().__init__(message, 401)
 
 
+class JwtTokenNotFound(UnauthorizedException):
+    def __init__(self):
+        super().__init__("인증 정보를 찾을 수 없습니다.")
+
+
+class InvalidJwtToken(UnauthorizedException):
+    def __init__(self):
+        super().__init__("유효하지 않은 토큰입니다.")
+
+
+class ExpiredJwtToken(UnauthorizedException):
+    def __init__(self):
+        super().__init__("만료된 토큰입니다.")
+
+
 class InvalidRefreshToken(UnauthorizedException):
     def __init__(self):
         super().__init__("RefreshToken이 유효하지 않습니다.")

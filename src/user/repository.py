@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from src.exceptions.definitions import SQLError
-from src.logger_config import add_daily_file_handler, setup_logger
+from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.models import User
 
 logger = setup_logger(__name__)

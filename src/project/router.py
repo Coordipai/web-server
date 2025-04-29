@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from src.database import get_db
+from src.config.database import get_db
 from src.exceptions.definitions import InvalidJsonDataFormat, InvalidJsonFormat
 from src.project.schemas import ProjectReq
 from project import service

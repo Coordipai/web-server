@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Identity, Integer, String
-from src.database import Base
+from src.config.database import Base
 
 
 class User(Base):

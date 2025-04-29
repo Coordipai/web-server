@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config.middleware import jwt_authentication_middleware
 from src.exceptions.definitions import BaseAppException
 import src.models  # noqa: F401
-from src.database import initialize_database
+from src.config.database import initialize_database
 from exceptions.handler import register_exception_handlers
-from src.config import FRONTEND_URL
+from src.config.config import FRONTEND_URL
 
 # Import routers
 from auth.router import router as auth_router
@@ -31,6 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.middleware("http")(jwt_authentication_middleware)
 
 
 @app.get("/", summary="Test API")

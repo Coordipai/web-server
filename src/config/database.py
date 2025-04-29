@@ -1,10 +1,11 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.config import DATABASE_URL
-from src.logger_config import setup_logger, add_daily_file_handler
+from src.config.config import DATABASE_URL
+from src.config.logger_config import setup_logger, add_daily_file_handler
+from src.exceptions.definitions import SQLError
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 session = sessionmaker(bind=engine)
 
 Base = declarative_base()
@@ -23,12 +24,14 @@ def initialize_database():
     logger.info("✅ Database Initializing complete!")
 
 
-async def get_db():
+def get_db():
     """
     Create SQLAlchemy Sessoin
     """
     db = session()
     try:
         yield db
-    except:
+    except Exception:
+        raise SQLError()
+    finally:
         db.close()
