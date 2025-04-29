@@ -1,8 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from src.config.config import DATABASE_URL
-from src.config.logger_config import setup_logger, add_daily_file_handler
+from src.config.logger_config import setup_logger
 from src.exceptions.definitions import SQLError
 
 engine = create_engine(DATABASE_URL, echo=False)
@@ -11,7 +12,6 @@ session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 logger = setup_logger(__name__)
-add_daily_file_handler(logger)
 
 
 def initialize_database():
@@ -31,7 +31,7 @@ def get_db():
     db = session()
     try:
         yield db
-    except Exception:
+    except SQLAlchemyError as e:
         raise SQLError()
     finally:
         db.close()

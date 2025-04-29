@@ -1,12 +1,11 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.middleware import jwt_authentication_middleware
 from src.exceptions.definitions import BaseAppException
 import src.models  # noqa: F401
 from src.config.database import initialize_database
-from exceptions.handler import register_exception_handlers
+from exceptions.handler import base_app_exception_handler
 from src.config.config import FRONTEND_URL
 
 # Import routers
@@ -21,10 +20,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Initialize Database and Global Exception Handler
 initialize_database()
-register_exception_handlers(app)
-
+app.add_exception_handler(BaseAppException, base_app_exception_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[FRONTEND_URL],
@@ -33,11 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.middleware("http")(jwt_authentication_middleware)
-
-
-@app.get("/", summary="Test API")
-def read_root():
-    return {"message": "Hello World"}
 
 
 # Include routers
