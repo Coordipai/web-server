@@ -24,14 +24,14 @@ def initialize_database():
     logger.info("✅ Database Initializing complete!")
 
 
-async def get_db():
+def get_db():
     """
     Create SQLAlchemy Sessoin
     """
     db = session()
     try:
         yield db
-    except:
+    except Exception:
         raise SQLError()
     finally:
         db.close()
