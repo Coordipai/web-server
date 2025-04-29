@@ -1,23 +1,43 @@
-from fastapi import FastAPI
+import secrets
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.openapi.docs import get_swagger_ui_html
 
-from src.config.middleware import jwt_authentication_middleware
-from src.exceptions.definitions import BaseAppException
 import src.models  # noqa: F401
+from src.config.middleware import jwt_authentication_middleware
 from src.config.database import initialize_database
+from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
+from src.exceptions.definitions import BaseAppException
 from exceptions.handler import base_app_exception_handler
-from src.config.config import FRONTEND_URL
 
 # Import routers
 from auth.router import router as auth_router
 from project.router import router as project_router
 from user.router import router as user_router
 
+security = HTTPBasic()
+
+
+def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, SWAGGER_USERNAME)
+    correct_password = secrets.compare_digest(credentials.password, SWAGGER_PASSWORD)
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return True
+
 
 app = FastAPI(
     title="Coordipai Web Server",
     description="",
     version="1.0.0",
+    docs_url=None,
+    redoc_url=None,
 )
 
 initialize_database()
@@ -30,6 +50,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.middleware("http")(jwt_authentication_middleware)
+
+
+@app.get("/docs", include_in_schema=False)
+async def get_documentation(
+    credentials: HTTPBasicCredentials = Depends(verify_credentials),
+):
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
 
 
 # Include routers
