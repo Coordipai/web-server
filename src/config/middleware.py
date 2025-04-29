@@ -15,14 +15,18 @@ add_daily_file_handler(logger)
 
 
 async def jwt_authentication_middleware(request: Request, call_next):
-    allow_paths = [
+    auth_allow_paths = [
         "/auth/github/login",
         "/auth/github/callback",
         "/auth/login",
         "/auth/register",
     ]
+    api_docs_allow_paths = ["/docs", "/openapi.json"]
 
-    if any(request.url.path.startswith(path) for path in allow_paths):
+    if any(request.url.path.startswith(path) for path in auth_allow_paths):
+        return await call_next(request)
+
+    if any(request.url.path.startswith(path) for path in api_docs_allow_paths):
         return await call_next(request)
 
     if request.method == "OPTIONS":
