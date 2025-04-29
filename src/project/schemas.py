@@ -1,7 +1,33 @@
+from typing import List
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
+from src.project.models import Project
+from src.user.models import User
 from src.user.schemas import UserRes
+
+
+class ProjectUserReq(BaseModel):
+    id: int
+    role: str
+
+
+class ProjectUserRes(BaseModel):
+    name: str
+    github_id: int
+    github_name: str
+    category: str
+    role: str
+
+    @classmethod
+    def from_user(cls, user: User, role: str) -> "ProjectUserRes":
+        return cls(
+            name=user.name,
+            github_id=user.github_id,
+            github_name=user.github_name,
+            category=user.category,
+            role=role,
+        )
 
 
 class ProjectReq(BaseModel):
@@ -11,6 +37,7 @@ class ProjectReq(BaseModel):
     end_date: datetime
     sprint_unit: int
     discord_chnnel_id: int
+    members: List[ProjectUserReq]
 
 
 class ProjectRes(BaseModel):
@@ -22,5 +49,22 @@ class ProjectRes(BaseModel):
     end_date: datetime
     sprint_unit: int
     discord_channel_id: int
+    members: List[ProjectUserRes]
 
     model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    def from_project(
+        cls, project: Project, owner: User, project_members: list[ProjectUserRes]
+    ) -> "ProjectRes":
+        return cls(
+            id=project.id,
+            name=project.name,
+            owner=UserRes.model_validate(owner),
+            repo_name=project.repo_name,
+            start_date=project.start_date,
+            end_date=project.end_date,
+            sprint_unit=project.sprint_unit,
+            discord_channel_id=project.discord_channel_id,
+            members=project_members,
+        )

@@ -2,14 +2,16 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 from sqlalchemy.orm import Session
 
-from src.models import Project
-from project.schemas import ProjectReq, ProjectRes
+from src.models import Project, ProjectUser
+from project.schemas import ProjectReq, ProjectRes, ProjectUserRes
 from project import repository
 from src.exceptions.definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,
 )
+
+from src.project_user.repository import create_project_user
 from src.user.repository import find_user_by_user_id
 from src.user.schemas import UserRes
 
@@ -41,18 +43,19 @@ def create_project(
     )
 
     saved_project = repository.create_project(db, project)
-    owner_user = find_user_by_user_id(db, user_id)
+    project_members = []
 
-    project_res = ProjectRes(
-        id=saved_project.id,
-        name=saved_project.name,
-        owner=UserRes.model_validate(owner_user),
-        repo_name=saved_project.repo_name,
-        start_date=saved_project.start_date,
-        end_date=saved_project.end_date,
-        sprint_unit=saved_project.sprint_unit,
-        discord_channel_id=saved_project.discord_channel_id,
-    )
+    for req_member in project_req.members:
+        found_user = find_user_by_user_id(db, req_member.id)
+        project_user = ProjectUser(
+            user=found_user, project=saved_project, role=req_member.role
+        )
+        saved_project_user = create_project_user(db, project_user)
+        project_member = ProjectUserRes.from_user(found_user, saved_project_user.role)
+        project_members.append(project_member)
+
+    owner_user = find_user_by_user_id(db, user_id)
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
 
     # TODO Embedding project files
     # Check files exist
@@ -73,16 +76,13 @@ def get_project(project_id: int, db: Session):
 
     owner_user = find_user_by_user_id(db, existing_project.owner)
 
-    project_res = ProjectRes(
-        id=existing_project.id,
-        name=existing_project.name,
-        owner=UserRes.model_validate(owner_user),
-        repo_name=existing_project.repo_name,
-        start_date=existing_project.start_date,
-        end_date=existing_project.end_date,
-        sprint_unit=existing_project.sprint_unit,
-        discord_channel_id=existing_project.discord_channel_id,
-    )
+    project_members = []
+    for project_user in existing_project.members:
+        found_user = find_user_by_user_id(db, project_user.user_id)
+        project_member = ProjectUserRes.from_user(found_user, project_user.role)
+        project_members.append(project_member)
+
+    project_res = ProjectRes.from_project(existing_project, owner_user, project_members)
 
     return project_res
 
@@ -107,10 +107,19 @@ def update_project(
     existing_project.discord_channel_id = (project_req.discord_chnnel_id,)
 
     saved_project = repository.update_project(db, existing_project)
-    project_res = ProjectRes.model_validate(saved_project)
 
     # TODO Embedding project files
     # saved_files = await upload_file(saved_project.project_name, files)
+
+    owner_user = find_user_by_user_id(db, saved_project.owner)
+
+    project_members = []
+    for project_user in saved_project.members:
+        found_user = find_user_by_user_id(db, project_user.user_id)
+        project_member = ProjectUserRes.from_user(found_user, project_user.role)
+        project_members.append(project_member)
+
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
 
     return project_res
 
@@ -123,7 +132,7 @@ def delete_project(user_id: int, project_id: int, db: Session):
     if not existing_project:
         raise ProjectNotFound()
 
-    if existing_project.owner == user_id:
+    if existing_project.owner == int(user_id):
         repository.delete_project(db, existing_project)
     else:
         raise ProjectOwnerMismatched()

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Identity, Integer, String
+from sqlalchemy.orm import relationship
 from src.config.database import Base
 
 
@@ -15,3 +16,7 @@ class Project(Base):
     sprint_unit = Column(Integer)
     discord_channel_id = Column(Integer, unique=True, index=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    members = relationship(
+        "ProjectUser", back_populates="project", cascade="all, delete-orphan"
+    )
