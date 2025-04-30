@@ -12,6 +12,7 @@ class UserReq(BaseModel):
 
 
 class UserRes(BaseModel):
+    id: int
     name: str
     discord_id: int
     github_id: int
