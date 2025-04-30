@@ -9,6 +9,13 @@ from src.config.database import get_db
 from src.response.error_definitions import InvalidJsonDataFormat, InvalidJsonFormat
 from src.project.schemas import ProjectReq, ProjectRes
 from project import service
+from src.response.schemas import SuccessResponse
+from src.response.success_definitions import (
+    project_create_success,
+    project_delete_success,
+    project_read_success,
+    project_update_success,
+)
 
 router = APIRouter(prefix="/project", tags=["Project"])
 
@@ -16,7 +23,7 @@ router = APIRouter(prefix="/project", tags=["Project"])
 @router.post(
     "/",
     summary="Create a new project",
-    response_model=ProjectRes,
+    response_model=SuccessResponse[ProjectRes],
 )
 def create_project(
     request: Request,
@@ -43,24 +50,26 @@ def create_project(
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    return service.create_project(
+    data = service.create_project(
         user_id, parse_project_req_str(project_req), db, files
     )
+    return project_create_success(data)
 
 
 @router.get(
     "/{project_id}",
     summary="Get existing project",
-    response_model=ProjectRes,
+    response_model=SuccessResponse[ProjectRes],
 )
 def get_project(project_id: int, db: Session = Depends(get_db)):
-    return service.get_project(project_id, db)
+    data = service.get_project(project_id, db)
+    return project_read_success(data)
 
 
 @router.put(
     "/{project_id}",
     summary="Update existing project",
-    response_model=ProjectRes,
+    response_model=SuccessResponse[ProjectRes],
 )
 def update_project(
     project_id: int,
@@ -68,19 +77,25 @@ def update_project(
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
 ):
-    return service.update_project(
+    data = service.update_project(
         project_id, parse_project_req_str(project_req), files, db
     )
+    return project_update_success(data)
 
 
-@router.delete("/{project_id}", summary="Delete existing project")
+@router.delete(
+    "/{project_id}",
+    summary="Delete existing project",
+    response_model=SuccessResponse,
+)
 def delete_project(
     request: Request,
     project_id: int,
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    return service.delete_project(user_id, project_id, db)
+    service.delete_project(user_id, project_id, db)
+    return project_delete_success()
 
 
 def parse_project_req_str(project_req: str = Form(...)):
