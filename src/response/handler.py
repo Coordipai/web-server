@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TypeVar
+from typing import Optional, TypeVar
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from src.config.logger_config import setup_logger, add_daily_file_handler
@@ -21,7 +21,7 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     )
 
 
-def success_handler(status_code: int, message: str, data: T):
+def success_handler(status_code: int, message: str, data: Optional[T] = None):
     return SuccessResponse(
         status_code=status_code, content=SuccessContent(message=message, data=data)
     )
