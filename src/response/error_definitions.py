@@ -140,3 +140,8 @@ class GitHubAccessTokenError(InternalServerErrorException):
 class SQLError(InternalServerErrorException):
     def __init__(self):
         super().__init__("DB 관련 로직 처리 중 문제가 발생했습니다.")
+
+
+class GitHubApiError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__("GitHub 요청 처리 중 문제가 발생했습니다.")
