@@ -11,7 +11,7 @@ from auth.util.redis import (
 )
 from auth.util.github import get_github_access_token, get_github_user_info
 from auth.schemas import AuthReq, AuthRes
-from src.exceptions.definitions import (
+from src.response.error_definitions import (
     AccessTokenNotFound,
     GitHubCredentialCodeNotFound,
     GitHubAccessTokenError,

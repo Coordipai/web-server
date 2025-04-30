@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from src.config.config import DATABASE_URL
 from src.config.logger_config import setup_logger
-from src.exceptions.definitions import SQLError
+from src.response.error_definitions import SQLError
 
 engine = create_engine(DATABASE_URL, echo=False)
 session = sessionmaker(bind=engine)
