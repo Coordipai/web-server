@@ -45,3 +45,12 @@ def project_update_success(data: T):
 
 def project_delete_success():
     return success_handler(200, "프로젝트 삭제 성공")
+
+
+"""
+User Success Response
+"""
+
+
+def user_search_success(data: T):
+    return success_handler(200, "사용자 조회 성공", data)

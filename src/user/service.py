@@ -7,7 +7,7 @@ from src.models import User
 from auth.util.redis import get_token_from_redis
 
 
-async def create_user(db: Session, user_req: UserReq) -> UserRes:
+async def create_user(db: Session, user_req: UserReq):
     """
     Create new user
     """
@@ -31,8 +31,8 @@ async def create_user(db: Session, user_req: UserReq) -> UserRes:
     return saved_user
 
 
-def search_users_by_name(db: Session, user_name: str):
-    users = db.query(User).filter(User.username.ilike(f"%{user_name}%")).all()
+def search_users_by_name(user_name: str, db: Session):
+    users = db.query(User).filter(User.name.ilike(f"%{user_name}%")).all()
     user_res_list = []
 
     for user in users:
