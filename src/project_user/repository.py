@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from src.exceptions.definitions import SQLError
+from src.response.error_definitions import SQLError
 from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.models import ProjectUser
 

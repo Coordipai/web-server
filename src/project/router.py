@@ -6,7 +6,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
-from src.exceptions.definitions import InvalidJsonDataFormat, InvalidJsonFormat
+from src.response.error_definitions import InvalidJsonDataFormat, InvalidJsonFormat
 from src.project.schemas import ProjectReq, ProjectRes
 from project import service
 

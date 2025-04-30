@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from src.models import Project, ProjectUser
 from project.schemas import ProjectReq, ProjectRes, ProjectUserRes
 from project import repository
-from src.exceptions.definitions import (
+from src.response.error_definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,

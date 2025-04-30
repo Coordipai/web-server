@@ -9,13 +9,33 @@ import src.models  # noqa: F401
 from src.config.middleware import jwt_authentication_middleware
 from src.config.database import initialize_database
 from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
-from src.exceptions.definitions import BaseAppException
-from exceptions.handler import base_app_exception_handler
+from src.response.error_definitions import BaseAppException
+from src.response.handler import exception_handler
 
 # Import routers
 from auth.router import router as auth_router
 from project.router import router as project_router
 from user.router import router as user_router
+
+
+app = FastAPI(
+    title="Coordipai Web Server",
+    description="",
+    version="1.0.0",
+    docs_url=None,
+    redoc_url=None,
+)
+
+initialize_database()
+app.add_exception_handler(BaseAppException, exception_handler)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[FRONTEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.middleware("http")(jwt_authentication_middleware)
 
 security = HTTPBasic()
 
@@ -30,26 +50,6 @@ def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
             headers={"WWW-Authenticate": "Basic"},
         )
     return True
-
-
-app = FastAPI(
-    title="Coordipai Web Server",
-    description="",
-    version="1.0.0",
-    docs_url=None,
-    redoc_url=None,
-)
-
-initialize_database()
-app.add_exception_handler(BaseAppException, base_app_exception_handler)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[FRONTEND_URL],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-app.middleware("http")(jwt_authentication_middleware)
 
 
 @app.get("/docs", include_in_schema=False)

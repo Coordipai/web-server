@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from src.exceptions.definitions import UserAlreadyExist
+from src.response.error_definitions import UserAlreadyExist
 from src.models import User
 from user.schemas import UserReq, UserRes
 from user import repository

@@ -9,7 +9,7 @@ from src.config.config import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
-from src.exceptions.definitions import ExpiredJwtToken, InvalidJwtToken
+from src.response.error_definitions import ExpiredJwtToken, InvalidJwtToken
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
