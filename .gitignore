@@ -5,7 +5,7 @@
 .vscode/
 
 # Python cache files
-__pycache__/
+**/**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -51,8 +51,7 @@ staticfiles/
 media/
 
 # For application default credentials
-.json
-*.json
+app_credentials.json
 
 # For chroma database files
 */chroma_db/
