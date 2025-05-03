@@ -148,5 +148,7 @@ class SQLError(InternalServerErrorException):
 
 
 class GitHubApiError(InternalServerErrorException):
-    def __init__(self):
-        super().__init__("GitHub 요청 처리 중 문제가 발생했습니다.")
+    def __init__(self, code):
+        super().__init__(
+            f"GitHub 요청 처리 중 문제가 발생했습니다. (response status: {code})"
+        )

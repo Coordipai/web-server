@@ -4,9 +4,13 @@ from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.issue import service
-from src.issue.schemas import IssueCreateReq, IssueGetReq, IssueRes
+from src.issue.schemas import IssueCreateReq, IssueGetReq, IssueRes, IssueUpdateReq
 from src.response.schemas import SuccessResponse
-from src.response.success_definitions import issue_read_success
+from src.response.success_definitions import (
+    issue_create_success,
+    issue_read_success,
+    issue_update_success,
+)
 
 
 router = APIRouter(prefix="/issue", tags=["Issue"])
@@ -20,7 +24,7 @@ def create_issue(
 ):
     user_id = request.state.user_id
     data = service.create_issue(user_id, issue_req, db)
-    return issue_read_success(data)
+    return issue_create_success(data)
 
 
 @router.get(
@@ -38,3 +42,14 @@ def get_issue(
     user_id = request.state.user_id
     data = service.get_issue(user_id, f"{owner}/{repo}", issue_number, db)
     return issue_read_success(data)
+
+
+@router.put(
+    "/", summary="Update the existing issue", response_model=SuccessResponse[IssueRes]
+)
+def update_issue(
+    request: Request, issue_req: IssueUpdateReq, db: Session = Depends(get_db)
+):
+    user_id = request.state.user_id
+    data = service.update_issue(user_id, issue_req, db)
+    return issue_update_success(data)
