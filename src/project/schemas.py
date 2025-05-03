@@ -18,6 +18,7 @@ class ProjectUserRes(BaseModel):
     github_name: str
     category: str
     role: str
+    profile_img: str
 
     @classmethod
     def from_user(cls, user: User, role: str) -> "ProjectUserRes":
@@ -27,6 +28,7 @@ class ProjectUserRes(BaseModel):
             github_name=user.github_name,
             category=user.category,
             role=role,
+            profile_img=user.profile_img,
         )
 
 
