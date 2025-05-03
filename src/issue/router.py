@@ -4,9 +4,16 @@ from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.issue import service
-from src.issue.schemas import IssueCreateReq, IssueGetReq, IssueRes, IssueUpdateReq
+from src.issue.schemas import (
+    IssueCloseReq,
+    IssueCreateReq,
+    IssueGetReq,
+    IssueRes,
+    IssueUpdateReq,
+)
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
+    issue_close_success,
     issue_create_success,
     issue_read_success,
     issue_update_success,
@@ -53,3 +60,12 @@ def update_issue(
     user_id = request.state.user_id
     data = service.update_issue(user_id, issue_req, db)
     return issue_update_success(data)
+
+
+@router.patch("/", summary="Close the existing issue", response_model=SuccessResponse)
+def close_issue(
+    request: Request, issue_req: IssueCloseReq, db: Session = Depends(get_db)
+):
+    user_id = request.state.user_id
+    service.close_issue(user_id, issue_req, db)
+    return issue_close_success()

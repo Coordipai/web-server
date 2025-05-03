@@ -2,7 +2,13 @@ from typing import Optional, Tuple
 import requests
 import re
 from sqlalchemy.orm import Session
-from src.issue.schemas import IssueCreateReq, IssueGetReq, IssueRes, IssueUpdateReq
+from src.issue.schemas import (
+    IssueCloseReq,
+    IssueCreateReq,
+    IssueGetReq,
+    IssueRes,
+    IssueUpdateReq,
+)
 from src.response.error_definitions import GitHubApiError, InvalidReqFormat
 from src.user.repository import find_user_by_user_id
 
@@ -117,7 +123,7 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
         "labels": issue_req.labels,
     }
 
-    issue_response = requests.post(
+    issue_response = requests.patch(
         repos_url, headers=get_github_headers(user_id, db), json=req_data
     )
 
@@ -128,11 +134,15 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
     return return_issue_res(issue_json)
 
 
-# def delete_issue(db: Session, issue: Project):
-#     try:
-#         db.delete(issue)
-#         db.commit()
-#     except SQLAlchemyError as e:
-#         logger.error(f"Database error: {e}")
-#         db.rollback()
-#         raise SQLError()
+def close_issue(user_id: int, issue_req: IssueCloseReq, db: Session):
+    repos_url = f"https://api.github.com/repos/{issue_req.repo_fullname}/issues/{issue_req.issue_number}"
+    req_data = {
+        "state": "close",
+    }
+
+    issue_response = requests.patch(
+        repos_url, headers=get_github_headers(user_id, db), json=req_data
+    )
+
+    if issue_response.status_code != 200:
+        raise GitHubApiError(issue_response.status_code)

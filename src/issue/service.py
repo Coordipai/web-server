@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from src.issue import repository
-from src.issue.schemas import IssueCreateReq, IssueGetReq, IssueUpdateReq
+from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueGetReq, IssueUpdateReq
 from src.user.repository import find_user_by_user_id
 
 
@@ -38,3 +38,12 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
     Returns issue data
     """
     return repository.update_issue(user_id, issue_req, db)
+
+
+def close_issue(user_id: int, issue_req: IssueCloseReq, db: Session):
+    """
+    Close the existing issue by issue number in GitHub
+
+    Returns issue data
+    """
+    repository.close_issue(user_id, issue_req, db)

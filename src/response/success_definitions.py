@@ -71,3 +71,7 @@ def issue_read_success(data: T):
 
 def issue_update_success(data: T):
     return success_handler(200, "이슈 수정 성공", data)
+
+
+def issue_close_success():
+    return success_handler(200, "이슈 닫기 성공")

@@ -30,6 +30,11 @@ class IssueUpdateReq(BaseModel):
     labels: List[str]
 
 
+class IssueCloseReq(BaseModel):
+    repo_fullname: str
+    issue_number: int
+
+
 class IssueRes(BaseModel):
     repo_fullname: str
     issue_number: int
