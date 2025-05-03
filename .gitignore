@@ -50,7 +50,7 @@ build/
 staticfiles/
 media/
 
-
-*.json
+# For application default credentials
 .json
+*.json
 
