@@ -2,7 +2,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.vectorstores import Chroma
 from src.agent import prompts
-from src.config import GEMINI_MODEL, GEMINI_API_KEY, VERTEX_EMBEDDING_MODEL
+from src.config.config import GEMINI_MODEL, GEMINI_API_KEY, VERTEX_EMBEDDING_MODEL, VERTEX_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS
 import json
 from pathlib import Path
 from fastapi import UploadFile, File
@@ -11,10 +11,10 @@ import pdfplumber
 from docx import Document
 from dotenv import load_dotenv
 from langchain_google_vertexai import VertexAIEmbeddings
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
-load_dotenv() # for application default credentials
-
-embedding = VertexAIEmbeddings(model_name=VERTEX_EMBEDDING_MODEL)
+embedding = VertexAIEmbeddings(model_name=VERTEX_EMBEDDING_MODEL, project=VERTEX_PROJECT_ID)
 vector_db = Chroma(persist_directory="chroma_db", embedding_function=embedding)
 llm = ChatGoogleGenerativeAI(
     model=GEMINI_MODEL,
