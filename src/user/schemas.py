@@ -9,6 +9,7 @@ class UserReq(BaseModel):
     github_name: str
     category: str
     career: str
+    profile_img: str
 
 
 class UserRes(BaseModel):
@@ -19,10 +20,6 @@ class UserRes(BaseModel):
     category: str
     career: str
     created_at: datetime
+    profile_img: str
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class UserSearchRes(BaseModel):
-    id: int
-    name: str

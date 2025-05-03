@@ -15,6 +15,7 @@ class User(Base):
     github_access_token = Column(String(255))
     category = Column(String(255))
     career = Column(String(255))
+    profile_img = Column(String(255))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     members = relationship("ProjectUser", back_populates="user")

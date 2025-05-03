@@ -45,7 +45,6 @@ async def github_callback(
         raise GitHubAccessTokenError()
 
     github_user = await get_github_user_info(github_access_token)
-    print(github_user)
     github_id = github_user["id"]
     github_name = github_user["login"]
 
@@ -116,7 +115,7 @@ async def register(
         **auth_req.model_dump(),
         github_id=github_user["id"],
         github_name=github_user["login"],
-        github_access_token=github_access_token,
+        profile_img=github_user["avatar_url"],
     )
     saved_user = await create_user(db, new_user)
     user_res = UserRes.model_validate(saved_user)
