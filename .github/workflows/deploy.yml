@@ -52,8 +52,6 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd /home/${{ secrets.REMOTE_SSH_USERNAME }}/Projects
-            mkdir -p coordipai/web-server
-            printf "%s" "${{ secrets.ENV_FILE }}" > coordipai/web-server/.env
 
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
             docker pull ghcr.io/coordipai/web-server
