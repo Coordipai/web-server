@@ -27,6 +27,11 @@ class InvalidJsonDataFormat(BadRequestException):
         super().__init__("Json data format이 유효하지 않습니다.")
 
 
+class InvalidReqFormat(BadRequestException):
+    def __init__(self):
+        super().__init__("요청 형식이 맞지 않습니다.")
+
+
 """
 401 UNAUTHORIZED
 """
@@ -143,5 +148,7 @@ class SQLError(InternalServerErrorException):
 
 
 class GitHubApiError(InternalServerErrorException):
-    def __init__(self):
-        super().__init__("GitHub 요청 처리 중 문제가 발생했습니다.")
+    def __init__(self, code):
+        super().__init__(
+            f"GitHub 요청 처리 중 문제가 발생했습니다. (response status: {code})"
+        )
