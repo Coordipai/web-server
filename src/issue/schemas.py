@@ -35,7 +35,7 @@ class IssueRes(BaseModel):
     issue_number: int
     title: str
     body: str
-    assignees: List[str]
+    assignees: List[UserRes]
     priority: str
     iteration: int
     labels: List[str]

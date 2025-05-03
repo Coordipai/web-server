@@ -9,7 +9,8 @@ from src.issue.schemas import (
     IssueUpdateReq,
 )
 from src.response.error_definitions import GitHubApiError, InvalidReqFormat
-from src.user.repository import find_user_by_user_id
+from src.user.repository import find_all_users_by_github_names, find_user_by_user_id
+from src.user.schemas import UserRes
 
 
 def get_github_headers(user_id: int, db: Session):
@@ -61,14 +62,19 @@ def add_hidden_metadata(body: str, priority: str, iteration: int) -> str:
         return f"{body.rstrip()}\n\n{new_metadata}"
 
 
-def return_issue_res(issue_json):
+def return_issue_res(issue_json, db: Session):
     priority, iteration = retrieve_hidden_metadata(issue_json["body"])
+
+    github_names = [assignee["login"] for assignee in issue_json.get("assignees", [])]
+    users = find_all_users_by_github_names(db, github_names)
+    assignees = [UserRes.model_validate(user) for user in users]
+
     issue_res = IssueRes(
         repo_fullname=issue_json["repository_url"].split("repos/")[-1],
         issue_number=int(issue_json["number"]),
         title=issue_json["title"],
         body=issue_json["body"],
-        assignees=[assignee["login"] for assignee in issue_json.get("assignees", [])],
+        assignees=assignees,
         priority=priority,
         iteration=iteration,
         labels=[label["name"] for label in issue_json.get("labels", [])],
@@ -95,7 +101,7 @@ def create_issue(user_id: int, issue_req: IssueCreateReq, db: Session):
         raise GitHubApiError(issue_response.status_code)
 
     issue_json = issue_response.json()
-    return return_issue_res(issue_json)
+    return return_issue_res(issue_json, db)
 
 
 def find_issue_by_issue_number(
@@ -108,7 +114,7 @@ def find_issue_by_issue_number(
         raise GitHubApiError(issue_response.status_code)
 
     issue_json = issue_response.json()
-    return return_issue_res(issue_json)
+    return return_issue_res(issue_json, db)
 
 
 def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
@@ -130,7 +136,7 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
         raise GitHubApiError(issue_response.status_code)
 
     issue_json = issue_response.json()
-    return return_issue_res(issue_json)
+    return return_issue_res(issue_json, db)
 
 
 def close_issue(user_id: int, issue_req: IssueCloseReq, db: Session):
