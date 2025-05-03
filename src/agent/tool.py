@@ -109,7 +109,7 @@ async def define_features(design_documents: str) -> dict:
     return features
 
 
-async def make_issues(features : dict):
+async def make_issues(design_documents: str, features : dict):
     """
     Make issues based on features.
     """
@@ -121,7 +121,7 @@ async def make_issues(features : dict):
 
     for i in range(0, len(features), interval):
         issues = await communicate_with_llm_tool(prompts.make_issue_template.format(
-            documents=prompts.docs,
+            documents=design_documents,
             issue_template=prompts.issue_template,
             features=list(features.values())[i:i+interval]
         ))
