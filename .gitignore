@@ -54,5 +54,5 @@ media/
 app_credentials.json
 
 # For chroma database files
-*/chroma_db/
+**/chroma_db/
 
