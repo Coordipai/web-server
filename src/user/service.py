@@ -25,6 +25,7 @@ async def create_user(db: Session, user_req: UserReq):
         github_access_token=github_access_token,
         category=user_req.category,
         career=user_req.career,
+        profile_img=user_req.profile_img,
     )
 
     saved_user = repository.create_user(db, new_user)
