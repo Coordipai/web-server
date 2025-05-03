@@ -1,6 +1,6 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage, SystemMessage
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from src.agent import prompts
 from src.config.config import GEMINI_MODEL, GEMINI_API_KEY, VERTEX_EMBEDDING_MODEL, VERTEX_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS
 import json
@@ -9,7 +9,6 @@ from fastapi import UploadFile, File
 import tempfile
 import pdfplumber
 from docx import Document
-from dotenv import load_dotenv
 from langchain_google_vertexai import VertexAIEmbeddings
 import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
