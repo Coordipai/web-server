@@ -61,26 +61,7 @@ async def get_documentation(
     credentials: HTTPBasicCredentials = Depends(verify_credentials),
 ):
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
-<<<<<<< HEAD
 
-
-@app.get("/store_vector")
-def store_vector():
-
-    texts = ["banana1 ", "banana1? banana2"]
-    metadatas = [{"source": "banana1"}, {"source": "banana1? banana2"}]
-    tool.add_text_data_tool(texts, metadatas=metadatas)
-
-    query = "banana1"
-    results = tool.search_data_tool(query, k=2)
-    print(f"현재 벡터 저장 개수: {len(tool.vector_db.get()['documents'])}")
-
-
-    for res in results:
-        print("내용: ", res.page_content)
-        print("메타데이터: ", res.metadata)
-
-    return results
 
 
 @app.get("/generate_issues")
@@ -92,8 +73,6 @@ async def generate_issues():
     executor = chain.CustomAgentExecutor()
     result = await executor.generate_issues()
     return result
-=======
->>>>>>> main
 
 
 # Include routers

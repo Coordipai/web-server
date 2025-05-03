@@ -1,4 +1,4 @@
-from src.agent import tool, prompts
+from src.agent import tool
 from fastapi.datastructures import UploadFile as FastUploadFile
 from pathlib import Path
 
@@ -14,7 +14,7 @@ class CustomAgentExecutor:
         
         # TODO: Get documents and issue template from database
 
-        # Load documents (pdf, docx)
+        # Load documents with file path (pdf, docx)
         test_file_path = Path("파일 경로가 들어갈 곳")
         with open(test_file_path, "rb") as f:
             upload_file = FastUploadFile(filename=test_file_path.name, file=f)
