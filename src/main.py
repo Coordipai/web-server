@@ -6,10 +6,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.openapi.docs import get_swagger_ui_html
 
 import src.models  # noqa: F401
-from src.database import initialize_database
-from exceptions.handler import register_exception_handlers
-from src.config import FRONTEND_URL
-from src.agent import chain, tool
+from src.agent import chain
 from src.config.middleware import jwt_authentication_middleware
 from src.config.database import initialize_database
 from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
