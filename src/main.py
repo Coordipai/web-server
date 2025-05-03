@@ -61,6 +61,7 @@ async def get_documentation(
     credentials: HTTPBasicCredentials = Depends(verify_credentials),
 ):
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
+<<<<<<< HEAD
 
 
 @app.get("/store_vector")
@@ -91,6 +92,8 @@ async def generate_issues():
     executor = chain.CustomAgentExecutor()
     result = await executor.generate_issues()
     return result
+=======
+>>>>>>> main
 
 
 # Include routers
