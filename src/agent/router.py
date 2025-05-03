@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from src.agent import chain
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
-    generate_issues_success,
+    issue_generate_success
 )
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
@@ -21,4 +21,4 @@ async def generate_issues():
     executor = chain.CustomAgentExecutor()
     result = await executor.generate_issues()
 
-    return generate_issues_success(result)
+    return issue_generate_success(result)
