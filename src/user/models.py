@@ -11,7 +11,7 @@ class User(Base):
     name = Column(String(255))
     discord_id = Column(Integer, unique=True, index=True)
     github_id = Column(Integer, unique=True, index=True)
-    github_name = Column(String(255))
+    github_name = Column(String(255), unique=True, index=True)
     github_access_token = Column(String(255))
     category = Column(String(255))
     career = Column(String(255))
