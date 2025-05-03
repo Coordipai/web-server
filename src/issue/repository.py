@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from src.issue.schemas import (
     IssueCloseReq,
     IssueCreateReq,
-    IssueGetReq,
     IssueRes,
     IssueUpdateReq,
 )

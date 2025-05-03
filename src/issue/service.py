@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from src.issue import repository
-from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueGetReq, IssueUpdateReq
+from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueUpdateReq
 from src.user.repository import find_user_by_user_id
 
 

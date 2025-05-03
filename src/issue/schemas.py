@@ -14,11 +14,6 @@ class IssueCreateReq(BaseModel):
     labels: List[str]
 
 
-class IssueGetReq(BaseModel):
-    repo_fullname: str
-    issue_number: int
-
-
 class IssueUpdateReq(BaseModel):
     repo_fullname: str
     issue_number: int

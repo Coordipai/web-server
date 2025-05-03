@@ -7,7 +7,6 @@ from src.issue import service
 from src.issue.schemas import (
     IssueCloseReq,
     IssueCreateReq,
-    IssueGetReq,
     IssueRes,
     IssueUpdateReq,
 )
