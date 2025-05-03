@@ -16,6 +16,7 @@ from src.response.handler import exception_handler
 from auth.router import router as auth_router
 from project.router import router as project_router
 from user.router import router as user_router
+from issue.router import router as issue_router
 
 
 app = FastAPI(
@@ -63,3 +64,4 @@ async def get_documentation(
 app.include_router(auth_router)
 app.include_router(project_router)
 app.include_router(user_router)
+app.include_router(issue_router)
