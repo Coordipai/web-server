@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 class ErrorResponse(BaseModel):
     message: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
 class SuccessContent(BaseModel, Generic[T]):
