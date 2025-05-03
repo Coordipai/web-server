@@ -5,7 +5,7 @@
 .vscode/
 
 # Python cache files
-__pycache__/
+**/**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -49,3 +49,10 @@ build/
 # FastAPI static and media files
 staticfiles/
 media/
+
+# For application default credentials
+app_credentials.json
+
+# For chroma database files
+*/chroma_db/
+

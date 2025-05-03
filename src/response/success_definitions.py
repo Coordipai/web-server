@@ -57,6 +57,13 @@ def user_search_success(data: T):
 
 
 """
+Agent Success Response
+"""
+
+def issue_generate_success(data: T):
+    return success_handler(200, "이슈 생성 성공", data)
+
+"""
 Issue Success Response
 """
 

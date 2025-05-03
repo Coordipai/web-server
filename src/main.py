@@ -16,6 +16,7 @@ from src.response.handler import exception_handler
 from auth.router import router as auth_router
 from project.router import router as project_router
 from user.router import router as user_router
+from agent.router import router as agent_router
 from issue.router import router as issue_router
 
 
@@ -60,8 +61,10 @@ async def get_documentation(
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
 
 
+
 # Include routers
 app.include_router(auth_router)
 app.include_router(project_router)
 app.include_router(user_router)
+app.include_router(agent_router)
 app.include_router(issue_router)
