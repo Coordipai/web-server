@@ -1,13 +1,22 @@
+from typing import List
 from fastapi import APIRouter
 from fastapi import Depends
 from sqlalchemy.orm import Session
+from src.response.schemas import SuccessResponse
+from src.response.success_definitions import user_search_success
+from src.user.schemas import UserRes
 from user import service
 
-from src.database import get_db
+from src.config.database import get_db
 
 router = APIRouter(prefix="/user", tags=["User"])
 
 
-@router.get("/search", summary="Search user by name")
+@router.get(
+    "/search",
+    summary="Search user by name",
+    response_model=SuccessResponse[List[UserRes]],
+)
 def search_users(user_name: str, db: Session = Depends(get_db)):
-    return service.search_users_by_name(user_name, db)
+    data = service.search_users_by_name(user_name, db)
+    return user_search_success(data)

@@ -1,50 +1,101 @@
 from datetime import datetime
 import json
-from typing import List
-from fastapi import APIRouter, File, Form, UploadFile
+from typing import List, Optional
+from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from src.database import get_db
-from src.exceptions.definitions import InvalidJsonDataFormat, InvalidJsonFormat
-from src.project.schemas import ProjectReq
+from src.config.database import get_db
+from src.response.error_definitions import InvalidJsonDataFormat, InvalidJsonFormat
+from src.project.schemas import ProjectReq, ProjectRes
 from project import service
+from src.response.schemas import SuccessResponse
+from src.response.success_definitions import (
+    project_create_success,
+    project_delete_success,
+    project_read_success,
+    project_update_success,
+)
 
 router = APIRouter(prefix="/project", tags=["Project"])
 
 
-@router.post("/", summary="Create a new project")
+@router.post(
+    "/",
+    summary="Create a new project",
+    response_model=SuccessResponse[ProjectRes],
+)
 def create_project(
-    project_req: str = Form(...),
-    files: List[UploadFile] = File(...),
+    request: Request,
+    project_req: str = Form(
+        ...,
+        description=(
+            "JSON string matching the ProjectReq schema.\n\n"
+            "example:\n\n"
+            "{\n\n"
+            '  "name": "My Project",\n\n'
+            '  "repo_name": "my-repo",\n\n'
+            '  "start_date": "2025-01-01T00:00:00Z",\n\n'
+            '  "end_date": "2025-03-01T00:00:00Z",\n\n'
+            '  "sprint_unit": 2,\n\n'
+            '  "discord_chnnel_id": 1234567890,\n\n'
+            '  "members": [\n\n'
+            '   {"id": 1, "role": "backend"},\n\n'
+            '   {"id": 2, "role": "frontend"}\n\n'
+            "  ]\n\n"
+            "}"
+        ),
+    ),
+    files: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db),
 ):
-    return service.create_project(parse_project_req_str(project_req), files, db)
+    user_id = request.state.user_id
+    data = service.create_project(
+        user_id, parse_project_req_str(project_req), db, files
+    )
+    return project_create_success(data)
 
 
-@router.get("/{project_id}", summary="Get existing project")
+@router.get(
+    "/{project_id}",
+    summary="Get existing project",
+    response_model=SuccessResponse[ProjectRes],
+)
 def get_project(project_id: int, db: Session = Depends(get_db)):
-    return service.get_project(project_id, db)
+    data = service.get_project(project_id, db)
+    return project_read_success(data)
 
 
-@router.put("/{project_id}", summary="Update existing project")
+@router.put(
+    "/{project_id}",
+    summary="Update existing project",
+    response_model=SuccessResponse[ProjectRes],
+)
 def update_project(
     project_id: int,
     project_req: str = Form(...),
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
 ):
-    return service.update_project(
+    data = service.update_project(
         project_id, parse_project_req_str(project_req), files, db
     )
+    return project_update_success(data)
 
 
-@router.delete("/{project_id}", summary="Delete existing project")
+@router.delete(
+    "/{project_id}",
+    summary="Delete existing project",
+    response_model=SuccessResponse,
+)
 def delete_project(
+    request: Request,
     project_id: int,
     db: Session = Depends(get_db),
 ):
-    return service.delete_project(project_id, db)
+    user_id = request.state.user_id
+    service.delete_project(user_id, project_id, db)
+    return project_delete_success()
 
 
 def parse_project_req_str(project_req: str = Form(...)):

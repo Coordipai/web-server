@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Identity, Integer, String
-from src.database import Base
+from sqlalchemy.orm import relationship
+from src.config.database import Base
 
 
 class User(Base):
@@ -15,3 +16,5 @@ class User(Base):
     category = Column(String(255))
     career = Column(String(255))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    members = relationship("ProjectUser", back_populates="user")

@@ -1,0 +1,17 @@
+2025-04-28 23:22:07,078 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:22:07,078 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:33:19,403 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:33:19,404 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:34:48,928 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:34:48,929 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:39:14,953 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:39:14,953 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:39:36,231 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:39:36,231 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:43:25,881 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:43:25,881 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:45:58,616 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:45:58,616 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:50:12,451 - src.database - INFO - ⏳ Initializing Database
+2025-04-28 23:50:12,451 - src.database - INFO - 🚨 Dropping all tables... (only for dev mode)
+2025-04-28 23:50:12,499 - src.database - INFO - ✅ Database Initializing complete!

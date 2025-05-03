@@ -3,12 +3,13 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from datetime import datetime, timedelta, timezone
-from src.config import (
+from src.config.config import (
     JWT_SECRET,
     ALGORITHM,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
+from src.response.error_definitions import ExpiredJwtToken, InvalidJwtToken
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -48,9 +49,12 @@ def parse_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         if payload is None:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
-        return payload.get("sub")
+            raise InvalidJwtToken()
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise InvalidJwtToken()
+        return user_id
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
+        raise ExpiredJwtToken()
     except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise InvalidJwtToken()

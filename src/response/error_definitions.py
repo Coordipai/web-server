@@ -37,6 +37,21 @@ class UnauthorizedException(BaseAppException):
         super().__init__(message, 401)
 
 
+class JwtTokenNotFound(UnauthorizedException):
+    def __init__(self):
+        super().__init__("인증 정보를 찾을 수 없습니다.")
+
+
+class InvalidJwtToken(UnauthorizedException):
+    def __init__(self):
+        super().__init__("유효하지 않은 토큰입니다.")
+
+
+class ExpiredJwtToken(UnauthorizedException):
+    def __init__(self):
+        super().__init__("만료된 토큰입니다.")
+
+
 class InvalidRefreshToken(UnauthorizedException):
     def __init__(self):
         super().__init__("RefreshToken이 유효하지 않습니다.")
@@ -45,6 +60,11 @@ class InvalidRefreshToken(UnauthorizedException):
 class AccessTokenNotFound(UnauthorizedException):
     def __init__(self):
         super().__init__("AccessToken을 찾을 수 없습니다.")
+
+
+class ProjectOwnerMismatched(UnauthorizedException):
+    def __init__(self):
+        super().__init__("프로젝트 소유권자만 프로젝트를 삭제시킬 수 있습니다.")
 
 
 """
@@ -120,3 +140,8 @@ class GitHubAccessTokenError(InternalServerErrorException):
 class SQLError(InternalServerErrorException):
     def __init__(self):
         super().__init__("DB 관련 로직 처리 중 문제가 발생했습니다.")
+
+
+class GitHubApiError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__("GitHub 요청 처리 중 문제가 발생했습니다.")

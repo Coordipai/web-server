@@ -49,3 +49,5 @@ build/
 # FastAPI static and media files
 staticfiles/
 media/
+
+.json

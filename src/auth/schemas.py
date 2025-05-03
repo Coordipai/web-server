@@ -18,7 +18,3 @@ class AuthRes(BaseModel):
 
 class RefreshReq(BaseModel):
     refresh_token: str
-
-
-class LogoutReq(BaseModel):
-    access_token: str

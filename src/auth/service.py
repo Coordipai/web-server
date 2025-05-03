@@ -1,8 +1,8 @@
 from typing import Optional
-from fastapi import Cookie, HTTPException, Request
+from fastapi import Cookie, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from src.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
+from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
 from auth.util.jwt import create_access_token, create_refresh_token, parse_token
 from auth.util.redis import (
     delete_token_from_redis,
@@ -11,7 +11,7 @@ from auth.util.redis import (
 )
 from auth.util.github import get_github_access_token, get_github_user_info
 from auth.schemas import AuthReq, AuthRes
-from src.exceptions.definitions import (
+from src.response.error_definitions import (
     AccessTokenNotFound,
     GitHubCredentialCodeNotFound,
     GitHubAccessTokenError,
@@ -116,7 +116,6 @@ async def register(
         github_name=github_user["login"],
         github_access_token=github_access_token,
     )
-
     saved_user = await create_user(db, new_user)
     user_res = UserRes.model_validate(saved_user)
 
@@ -197,14 +196,12 @@ async def refresh(db: Session, refresh_token: str):
     return AuthRes(user=user, access_token=access_token, refresh_token=refresh_token)
 
 
-async def logout(access_token: str):
+async def logout(user_id: int):
     """
     Logout user
 
     Deleting refresh token stored in redis
     """
-    user_id = parse_token(access_token)
-
     # Delete existing refresh token stored in redis
     redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
     await delete_token_from_redis(redis_refresh_token)

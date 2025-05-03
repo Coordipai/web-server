@@ -2,8 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
-from src.exceptions.definitions import SQLError
-from src.logger_config import add_daily_file_handler, setup_logger
+from src.response.error_definitions import SQLError
+from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.models import User
 
 logger = setup_logger(__name__)
@@ -36,7 +36,7 @@ def find_user_by_github_id(db: Session, github_id: str) -> User | None:
 
 def find_user_by_user_id(db: Session, user_id: str) -> User | None:
     try:
-        result = db.execute(select(User).filter(User.user_id == user_id))
+        result = db.execute(select(User).filter(User.id == user_id))
         return result.scalars().first()
     except NoResultFound:
         return None

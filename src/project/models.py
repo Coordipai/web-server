@@ -1,16 +1,22 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Identity, Integer, String
-from src.database import Base
+from sqlalchemy.orm import relationship
+from src.config.database import Base
 
 
 class Project(Base):
     __tablename__ = "project"
 
-    project_id = Column(Integer, Identity(), primary_key=True, index=True)
-    project_name = Column(String(255), unique=True, index=True)
+    id = Column(Integer, Identity(), primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True)
+    owner = Column(Integer, index=True)
     repo_name = Column(String(255))
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     sprint_unit = Column(Integer)
     discord_channel_id = Column(Integer, unique=True, index=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    members = relationship(
+        "ProjectUser", back_populates="project", cascade="all, delete-orphan"
+    )
