@@ -54,3 +54,6 @@ media/
 .json
 *.json
 
+# For chroma database files
+*/chroma_db/
+
