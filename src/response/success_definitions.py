@@ -54,3 +54,12 @@ User Success Response
 
 def user_search_success(data: T):
     return success_handler(200, "사용자 조회 성공", data)
+
+
+"""
+Issue Success Response
+"""
+
+
+def issue_read_success(data: T):
+    return success_handler(200, "이슈 조회 성공", data)

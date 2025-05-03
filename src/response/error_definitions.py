@@ -27,6 +27,11 @@ class InvalidJsonDataFormat(BadRequestException):
         super().__init__("Json data format이 유효하지 않습니다.")
 
 
+class InvalidReqFormat(BadRequestException):
+    def __init__(self):
+        super().__init__("요청 형식이 맞지 않습니다.")
+
+
 """
 401 UNAUTHORIZED
 """
