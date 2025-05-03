@@ -50,4 +50,7 @@ build/
 staticfiles/
 media/
 
+
+*.json
 .json
+
