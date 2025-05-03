@@ -45,7 +45,9 @@ async def github_callback(
         raise GitHubAccessTokenError()
 
     github_user = await get_github_user_info(github_access_token)
+    print(github_user)
     github_id = github_user["id"]
+    github_name = github_user["login"]
 
     # Check if there is user data in db
     existing_user = find_user_by_github_id(db, github_id)
@@ -74,7 +76,7 @@ async def github_callback(
         await save_token_to_redis(GITHUB_OAUTH_REDIS, github_id, github_access_token)
         access_token = create_access_token(github_id)
 
-        redirect = RedirectResponse(url=f"{FRONTEND_URL}/register")
+        redirect = RedirectResponse(url=f"{FRONTEND_URL}/register/{github_name}")
         redirect.set_cookie(
             key="access_token",
             value=access_token,
