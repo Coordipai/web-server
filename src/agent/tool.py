@@ -148,6 +148,11 @@ def extract_text_from_docx(docx_path: Path) -> str:
         text += paragraph.text + "\n"
     return text.strip()
 
+def extract_text_from_json(json_path: Path) -> str:
+    with open(json_path, 'r') as file:
+        data = json.load(file)
+    return json.dumps(data, ensure_ascii=False, indent=4)
+
 
 async def extract_text_from_documents(file: UploadFile = File(...)):
     suffix = Path(file.filename).suffix.lower()
@@ -160,6 +165,8 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
         text = extract_text_from_pdf(tmp_path)
     elif suffix == ".docx":
         text = extract_text_from_docx(tmp_path)
+    elif suffix == ".json":
+        text = extract_text_from_json(tmp_path)
     else:
         raise ValueError("Unsupported file type. Please upload a PDF or DOCX file.")
         # TODO: Handle other file types if needed
