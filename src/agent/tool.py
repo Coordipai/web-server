@@ -13,6 +13,7 @@ from langchain_google_vertexai import VertexAIEmbeddings
 import os
 from src.stat import service as stat_service
 from src.auth import service as auth_service
+from src.user import models as user_models
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -39,7 +40,6 @@ def add_image_data_tool(images: list, metadatas: list):
     Add image data to the vector database.
     """
     vector_db.add_images(images, metadatas=metadatas)
-
 
 
 def search_data_tool(query: str, k: int = 2) -> list:
@@ -143,12 +143,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
             text += page.extract_text() + "\n"
     return text.strip()
 
+
 def extract_text_from_docx(docx_path: Path) -> str:
     doc = Document(docx_path)
     text = ""
     for paragraph in doc.paragraphs:
         text += paragraph.text + "\n"
     return text.strip()
+
 
 def extract_text_from_json(json_path: Path) -> str:
     with open(json_path, 'r') as file:
@@ -175,6 +177,7 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
 
     return text
 
+
 async def get_github_activation_info(token: str):
     """
     Get GitHub information using the agent executor.
@@ -185,7 +188,6 @@ async def get_github_activation_info(token: str):
     user_info = await auth_service.get_github_user_info(token)
     user_name = user_info["login"]
 
-
     for repo in repo_list:
         prs = stat_service.get_pull_requests(repo["name"], user_name, token)
         commits = stat_service.get_commits(repo["name"], user_name, token)
@@ -194,3 +196,28 @@ async def get_github_activation_info(token: str):
 
     return repo_list
 
+async def assess_with_data(user: user_models.User, github_activation_data: list):
+    """
+    Assess the competency of a user based on their GitHub activity.
+    """
+    competency = await communicate_with_llm_tool(prompts.define_stat_prompt.format(
+        user_name=user.name,
+        criteria_table=prompts.score_table,
+        github_activation_data=github_activation_data,
+        info_file=prompts.info_file,
+        output_example=prompts.define_stat_output_example
+    ))
+
+    competency = competency.replace("```json", "")
+    competency = competency.replace("```", "")
+    competency = json.loads(competency)
+    competency_data = {
+        "Name": competency["Name"],
+        "Field": competency["Field"],
+        "Experience" : competency["Experience"],
+        "evaluation_scores": competency["evaluation_scores"],
+        "implemented_features": competency["implemented_features"]
+    }
+    
+
+    return competency_data

@@ -1,6 +1,8 @@
 from src.agent import tool
+from src.user import repository as user_repository
 from fastapi.datastructures import UploadFile as FastUploadFile
 from pathlib import Path
+from sqlalchemy.orm import Session
 
 
 class CustomAgentExecutor:
@@ -24,3 +26,27 @@ class CustomAgentExecutor:
         issues = await tool.make_issues(text, features)
 
         return issues
+    
+    async def assess_competency(self, user_id: str, db: Session) -> dict:
+        """
+        Assess the competency of a user based on their GitHub activity.
+        """
+
+        # get user
+        user = user_repository.find_user_by_user_id(db, user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        activity_info = await tool.get_github_activation_info(user.github_access_token)
+        if not activity_info:
+            raise ValueError("Failed to retrieve GitHub activity information")
+        
+        stat = await tool.assess_with_data(user, activity_info)
+        
+        user.stat = stat
+        db.commit()
+        db.refresh(user)
+
+        return user.stat
+
+

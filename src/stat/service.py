@@ -23,7 +23,7 @@ def get_repositories(token):
         repo_list.append(data)
 
     if repos_response.status_code != 200:
-        raise GitHubApiError()
+        raise GitHubApiError(repos_response.status_code)
 
     return repo_list
 
@@ -37,7 +37,7 @@ def get_pull_requests(repo_name, user_name, token):
     prs_response = requests.get(prs_url, headers=headers)
 
     if prs_response.status_code != 200:
-        raise GitHubApiError()
+        raise GitHubApiError(prs.response.status_code)
 
     prs = prs_response.json()
 
@@ -48,7 +48,7 @@ def get_pull_requests(repo_name, user_name, token):
             pr_details_response = requests.get(pr_details_url, headers=headers)
 
             if pr_details_response.status_code != 200:
-                raise GitHubApiError()
+                raise GitHubApiError(pr_details_response.status_code)
 
             pr_details = pr_details_response.json()
 
@@ -87,7 +87,9 @@ def get_commits(repo_name, user_name, token):
     commits_response = requests.get(commits_url, headers=headers)
 
     if commits_response.status_code != 200:
-        raise GitHubApiError()
+        if(commits_response.json()["message"] == "Git Repository is empty."):
+            return []
+        raise GitHubApiError(commits_response.status_code)
 
     commits = commits_response.json()
 
