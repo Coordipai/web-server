@@ -44,7 +44,6 @@ async def github_callback(
     if not github_access_token:
         raise GitHubAccessTokenError()
 
-    print("github_access_token", github_access_token)
     github_user = await get_github_user_info(github_access_token)
     github_id = github_user["id"]
     github_name = github_user["login"]
@@ -87,8 +86,6 @@ async def github_callback(
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
             path="/",
         )
-
-    print("access_token: ", access_token)
 
     return redirect
 
