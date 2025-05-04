@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 from src.config.database import get_db
 from src.user import repository as user_repository
+from src.agent.schemas import AssessStatRes
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_generate_success,
@@ -58,4 +59,4 @@ async def get_stat(user_id: str, db: Session = Depends(get_db)):
     if not user:
         raise ValueError("User not found")
 
-    return assessment_read_success(user.stat)
+    return assessment_read_success(AssessStatRes(stat=user.stat))
