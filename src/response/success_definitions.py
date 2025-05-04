@@ -63,6 +63,9 @@ Agent Success Response
 def issue_generate_success(data: T):
     return success_handler(200, "이슈 생성 성공", data)
 
+def github_info_success(data: T):
+    return success_handler(200, "GitHub 정보 조회 성공", data)
+
 """
 Issue Success Response
 """

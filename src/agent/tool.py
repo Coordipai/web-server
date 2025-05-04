@@ -11,6 +11,9 @@ import pdfplumber
 from docx import Document
 from langchain_google_vertexai import VertexAIEmbeddings
 import os
+from src.stat import service as stat_service
+from src.auth import service as auth_service
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
 embedding = VertexAIEmbeddings(model_name=VERTEX_EMBEDDING_MODEL, project=VERTEX_PROJECT_ID)
@@ -171,4 +174,23 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
         # TODO: Handle other file types if needed
 
     return text
+
+async def get_github_activation_info(token: str):
+    """
+    Get GitHub information using the agent executor.
+    """
+    repo_list = stat_service.get_repositories(token)
+
+    # get user name from token
+    user_info = await auth_service.get_github_user_info(token)
+    user_name = user_info["login"]
+
+
+    for repo in repo_list:
+        prs = stat_service.get_pull_requests(repo["name"], user_name, token)
+        commits = stat_service.get_commits(repo["name"], user_name, token)
+        repo["prs"] = prs
+        repo["commits"] = commits
+
+    return repo_list
 
