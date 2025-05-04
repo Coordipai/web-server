@@ -59,4 +59,10 @@ async def get_stat(user_id: str, db: Session = Depends(get_db)):
     if not user:
         raise ValueError("User not found")
 
-    return assessment_read_success(AssessStatRes(stat=user.stat))
+    return assessment_read_success(AssessStatRes(
+        name=user.stat["Name"],
+        field=user.stat["Field"],
+        experience=user.stat["Experience"],
+        evaluation_scores=user.stat["evaluation_scores"],
+        implemented_features=user.stat["implemented_features"]
+    ))

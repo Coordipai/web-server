@@ -1,7 +1,21 @@
 from pydantic import BaseModel
 
 class GenerateIssueRes(BaseModel):
-    issues: list[str]
+    type: str
+    name: str
+    description: str
+    title: str
+    lablels: list[str]
+    priority: str
+    body: dict[str, str]
+
+class GenerateIssuesRes(BaseModel):
+    issues: list[GenerateIssueRes]
+
 
 class AssessStatRes(BaseModel):
-    stat: dict[str, str]
+    name: str
+    field: str
+    experience: str
+    evaluatino_scores: dict[str, float]
+    implemented_features: list[str]
