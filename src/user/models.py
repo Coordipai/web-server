@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, Identity, Integer, String
+from sqlalchemy import Column, DateTime, Identity, Integer, String, JSON
 from sqlalchemy.orm import relationship
 from src.config.database import Base
 
@@ -17,5 +17,6 @@ class User(Base):
     career = Column(String(255))
     profile_img = Column(String(255))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    stat = Column(JSON)
 
     members = relationship("ProjectUser", back_populates="user")

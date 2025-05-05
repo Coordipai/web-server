@@ -1,5 +1,103 @@
 from langchain.prompts import PromptTemplate
 
+define_stat_prompt = PromptTemplate(
+    input_variables=["user_name", "criteria_table", "github_activation_data" , "info_file", "output_example"],
+    template=(
+        "You are an expert software engineering analyst. Your task is to analyze commit and pull request data, score contributions based on predefined criteria, and augment a JSON file with the results.\n"
+        "**Input Files:**\n"
+            "1.  **Criteria Table:** {criteria_table} (This  contains the troubleshooting and project contribution scoring rubric, as previously provided.  Assume it's readily available to you with that filename.)\n"
+            "2.  **Commit and Pull Request Data:** {github_activation_data} (This file contains the commit history and pull request contents for one or more repositories. The format is unstructured text but should be understandable for analysis.)\n"
+            "3.  **Info File:** {info_file} (This file is a JSON template where you will add the analysis results.  Initially, it may be empty or contain placeholder fields.)\n\n"
+            "In Info File, write user name as {user_name}, field, and experience level.\n"
+            "The field can be Backend, Frontend, AI, etc.\n"
+            "The experience level can be Junior, Middle, Senior, etc.\n\n"
+        "**Task:**\n"
+            "1.  **Analyze Commit and Pull Request Data:**  Thoroughly examine the contents of `github_data.json`. Identify key activities, contributions, and issues addressed in the commits and pull requests.  Focus on the type of work done (feature implementation, bug fixes, documentation, etc.) and the level of contribution (major, minor, etc.).\n"
+            "2.  **Score Contributions:** Using the `scoring_criteria.json` file as a guide, assign scores for both 'Troubleshooting' and 'Project Contribution' based on your analysis of the `github_data.json` file.  Justify each score briefly (1-2 sentences) based on specific examples found in the commit/PR data.\n"
+            "3.  **Extract Implemented Features:** Based on the commit messages and pull request descriptions in `github_data.json`, identify a list of commonly recognized features that have been implemented. Examples of features are: 'User Authentication', 'Log Management', 'Static Page Rendering', 'API Endpoint Creation', etc. Aim for a comprehensive but concise list.\n"
+            "4.  **Update Info File:** Modify the contents of `Info File` to include the following:\n\n"
+
+        "*   Add a section called `evaluation_scores` with the 'Troubleshooting' and 'Project Contribution' scores, including your justification for each score.\n"
+        "*   Add a section called `implemented_features` containing a list of the features identified.\n"
+        "**Output:**"
+        "Provide the complete, updated contents of `Info File` as your response. The JSON must be valid. The structure should include the original content of `Info File` (if any), plus the new `evaluation_scores` and `implemented_features` sections.  The keys should be in snake_case.\n\n"
+        "**Example Output:**\n"
+        "{output_example}\n\n"
+    ),
+)
+
+score_table = (
+    """
+            project_contribution:
+        - score: 90-100
+            description: "Contributed significantly to core feature planning and implementation, adoption of key technologies, team leadership, and thorough reviews and documentation."
+        - score: 70-89
+            description: "Played a major role in implementing key features, performance improvements, test coverage enhancements, and actively participated in code reviews."
+        - score: 50-69
+            description: "Contributed to feature implementation, bug fixes, and team communication."
+        - score: 30-49
+            description: "Developed partial features, committed sporadically, and participated minimally in reviews."
+        - score: 0-29
+            description: "Had very few commits or contributions."
+
+        troubleshooting:
+        - score: 90-100
+            description: "Demonstrated rapid root cause analysis and resolution in complex failure scenarios, eliminated underlying issues, and provided detailed RCA documentation."
+        - score: 70-89
+            description: "Possessed significant experience in resolving major issues, identifying causes, and implementing temporary or permanent fixes."
+        - score: 50-69
+            description: "Capable of addressing common bugs and errors, analyzing logs, and determining root causes."
+        - score: 30-49
+            description: "Able to solve simple issues but requires assistance for complex situations."
+        - score: 0-29
+            description: "Lacks troubleshooting experience or has very few contributions."
+    """
+
+)
+
+info_file = (
+    """
+        {
+            "Name": ,
+            "Field": ,
+            "Experience": ,
+        }
+    """
+)
+
+define_stat_output_example = (
+    """
+        {
+            "Name": "송재훈",
+            "Field": "Backend",
+            "Experience": "Junior",
+            "evaluation_scores": {
+                "project_contribution_scoring": {
+                    "score": "75",
+                    "justification": "Played a major role in implementing key features (e.g., authentication, data handling across multiple projects like GDG, happyaginginc, profitnote) and actively participated in project setup and maintenance (e.g., templates, dependencies)."
+                },
+                "troubleshooting_scoring_criteria": {
+                    "score": "80",
+                    "justification": "Possessed significant experience resolving diverse issues (UI, logic, data, config) across multiple projects, as shown by numerous 'fix' and 'hotfix' commits addressing problems like validation, CORS, state management, and API errors."
+                }
+            },
+            "implemented_features": [
+                "User Authentication (Social Login, JWT, Session Management)",
+                "API Development (CRUD, RESTful)",
+                "Database Interaction / Management (SQL, ORM-like patterns, DDL/DML)",
+                "UI Development & Component Design (Web, Mobile)",
+                "State Management (Frontend - Recoil, Provider)",
+                "Asynchronous Programming / API Integration",
+                "Error Handling & Input Validation",
+                "Configuration & Build Management (Dependencies, Deployment, CORS)",
+                "Mobile Application Development (Flutter, React Native suspected)",
+                "Web Application Development (React suspected, SPA)",
+                "Version Control Best Practices (Conventional Commits, PR Templates, Issue Linking)",
+                "Basic System Programming Concepts (C - File I/O, Error Handling)"
+            ]
+        }
+    """
+)
 
 define_feature_template = PromptTemplate(
     input_variables=["example", "documents"],

@@ -63,6 +63,12 @@ Agent Success Response
 def issue_generate_success(data: T):
     return success_handler(200, "이슈 생성 성공", data)
 
+def assess_success(data: T):
+    return success_handler(200, "역량 평가 성공", data)
+
+def assessment_read_success(data: T):
+    return success_handler(200, "역량 조회 성공", data)
+
 """
 Issue Success Response
 """

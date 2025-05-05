@@ -56,3 +56,14 @@ def find_user_by_user_id(db: Session, user_id: str) -> User | None:
         logger.error(f"Database error: {e}")
         db.rollback()
         raise SQLError()
+    
+def update_user_stat(db: Session, user: User, stat: dict) -> User:
+    try:
+        user.stat = stat
+        db.commit()
+        db.refresh(user)
+        return user
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
