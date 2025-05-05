@@ -16,5 +16,5 @@ class AssessStatRes(BaseModel):
     name: str
     field: str
     experience: str
-    evaluatino_scores: dict[str, float]
+    evaluatino_scores: dict[str, str]
     implemented_features: list[str]
