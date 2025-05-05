@@ -9,9 +9,8 @@ class GenerateIssueRes(BaseModel):
     priority: str
     body: dict[str, str]
 
-class GenerateIssuesRes(BaseModel):
+class GenerateIssueListRes(BaseModel):
     issues: list[GenerateIssueRes]
-
 
 class AssessStatRes(BaseModel):
     name: str

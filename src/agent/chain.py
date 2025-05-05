@@ -3,9 +3,8 @@ from src.user import repository as user_repository
 from fastapi.datastructures import UploadFile as FastUploadFile
 from pathlib import Path
 from sqlalchemy.orm import Session
-from src.issue.schemas import IssueRes
 from src.agent.schemas import (
-    GenerateIssuesRes,
+    GenerateIssueListRes,
     GenerateIssueRes,
     AssessStatRes
 )
@@ -46,7 +45,7 @@ class CustomAgentExecutor:
             issueResList.append(issueRes)
             
 
-        return GenerateIssuesRes(issues=issueResList)
+        return GenerateIssueListRes(issues=issueResList)
     
     async def assess_competency(self, user_id: str, db: Session):
         """
