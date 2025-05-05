@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Request
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -47,6 +48,22 @@ def get_issue(
 ):
     user_id = request.state.user_id
     data = service.get_issue(user_id, f"{owner}/{repo}", issue_number, db)
+    return issue_read_success(data)
+
+
+@router.get(
+    "/{owner}/{repo}",
+    summary="Get all existing issues",
+    response_model=SuccessResponse[List[IssueRes]],
+)
+def get_all_issues(
+    request: Request,
+    owner: str,
+    repo: str,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user_id
+    data = service.get_all_issues(user_id, f"{owner}/{repo}", db)
     return issue_read_success(data)
 
 

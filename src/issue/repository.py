@@ -78,6 +78,7 @@ def return_issue_res(issue_json, db: Session):
         priority=priority,
         iteration=iteration,
         labels=[label["name"] for label in issue_json.get("labels", [])],
+        closed=(issue_json["closed_at"] != None),
     )
     return issue_res
 
@@ -115,6 +116,16 @@ def find_issue_by_issue_number(
 
     issue_json = issue_response.json()
     return return_issue_res(issue_json, db)
+
+
+def find_all_issues_by_project_id(user_id: int, repo_fullname: str, db: Session):
+    repos_url = f"https://api.github.com/repos/{repo_fullname}/issues"
+    response = requests.get(repos_url, headers=get_github_headers(user_id, db))
+    if response.status_code != 200:
+        raise GitHubApiError(response.status_code)
+
+    issue_list_json = response.json()
+    return [return_issue_res(issue_json) for issue_json in issue_list_json]
 
 
 def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
