@@ -168,6 +168,6 @@ class GitHubApiError(InternalServerErrorException):
             f"GitHub 요청 처리 중 문제가 발생했습니다. (response status: {code})"
         )
 
-class GetGitHubActivationInfoError(InternalServerErrorException):
+class GitHubActivationInfoError(InternalServerErrorException):
     def __init__(self):
         super().__init__("GitHub Activation Info를 가져오는 중에 문제가 발생했습니다.")
