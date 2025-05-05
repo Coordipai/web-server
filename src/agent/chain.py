@@ -14,7 +14,7 @@ from src.agent.schemas import (
 from src.response.error_definitions import (
     UserNotFound,
     ProjectNotFound,
-    GitHubApiError
+    GetGitHubActivationInfoError
 )
 
 class CustomAgentExecutor:
@@ -66,7 +66,7 @@ class CustomAgentExecutor:
         
         activity_info = await tool.get_github_activation_info(user.github_access_token)
         if not activity_info:
-            raise GitHubApiError()
+            raise GetGitHubActivationInfoError()
         
         stat = await tool.assess_with_data(user, activity_info)
         user_repository.update_user_stat(db, user, stat)
