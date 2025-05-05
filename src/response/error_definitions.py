@@ -128,6 +128,21 @@ class ProjectAlreadyExist(ConflictException):
 
 
 """
+415 UNSUPPORTED_MEDIA_TYPE
+"""
+
+
+class UnsupportedMediaType(BaseAppException):
+    def __init__(self, message):
+        super().__init__(message, 415)
+
+
+class InvalidFileType(UnsupportedMediaType):
+    def __init__(self):
+        super().__init__("지원하지 않는 파일 형식입니다.")
+
+
+"""
 500 INTERNAL_SERVER_ERROR
 """
 

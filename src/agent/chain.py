@@ -11,6 +11,11 @@ from src.agent.schemas import (
     AssignedIssueRes,
     AssignedIssueListRes
 )
+from src.response.error_definitions import (
+    UserNotFound,
+    ProjectNotFound,
+    GitHubApiError
+)
 
 class CustomAgentExecutor:
     def __init__(self):
@@ -57,11 +62,11 @@ class CustomAgentExecutor:
         # get user
         user = user_repository.find_user_by_user_id(db, user_id)
         if not user:
-            raise ValueError("User not found")
+            raise UserNotFound()
         
         activity_info = await tool.get_github_activation_info(user.github_access_token)
         if not activity_info:
-            raise ValueError("Failed to retrieve GitHub activity information")
+            raise GitHubApiError()
         
         stat = await tool.assess_with_data(user, activity_info)
         user_repository.update_user_stat(db, user, stat)
@@ -83,14 +88,14 @@ class CustomAgentExecutor:
         # Get project information from database
         project = project_repository.find_project_by_id(db, project_id)
         if not project:
-            raise ValueError("Project not found")
+            raise ProjectNotFound()
 
         # Get user stat from database
         user_stat_list = list()
         for user_id in user_ids:
             user = user_repository.find_user_by_user_id(db, user_id)
             if not user:
-                raise ValueError("User not found")
+                raise UserNotFound()
             user_stat_list.append(user.stat)
 
         # Assign issues to users

@@ -17,6 +17,9 @@ from src.models import Project, User
 from src.agent.schemas import (
     GenerateIssueListRes,
 )
+from src.response.error_definitions import (
+    InvalidFileType
+)
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -175,7 +178,7 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
     elif suffix == ".json":
         text = extract_text_from_json(tmp_path)
     else:
-        raise ValueError("Unsupported file type. Please upload a PDF or DOCX file.")
+        raise InvalidFileType()
         # TODO: Handle other file types if needed
 
     return text
