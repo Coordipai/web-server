@@ -78,6 +78,7 @@ def return_issue_res(issue_json, db: Session):
         priority=priority,
         iteration=iteration,
         labels=[label["name"] for label in issue_json.get("labels", [])],
+        closed=(issue_json["closed_at"] != None),
     )
     return issue_res
 

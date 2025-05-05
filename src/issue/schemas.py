@@ -39,3 +39,4 @@ class IssueRes(BaseModel):
     priority: str
     iteration: int
     labels: List[str]
+    closed: bool
