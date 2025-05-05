@@ -33,7 +33,7 @@ def find_issue_reschedule_request_by_id(db: Session, request_id: int) -> IssueRe
         db.rollback()
         raise SQLError()
     
-    
+
 def find_issue_reschedule_request_by_issue_num(db: Session, issue_num: int) -> IssueRescheduleRequest | None:
     try:
         result = db.execute(select(IssueRescheduleRequest).filter(IssueRescheduleRequest.issue_num == issue_num))
@@ -54,5 +54,15 @@ def find_issue_reschedule_requests_by_user_id(db: Session ,user_id: int) -> list
         return None
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+    
+    
+def delete_issue_reschedule_request(db: Session, issue_reschedule_request: IssueRescheduleRequest):
+    try:
+        db.delete(issue_reschedule_request)
+        db.commit()
+    except SQLAlchemyError as e:
+        logger.error(f"Database error during issue reschedule request deletion: {e}")
         db.rollback()
         raise SQLError()
