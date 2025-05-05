@@ -13,7 +13,10 @@ from langchain_google_vertexai import VertexAIEmbeddings
 import os
 from src.stat import service as stat_service
 from src.auth import service as auth_service
-from src.user import models as user_models
+from src.models import Project, User
+from src.agent.schemas import (
+    GenerateIssueListRes,
+)
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -196,12 +199,12 @@ async def get_github_activation_info(token: str):
 
     return repo_list
 
-async def assess_with_data(user: user_models.User, github_activation_data: list):
+async def assess_with_data(user: User, github_activation_data: list):
     """
     Assess the competency of a user based on their GitHub activity.
     """
     competency = await communicate_with_llm_tool(prompts.define_stat_prompt.format(
-        user_name=user.name,
+        user_name=user.github_name,
         criteria_table=prompts.score_table,
         github_activation_data=github_activation_data,
         info_file=prompts.info_file,
@@ -218,6 +221,39 @@ async def assess_with_data(user: user_models.User, github_activation_data: list)
         "evaluation_scores": competency["evaluation_scores"],
         "implemented_features": competency["implemented_features"]
     }
-    
 
     return competency_data
+
+
+async def assign_issues_to_users(project_info: Project, user_stat_list: list, issues: GenerateIssueListRes):
+    """
+    Assign issues to users based on their competency.
+    """
+
+    assigned_issues = list()
+    if(len(issues.issues) >= 10):
+        interval = 10
+    else:
+        interval = len(issues.issues)
+
+    for i in range(0, len(issues.issues), interval):
+        response = await communicate_with_llm_tool(prompts.assign_issue_template.format(
+            input_file=prompts.assign_input_template.format(
+                project_name="project_info.name",
+                project_overview="project overview",
+                issues=issues.issues[i:i+interval],
+                stats=user_stat_list
+            ),
+            output_example=prompts.assign_output_example
+        ))
+
+        response = response.replace("```json", "")
+        response = response.replace("```", "")
+        print(response)
+        response = json.loads(response)
+
+        assigned_issues.extend(response)
+
+    print(assigned_issues)
+    
+    return assigned_issues

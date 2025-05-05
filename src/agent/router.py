@@ -7,13 +7,16 @@ from src.config.database import get_db
 from src.user import repository as user_repository
 from src.agent.schemas import (
     GenerateIssueListRes,
-    AssessStatRes
+    AssessStatRes,
+    AssignedIssueListRes,
+    AssignIssueReq
 )
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_generate_success,
     assess_success,
-    assessment_read_success
+    assessment_read_success,
+    issue_assign_success
 )
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
@@ -69,3 +72,17 @@ async def get_stat(user_id: str, db: Session = Depends(get_db)):
         evaluation_scores=user.stat["evaluation_scores"],
         implemented_features=user.stat["implemented_features"]
     ))
+
+@router.post(
+        "/assign_issues/{project_id}",
+        summary="Assign issues to users",
+        response_model=SuccessResponse[AssignedIssueListRes]
+        )
+async def assign_issues(project_id: int, request:AssignIssueReq, db: Session = Depends(get_db)):
+    """
+    Assign issues to users based on their competency.
+    """
+    executor = chain.CustomAgentExecutor()
+    result = await executor.assign_issue_to_users(db, project_id, request.user_names, request.issues)
+
+    return issue_assign_success(result)
