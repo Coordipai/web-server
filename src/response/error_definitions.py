@@ -128,6 +128,21 @@ class ProjectAlreadyExist(ConflictException):
 
 
 """
+415 UNSUPPORTED_MEDIA_TYPE
+"""
+
+
+class UnsupportedMediaType(BaseAppException):
+    def __init__(self, message):
+        super().__init__(message, 415)
+
+
+class InvalidFileType(UnsupportedMediaType):
+    def __init__(self):
+        super().__init__("지원하지 않는 파일 형식입니다.")
+
+
+"""
 500 INTERNAL_SERVER_ERROR
 """
 
@@ -152,3 +167,7 @@ class GitHubApiError(InternalServerErrorException):
         super().__init__(
             f"GitHub 요청 처리 중 문제가 발생했습니다. (response status: {code})"
         )
+
+class GitHubActivationInfoError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__("GitHub Activation Info를 가져오는 중에 문제가 발생했습니다.")

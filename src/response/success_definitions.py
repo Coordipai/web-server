@@ -69,6 +69,9 @@ def assess_success(data: T):
 def assessment_read_success(data: T):
     return success_handler(200, "역량 조회 성공", data)
 
+def issue_assign_success(data: T):
+    return success_handler(200, "이슈 할당 성공", data)
+
 """
 Issue Success Response
 """

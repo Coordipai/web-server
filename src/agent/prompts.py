@@ -1,5 +1,87 @@
 from langchain.prompts import PromptTemplate
 
+
+# -------------------------------------------------------------------------------
+# Prompts for Developer Assignment
+# -------------------------------------------------------------------------------
+
+assign_issue_template = PromptTemplate(
+    input_variables=["input_file", "output_example"],
+    template=(
+        "**Input Description**\n"
+        "'input file' : {input_file}"
+        "The input file includes the following fields:\n"
+        "- **Project Name**: Overall title of the project\n"
+        "- **Development Overview**: A short description of the system’s purpose and features\n"
+        "- **Planned Issues**: A list of structured GitHub-style issues, each containing:\n"
+            "- type, title, labels, description\n"
+            "- TODOs\n"
+            "- additional context\n"
+            "- desired developer requirements (scores, field, etc.)\n"
+        "- **Developers**: A list of developers with the following information:\n"
+            "- Name\n"
+            "- Field (Frontend / Backend / AI)\n"
+            "- Experience Level (e.g., Junior / Intermediate / Senior)\n"
+            "- Troubleshooting Score (0–100)\n"
+            "- Project Contribution Score (0–100)\n"
+            "- Implemented Features (list of experience)\n"
+
+        "**Assignment Criteria**\n"
+        "Assign developers based on the following principles:\n"
+        "1. **Skill Match**: The developer’s field and implemented features should align with the issue’s required stack or type.\n"  
+        "2. **Relevant Experience**: Prior work or commits that show experience with similar features or systems.\n"  
+        "3. **Troubleshooting Score**: Higher scores indicate stronger problem-solving skills.\n"  
+        "4. **Project Contribution Score**: Reflects reliability and initiative.\n"  
+        "5. **Timeliness Potential**: Prefer developers likely to deliver on time for high-priority or high-difficulty issues.\n"
+        "6. **Team Dynamics**: Consider team members' workload and collaboration potential.\n\n"
+
+        "**Real-World Constraints and Exceptions**\n"
+        "- If **no developer exactly meets** all score thresholds for an issue, assign the **most suitable developer(s)** who come **closest** to the requirements, and explain why they were chosen anyway.\n"
+        "- If the issue appears **complex or multi-step**, consider assigning **more than one developer**, especially if their expertise complements each other.\n"
+        "- If absolutely no reasonable candidate exists, only then set the issue as `Unassigned` and provide an explanation.\n\n"
+
+        "**Task**\n"
+        "For each issue in the input file, assign the most appropriate 1–2 developers from the provided developer list.\n"  
+        "Provide a clear, detailed justification for each assigned developer based on the criteria above.\n"  
+        "Include explanations if a developer doesn’t fully meet a score requirement but is still assigned.\n"  
+        "Try to minimize overloading any single developer with too many tasks, unless necessary.\n\n"
+        
+        "Do not include your analysis or reasoning in the output.\n"
+        "Output must be in following format:\n"
+        "**Output Format**\n"
+        "{output_example}"
+    )
+)
+
+assign_input_template = PromptTemplate(
+    input_variables=["project_name", "project_overview", "issues", "stats"],
+    template=(
+        "project_name: {project_name}\n"
+        "project_overview: {project_overview}\n"
+        "issues: {issues}\n"
+        "stats: {stats}\n\n"
+    )
+)
+
+assign_output_example = (
+    """
+        [
+            {
+                "issue": "Issue title",
+                "assignee": "Developer1, Developer2",
+                "description": [
+                    "Developer1: Backend, experience with API development and session management. Troubleshooting: 85, Contribution: 90. Assigned due to strong alignment with backend stack and history of relevant features.",
+                    "Developer2: Frontend, worked on dashboard UI and error handling. Troubleshooting: 78, Contribution: 75. Assigned to support interface integration and ensure reliability."
+                ]
+            },
+        ]
+    """
+)
+
+# -------------------------------------------------------------------------------
+# Prompts for Competency Assessment
+# -------------------------------------------------------------------------------
+
 define_stat_prompt = PromptTemplate(
     input_variables=["user_name", "criteria_table", "github_activation_data" , "info_file", "output_example"],
     template=(
@@ -99,6 +181,10 @@ define_stat_output_example = (
     """
 )
 
+# -------------------------------------------------------------------------------
+# Prompts for Issue Generation
+# -------------------------------------------------------------------------------
+
 define_feature_template = PromptTemplate(
     input_variables=["example", "documents"],
     template=(
@@ -137,13 +223,12 @@ make_issue_template = PromptTemplate(
     )
 )
 
-
 issue_template = PromptTemplate(
     input_variables=["issue_name"],
     template=(
         """
         {
-            "type": "Enter the development roles (e.g., Backend, Frontend, AI, etc.).",
+            "type": "Enter the development roles (Backend, Frontend, AI).",
             "name": "issue_name",
             "description": "Please propose a new feature, UI improvement, or documentation enhancement.",
             "title": "[Feature]: ",
@@ -188,6 +273,10 @@ feature_example = (
     "Embedding Model: Embed User Information\n",
     "Gemini: Generate Issue Template\n"
 )
+
+# -------------------------------------------------------------------------------
+# Prompts for RAG
+# -------------------------------------------------------------------------------
 
 decomposition_prompt_template = PromptTemplate(
     input_variables=["documents"],
