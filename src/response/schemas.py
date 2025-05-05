@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-from typing import Generic, Optional, TypeVar
+from typing import Generic, List, Optional, TypeVar, Union
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -15,7 +15,7 @@ class ErrorResponse(BaseModel):
 
 class SuccessContent(BaseModel, Generic[T]):
     message: str
-    data: Optional[T] = None
+    data: Optional[Union[T, List[T]]] = None
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 

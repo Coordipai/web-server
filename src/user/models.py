@@ -20,3 +20,4 @@ class User(Base):
     stat = Column(JSON)
 
     members = relationship("ProjectUser", back_populates="user")
+    repos = relationship("UserRepository", back_populates="user")

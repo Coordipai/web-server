@@ -60,17 +60,22 @@ def user_search_success(data: T):
 Agent Success Response
 """
 
+
 def issue_generate_success(data: T):
     return success_handler(200, "이슈 생성 성공", data)
+
 
 def assess_success(data: T):
     return success_handler(200, "역량 평가 성공", data)
 
+
 def assessment_read_success(data: T):
     return success_handler(200, "역량 조회 성공", data)
 
+
 def issue_assign_success(data: T):
     return success_handler(200, "이슈 할당 성공", data)
+
 
 """
 Issue Success Response
@@ -91,3 +96,20 @@ def issue_update_success(data: T):
 
 def issue_close_success():
     return success_handler(200, "이슈 닫기 성공")
+
+
+"""
+User Repository Success Response
+"""
+
+
+def user_repository_sync_success(data: T):
+    return success_handler(200, "역량 평가용 레포지토리 업데이트 성공", data)
+
+
+def user_repository_read_success(data: T):
+    return success_handler(200, "역량 평가용 레포지토리 조회 성공", data)
+
+
+def user_repository_from_github_read_success(data: T):
+    return success_handler(200, "GitHub 레포지토리 조회 성공", data)
