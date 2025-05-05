@@ -5,7 +5,10 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 from src.config.database import get_db
 from src.user import repository as user_repository
-from src.agent.schemas import AssessStatRes
+from src.agent.schemas import (
+    GenerateIssueListRes,
+    AssessStatRes
+)
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_generate_success,
@@ -18,7 +21,7 @@ router = APIRouter(prefix="/agent", tags=["Agent"])
 @router.get(
         "/generate_issues",
         summary="Generate issues",
-        response_model=SuccessResponse[list]
+        response_model=SuccessResponse[GenerateIssueListRes]
         )
 async def generate_issues():
     """
@@ -34,7 +37,7 @@ async def generate_issues():
 @router.get(
         "/assess_stat/{user_id}",
         summary="Assess Stat",
-        response_model=SuccessResponse[dict]
+        response_model=SuccessResponse[AssessStatRes]
         )
 async def assess_stat(user_id: str, db: Session = Depends(get_db)):
     """
@@ -49,7 +52,7 @@ async def assess_stat(user_id: str, db: Session = Depends(get_db)):
 @router.get(
         "/read_stat/{user_id}",
         summary="Read Stat",
-        response_model=SuccessResponse[dict]
+        response_model=SuccessResponse[AssessStatRes]
         )
 async def get_stat(user_id: str, db: Session = Depends(get_db)):
     """
