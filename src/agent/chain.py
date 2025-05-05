@@ -12,7 +12,6 @@ from src.agent.schemas import (
     AssignedIssueListRes
 )
 
-
 class CustomAgentExecutor:
     def __init__(self):
         pass
@@ -49,6 +48,7 @@ class CustomAgentExecutor:
 
         return GenerateIssueListRes(issues=issueResList)
     
+
     async def assess_competency(self, user_id: int, db: Session):
         """
         Assess the competency of a user based on their GitHub activity.
@@ -74,10 +74,12 @@ class CustomAgentExecutor:
             implemented_features=stat["implemented_features"]
         )
     
+
     async def assign_issue_to_users(self, db: Session, project_id: str, user_ids: list[str], issues: GenerateIssueListRes):
         """
         Assign issues to users.
         """
+
         # Get project information from database
         project = project_repository.find_project_by_id(db, project_id)
         if not project:
@@ -91,8 +93,7 @@ class CustomAgentExecutor:
                 raise ValueError("User not found")
             user_stat_list.append(user.stat)
 
-        # Assign issues to users based on their competency (for 10 issues)
-
+        # Assign issues to users
         assigned_issues = await tool.assign_issues_to_users("project", user_stat_list, issues)
 
         assigned_issue_list_res = list()
@@ -104,7 +105,6 @@ class CustomAgentExecutor:
             )
             assigned_issue_list_res.append(assigned_issue_res)
             
-
         return AssignedIssueListRes(issues=assigned_issue_list_res)
 
 

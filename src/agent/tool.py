@@ -199,6 +199,7 @@ async def get_github_activation_info(token: str):
 
     return repo_list
 
+
 async def assess_with_data(user: User, github_activation_data: list):
     """
     Assess the competency of a user based on their GitHub activity.
@@ -249,11 +250,7 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list, is
 
         response = response.replace("```json", "")
         response = response.replace("```", "")
-        print(response)
         response = json.loads(response)
-
         assigned_issues.extend(response)
-
-    print(assigned_issues)
     
     return assigned_issues
