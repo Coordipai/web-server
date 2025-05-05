@@ -193,7 +193,7 @@ define_feature_template = PromptTemplate(
         "Divide the tasks such that each task can be completed within one hour.\n"
         "List the divided tasks in order of development sequence.\n"
         "Each task should be written in task name\n"
-        "Define only three tasks for the project.\n"
+        "Define necessary tasks for the project.\n"
         "The output should be a list of task names in json.\n\n"
 
         "Output example: {example}"
