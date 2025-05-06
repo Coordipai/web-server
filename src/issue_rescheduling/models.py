@@ -11,7 +11,7 @@ class IssueRescheduling(Base):
     issue_number = Column(Integer)
     reason = Column(String(501))
     new_iteration = int
-    new_assignees: List[str]
+    new_assignees = List[str]
     project_id = Column(Integer, ForeignKey("project.id"))
 
     project = relationship("Project", back_populates="issue_rescheduling_list")
