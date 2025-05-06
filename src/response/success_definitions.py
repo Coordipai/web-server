@@ -99,6 +99,27 @@ def issue_close_success():
 
 
 """
+Issue Rescheduling Request Success Response
+"""
+
+
+def issue_rescheduling_create_success(data: T):
+    return success_handler(201, "이슈 변경 요청서 생성 성공", data)
+
+
+def issue_rescheduling_read_success(data: T):
+    return success_handler(200, "이슈 변경 요청서 조회 성공", data)
+
+
+def issue_rescheduling_update_success(data: T):
+    return success_handler(200, "이슈 변경 요청서 수정 성공", data)
+
+
+def issue_rescheduling_delete_success():
+    return success_handler(200, "이슈 변경 요청서 삭제 성공")
+
+
+"""
 User Repository Success Response
 """
 

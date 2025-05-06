@@ -20,3 +20,6 @@ class Project(Base):
     members = relationship(
         "ProjectUser", back_populates="project", cascade="all, delete-orphan"
     )
+    issue_rescheduling_list = relationship(
+        "IssueRescheduling", back_populates="project", cascade="all, delete-orphan"
+    )

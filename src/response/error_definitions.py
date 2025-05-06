@@ -97,6 +97,11 @@ class ProjectNotFound(NotFoundException):
         super().__init__("프로젝트 정보를 찾을 수 없습니다.")
 
 
+class IssueReschedulingNotFound(NotFoundException):
+    def __init__(self):
+        super().__init__("이슈 변경 요청서 정보를 찾을 수 없습니다.")
+
+
 """
 405 METHOD_NOT_ALLOWED
 """
@@ -125,6 +130,11 @@ class UserAlreadyExist(ConflictException):
 class ProjectAlreadyExist(ConflictException):
     def __init__(self):
         super().__init__("프로젝트 정보가 이미 존재합니다.")
+
+
+class IssueReschedulingAlreadyExist(ConflictException):
+    def __init__(self):
+        super().__init__("이슈 변경 요청서가 이미 존재합니다.")
 
 
 """
@@ -167,6 +177,7 @@ class GitHubApiError(InternalServerErrorException):
         super().__init__(
             f"GitHub 요청 처리 중 문제가 발생했습니다. (response status: {code})"
         )
+
 
 class GitHubActivationInfoError(InternalServerErrorException):
     def __init__(self):
