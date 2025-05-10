@@ -14,7 +14,7 @@ class User(Base):
     github_name = Column(String(255), unique=True, index=True)
     github_access_token = Column(String(255))
     category = Column(String(255))
-    career = Column(String(255))
+    career = Column(String(501))
     profile_img = Column(String(255))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     stat = Column(JSON)
