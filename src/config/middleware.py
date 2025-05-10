@@ -1,14 +1,16 @@
 from datetime import datetime
+
 from fastapi.responses import JSONResponse
 from starlette.requests import Request
+
 from src.auth.util.jwt import parse_token
+from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.response.error_definitions import (
     BaseAppException,
     InvalidJwtToken,
     JwtTokenNotFound,
 )
 from src.response.schemas import ErrorResponse
-from src.config.logger_config import setup_logger, add_daily_file_handler
 
 logger = setup_logger(__name__)
 add_daily_file_handler(logger)

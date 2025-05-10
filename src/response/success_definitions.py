@@ -2,7 +2,6 @@ from typing import TypeVar
 
 from src.response.handler import success_handler
 
-
 T = TypeVar("T")
 
 """

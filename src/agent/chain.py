@@ -1,21 +1,24 @@
-from src.agent import tool
-from src.user import repository as user_repository
-from src.project import repository as project_repository
-from fastapi.datastructures import UploadFile as FastUploadFile
 from pathlib import Path
+
+from fastapi.datastructures import UploadFile as FastUploadFile
 from sqlalchemy.orm import Session
+
+from src.agent import tool
 from src.agent.schemas import (
+    AssessStatRes,
+    AssignedIssueListRes,
+    AssignedIssueRes,
     GenerateIssueListRes,
     GenerateIssueRes,
-    AssessStatRes,
-    AssignedIssueRes,
-    AssignedIssueListRes
 )
+from src.project import repository as project_repository
 from src.response.error_definitions import (
-    UserNotFound,
+    GitHubActivationInfoError,
     ProjectNotFound,
-    GitHubActivationInfoError
+    UserNotFound,
 )
+from src.user import repository as user_repository
+
 
 class CustomAgentExecutor:
     def __init__(self):

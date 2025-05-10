@@ -1,16 +1,11 @@
 from typing import List
-from fastapi import APIRouter, Request
-from fastapi import Depends
+
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.issue import service
-from src.issue.schemas import (
-    IssueCloseReq,
-    IssueCreateReq,
-    IssueRes,
-    IssueUpdateReq,
-)
+from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_close_success,
@@ -18,7 +13,6 @@ from src.response.success_definitions import (
     issue_read_success,
     issue_update_success,
 )
-
 
 router = APIRouter(prefix="/issue", tags=["Issue"])
 

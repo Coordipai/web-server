@@ -1,13 +1,13 @@
 from typing import List
-from fastapi import APIRouter
-from fastapi import Depends
+
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
+from src.config.database import get_db
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import user_search_success
 from src.user.schemas import UserRes
 from user import service
-
-from src.config.database import get_db
 
 router = APIRouter(prefix="/user", tags=["User"])
 

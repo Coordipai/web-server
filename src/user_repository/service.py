@@ -1,10 +1,11 @@
 from typing import List
+
 from sqlalchemy.orm import Session
 
 from src.stat.service import get_repositories
 from src.user.repository import find_user_by_user_id
-from user_repository import repository
 from src.user_repository.schemas import UserRepositoryReq, UserRepositoryRes
+from user_repository import repository
 
 
 def sync_user_repositories(

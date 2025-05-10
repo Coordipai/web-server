@@ -1,25 +1,22 @@
 import secrets
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi import security
+
+from fastapi import Depends, FastAPI, HTTPException, security, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 import src.models  # noqa: F401
-from src.config.middleware import jwt_authentication_middleware
-from src.config.database import initialize_database
+from agent.router import router as agent_router
+from auth.router import router as auth_router
+from issue.router import router as issue_router
+from project.router import router as project_router
 from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
+from src.config.database import initialize_database
+from src.config.middleware import jwt_authentication_middleware
 from src.response.error_definitions import BaseAppException
 from src.response.handler import exception_handler
-
-# Import routers
-from auth.router import router as auth_router
-from project.router import router as project_router
 from user.router import router as user_router
-from agent.router import router as agent_router
-from issue.router import router as issue_router
 from user_repository.router import router as user_repository_router
-
 
 app = FastAPI(
     title="Coordipai Web Server",

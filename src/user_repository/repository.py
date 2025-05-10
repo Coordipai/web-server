@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from src.response.error_definitions import SQLError
+from sqlalchemy.orm import Session
+
 from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.models import UserRepository
+from src.response.error_definitions import SQLError
 
 logger = setup_logger(__name__)
 add_daily_file_handler(logger)

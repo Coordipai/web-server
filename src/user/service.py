@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from src.response.error_definitions import UserAlreadyExist
-from src.models import User
-from user.schemas import UserReq, UserRes
-from user import repository
-from src.models import User
+
 from auth.util.redis import get_token_from_redis
+from src.models import User
+from src.response.error_definitions import UserAlreadyExist
+from user import repository
+from user.schemas import UserReq, UserRes
 
 
 async def create_user(db: Session, user_req: UserReq):

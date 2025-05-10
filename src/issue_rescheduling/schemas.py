@@ -1,7 +1,7 @@
 from typing import List
+
 from pydantic import BaseModel
 
-from src.user.schemas import UserRes
 
 
 class IssueReschedulingReq(BaseModel):

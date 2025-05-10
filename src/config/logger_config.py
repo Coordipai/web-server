@@ -1,9 +1,10 @@
 # logger_config.py
 import logging
 import logging.handlers
-import colorlog
 import os
 from datetime import datetime
+
+import colorlog
 
 
 def setup_logger(name):

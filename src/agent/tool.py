@@ -1,25 +1,29 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.schema import HumanMessage, SystemMessage
-from langchain_chroma import Chroma
-from src.agent import prompts
-from src.config.config import GEMINI_MODEL, GEMINI_API_KEY, VERTEX_EMBEDDING_MODEL, VERTEX_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS
 import json
-from pathlib import Path
-from fastapi import UploadFile, File
+import os
 import tempfile
+from pathlib import Path
+
 import pdfplumber
 from docx import Document
+from fastapi import File, UploadFile
+from langchain.schema import HumanMessage, SystemMessage
+from langchain_chroma import Chroma
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_vertexai import VertexAIEmbeddings
-import os
-from src.stat import service as stat_service
+
+from src.agent import prompts
+from src.agent.schemas import GenerateIssueListRes
 from src.auth import service as auth_service
+from src.config.config import (
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    GOOGLE_APPLICATION_CREDENTIALS,
+    VERTEX_EMBEDDING_MODEL,
+    VERTEX_PROJECT_ID,
+)
 from src.models import Project, User
-from src.agent.schemas import (
-    GenerateIssueListRes,
-)
-from src.response.error_definitions import (
-    InvalidFileType
-)
+from src.response.error_definitions import InvalidFileType
+from src.stat import service as stat_service
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 

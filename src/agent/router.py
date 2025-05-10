@@ -1,23 +1,23 @@
 
-from fastapi import APIRouter
-from src.agent import chain
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from fastapi import Depends
-from src.config.database import get_db
-from src.user import repository as user_repository
+
+from src.agent import chain
 from src.agent.schemas import (
-    GenerateIssueListRes,
     AssessStatRes,
     AssignedIssueListRes,
-    AssignIssueReq
+    AssignIssueReq,
+    GenerateIssueListRes,
 )
+from src.config.database import get_db
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
-    issue_generate_success,
     assess_success,
     assessment_read_success,
-    issue_assign_success
+    issue_assign_success,
+    issue_generate_success,
 )
+from src.user import repository as user_repository
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 

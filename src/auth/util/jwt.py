@@ -1,12 +1,13 @@
+from datetime import datetime, timedelta, timezone
 from typing import Optional
-from fastapi import HTTPException
+
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from datetime import datetime, timedelta, timezone
+
 from src.config.config import (
-    JWT_SECRET,
-    ALGORITHM,
     ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    JWT_SECRET,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
 from src.response.error_definitions import ExpiredJwtToken, InvalidJwtToken
