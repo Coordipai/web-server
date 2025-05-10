@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Optional, TypeVar
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from src.config.logger_config import setup_logger, add_daily_file_handler
+
+from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.response.error_definitions import BaseAppException
 from src.response.schemas import ErrorResponse, SuccessContent, SuccessResponse
-
 
 logger = setup_logger(__name__)
 add_daily_file_handler(logger)

@@ -1,13 +1,10 @@
-from typing import Optional, Tuple
-import requests
 import re
+from typing import Optional, Tuple
+
+import requests
 from sqlalchemy.orm import Session
-from src.issue.schemas import (
-    IssueCloseReq,
-    IssueCreateReq,
-    IssueRes,
-    IssueUpdateReq,
-)
+
+from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
 from src.response.error_definitions import GitHubApiError, InvalidReqFormat
 from src.user.repository import find_all_users_by_github_names, find_user_by_user_id
 from src.user.schemas import UserRes

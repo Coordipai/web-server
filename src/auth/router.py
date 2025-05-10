@@ -1,11 +1,12 @@
 from typing import Optional
+
+from fastapi import APIRouter, Cookie, Depends, Request, Response
 from fastapi.responses import RedirectResponse
-from fastapi import APIRouter, Cookie, Request, Response
-from fastapi import Depends
 from sqlalchemy.orm import Session
-from src.config.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
+
 from auth import service
 from auth.schemas import AuthReq, AuthRes, RefreshReq
+from src.config.config import GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI
 from src.config.database import get_db
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (

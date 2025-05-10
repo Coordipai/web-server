@@ -1,7 +1,8 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 from src.config.config import DATABASE_URL
 from src.config.logger_config import setup_logger
 from src.response.error_definitions import SQLError

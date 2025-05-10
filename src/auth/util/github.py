@@ -1,4 +1,5 @@
 import httpx
+
 from src.config.config import (
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,

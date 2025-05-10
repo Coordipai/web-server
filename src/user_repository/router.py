@@ -1,7 +1,6 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy.orm import Session
-from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
@@ -11,8 +10,8 @@ from src.response.success_definitions import (
     user_repository_read_success,
     user_repository_sync_success,
 )
-from user_repository import service
 from src.user_repository.schemas import UserRepositoryReq, UserRepositoryRes
+from user_repository import service
 
 router = APIRouter(prefix="/user-repo", tags=["User Repository"])
 

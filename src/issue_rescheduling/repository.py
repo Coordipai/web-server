@@ -1,10 +1,11 @@
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import SQLAlchemyError
+
+from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.issue_rescheduling.models import IssueRescheduling
 from src.response.error_definitions import SQLError
-from src.config.logger_config import add_daily_file_handler, setup_logger
 
 logger = setup_logger(__name__)
 add_daily_file_handler(logger)

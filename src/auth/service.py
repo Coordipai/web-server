@@ -1,20 +1,22 @@
 from typing import Optional
+
 from fastapi import Cookie, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
+
+from auth.schemas import AuthReq, AuthRes
+from auth.util.github import get_github_access_token, get_github_user_info
 from auth.util.jwt import create_access_token, create_refresh_token, parse_token
 from auth.util.redis import (
     delete_token_from_redis,
     get_token_from_redis,
     save_token_to_redis,
 )
-from auth.util.github import get_github_access_token, get_github_user_info
-from auth.schemas import AuthReq, AuthRes
+from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
 from src.response.error_definitions import (
     AccessTokenNotFound,
-    GitHubCredentialCodeNotFound,
     GitHubAccessTokenError,
+    GitHubCredentialCodeNotFound,
     InvalidRefreshToken,
     UserAlreadyExist,
     UserNotFound,

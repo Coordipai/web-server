@@ -1,6 +1,7 @@
-from typing import List
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel, ConfigDict
 
 from src.project.models import Project
 from src.user.models import User
