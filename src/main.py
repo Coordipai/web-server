@@ -9,6 +9,7 @@ import src.models  # noqa: F401
 from agent.router import router as agent_router
 from auth.router import router as auth_router
 from issue.router import router as issue_router
+from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
 from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
 from src.config.database import initialize_database
@@ -66,3 +67,4 @@ app.include_router(user_router)
 app.include_router(agent_router)
 app.include_router(issue_router)
 app.include_router(user_repository_router)
+app.include_router(issue_rescheduling_router)
