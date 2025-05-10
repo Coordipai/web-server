@@ -10,11 +10,11 @@ class Project(Base):
     id = Column(Integer, Identity(), primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True)
     owner = Column(Integer, index=True)
-    repo_name = Column(String(255))
+    repo_fullname = Column(String(255))
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     sprint_unit = Column(Integer)
-    discord_channel_id = Column(Integer, unique=True, index=True)
+    discord_channel_id = Column(Integer, index=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     members = relationship(

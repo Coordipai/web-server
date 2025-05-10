@@ -35,7 +35,7 @@ def create_project(
     project = Project(
         name=project_req.name,
         owner=user_id,
-        repo_name=project_req.repo_name,
+        repo_fullname=project_req.repo_fullname,
         start_date=project_req.start_date,
         end_date=project_req.end_date,
         sprint_unit=project_req.sprint_unit,
@@ -100,7 +100,7 @@ def update_project(
         raise ProjectNotFound()
 
     existing_project.name = (project_req.name,)
-    existing_project.repo_name = (project_req.repo_name,)
+    existing_project.repo_fullname = (project_req.repo_fullname,)
     existing_project.start_date = (project_req.start_date,)
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)

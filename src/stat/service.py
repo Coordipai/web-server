@@ -28,12 +28,12 @@ def get_repositories(token):
     return repo_list
 
 
-def get_pull_requests(repo_name, user_name, token):
+def get_pull_requests(repo_fullname, user_name, token):
     """
     Get all pull requests owned by user
     """
     headers = {"Authorization": f"token {token}"}
-    prs_url = f"https://api.github.com/repos/{repo_name}/pulls?state=all"
+    prs_url = f"https://api.github.com/repos/{repo_fullname}/pulls?state=all"
     prs_response = requests.get(prs_url, headers=headers)
 
     if prs_response.status_code != 200:
@@ -67,7 +67,7 @@ def get_pull_requests(repo_name, user_name, token):
 
             pr_list.append(
                 {
-                    "repository": repo_name,
+                    "repository": repo_fullname,
                     "pull_request_number": pr["number"],
                     "author": user_name,
                     "title": pr["title"],
@@ -81,13 +81,15 @@ def get_pull_requests(repo_name, user_name, token):
     return pr_list
 
 
-def get_commits(repo_name, user_name, token):
+def get_commits(repo_fullname, user_name, token):
     headers = {"Authorization": f"token {token}"}
-    commits_url = f"https://api.github.com/repos/{repo_name}/commits?author={user_name}"
+    commits_url = (
+        f"https://api.github.com/repos/{repo_fullname}/commits?author={user_name}"
+    )
     commits_response = requests.get(commits_url, headers=headers)
 
     if commits_response.status_code != 200:
-        if(commits_response.json()["message"] == "Git Repository is empty."):
+        if commits_response.json()["message"] == "Git Repository is empty.":
             return []
         raise GitHubApiError(commits_response.status_code)
 

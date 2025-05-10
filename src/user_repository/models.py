@@ -8,6 +8,6 @@ class UserRepository(Base):
 
     id = Column(Integer, Identity(), primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    repo_full_name = Column(String(255))
+    repo_fullname = Column(String(255))
 
     user = relationship("User", back_populates="repos")
