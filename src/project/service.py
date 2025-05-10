@@ -13,7 +13,6 @@ from src.response.error_definitions import (
     ProjectOwnerMismatched,
 )
 from src.user.repository import find_user_by_user_id
-from src.user.schemas import UserRes
 
 
 def create_project(

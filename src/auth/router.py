@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi import APIRouter, Cookie, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
