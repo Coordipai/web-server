@@ -34,7 +34,7 @@ def create_project(
             "example:\n\n"
             "{\n\n"
             '  "name": "My Project",\n\n'
-            '  "repo_name": "my-repo",\n\n'
+            '  "repo_fullname": "my-repo",\n\n'
             '  "start_date": "2025-01-01T00:00:00Z",\n\n'
             '  "end_date": "2025-03-01T00:00:00Z",\n\n'
             '  "sprint_unit": 2,\n\n'

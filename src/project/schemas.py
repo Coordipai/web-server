@@ -34,7 +34,7 @@ class ProjectUserRes(BaseModel):
 
 class ProjectReq(BaseModel):
     name: str
-    repo_name: str
+    repo_fullname: str
     start_date: datetime
     end_date: datetime
     sprint_unit: int
@@ -46,7 +46,7 @@ class ProjectRes(BaseModel):
     id: int
     name: str
     owner: UserRes
-    repo_name: str
+    repo_fullname: str
     start_date: datetime
     end_date: datetime
     sprint_unit: int
@@ -63,7 +63,7 @@ class ProjectRes(BaseModel):
             id=project.id,
             name=project.name,
             owner=UserRes.model_validate(owner),
-            repo_name=project.repo_name,
+            repo_fullname=project.repo_fullname,
             start_date=project.start_date,
             end_date=project.end_date,
             sprint_unit=project.sprint_unit,
