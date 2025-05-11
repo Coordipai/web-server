@@ -188,7 +188,7 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
     return text
 
 
-async def get_github_activation_info(token: str):
+async def get_github_activation_info(token: str, selected_repos: list):
     """
     Get GitHub information using the agent executor.
     """
@@ -199,11 +199,12 @@ async def get_github_activation_info(token: str):
     user_name = user_info["login"]
 
     for repo in repo_list:
-        prs = stat_service.get_pull_requests(repo["name"], user_name, token)
-        commits = stat_service.get_commits(repo["name"], user_name, token)
-        repo["prs"] = prs
-        repo["commits"] = commits
-
+        if repo["name"] in selected_repos:
+            prs = stat_service.get_pull_requests(repo["name"], user_name, token)
+            commits = stat_service.get_commits(repo["name"], user_name, token)
+            repo["prs"] = prs
+            repo["commits"] = commits
+            
     return repo_list
 
 
