@@ -1,3 +1,6 @@
+import os
+import shutil
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import File, UploadFile
@@ -33,6 +36,9 @@ def create_project(
 
     if existing_project:
         raise ProjectAlreadyExist()
+    
+    design_doc_paths = upload_file(
+        existing_project, files, db)
 
     project = Project(
         name=project_req.name,
@@ -42,6 +48,7 @@ def create_project(
         end_date=project_req.end_date,
         sprint_unit=project_req.sprint_unit,
         discord_channel_id=project_req.discord_chnnel_id,
+        design_doc_paths=design_doc_paths,
     )
 
     saved_project = repository.create_project(db, project)
@@ -133,6 +140,7 @@ def update_project(
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)
     existing_project.discord_channel_id = (project_req.discord_chnnel_id,)
+    existing_project.design_doc_paths = (project_req.design_doc_paths,)
 
     saved_project = repository.update_project(db, existing_project)
 
@@ -166,7 +174,29 @@ def delete_project(user_id: int, project_id: int, db: Session):
         raise ProjectOwnerMismatched()
 
 
-async def upload_file(project_name: str, files: List[UploadFile]):
+async def upload_file(project: Project, files: List[UploadFile], db: Session):
+    """
+    Upload design documents to the project directory
+    """
+
+    project_dir = os.path.join("design_docs", project.name)
+    os.makedirs(project_dir, exist_ok=True)
+
+    uploaded_paths = []
     for file in files:
-        safe_filename = file.filename.replace("/", "_")
-        print(safe_filename)
+        safe_filename = file.filename.replace("/", "_").replace("\\", "_")
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        saved_filename = f"{timestamp}_{safe_filename}"
+        file_path = os.path.join(project_dir, saved_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        uploaded_paths.append(file_path)
+
+    if project.design_doc_paths is None:
+        project.design_doc_paths = []
+    project.design_doc_paths.extend(uploaded_paths)
+
+    await db.commit()
+    return uploaded_paths

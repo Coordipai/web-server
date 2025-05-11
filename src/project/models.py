@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Identity, Integer, String
+from sqlalchemy import JSON, Column, DateTime, Identity, Integer, String
 from sqlalchemy.orm import relationship
 
 from src.config.database import Base
@@ -18,6 +18,7 @@ class Project(Base):
     sprint_unit = Column(Integer)
     discord_channel_id = Column(Integer, index=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    design_doc_paths = Column(JSON)
 
     members = relationship(
         "ProjectUser", back_populates="project", cascade="all, delete-orphan"
