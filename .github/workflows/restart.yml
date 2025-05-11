@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+  id-token: write
+
+jobs:
+  relaunch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into Server and Re-start server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_SSH_HOST }}
+          username: ${{ secrets.REMOTE_SSH_USERNAME }}
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            docker stop coordipai-web-server
+            docker start coordipai-web-server
