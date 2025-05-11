@@ -12,7 +12,7 @@ from auth.util.redis import (
     get_token_from_redis,
     save_token_to_redis,
 )
-from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL
+from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL, IS_LOCAL
 from src.response.error_definitions import (
     AccessTokenNotFound,
     GitHubAccessTokenError,
@@ -59,17 +59,26 @@ async def github_callback(
         """
         access_token = create_access_token(github_id)
         redirect = RedirectResponse(url=f"{FRONTEND_URL}/")
-        redirect.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            # TODO Activate when deploy
-            secure=True,
-            # samesite="Lax",
-            samesite="none",
-            max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
-            path="/",
-        )
+
+        if IS_LOCAL:
+            redirect.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                samesite="lax",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
+                path="/",
+            )
+        else:
+            redirect.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="none",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
+                path="/",
+            )
     else:
         """
         Redirect to Register Page
@@ -79,17 +88,26 @@ async def github_callback(
         access_token = create_access_token(github_id)
 
         redirect = RedirectResponse(url=f"{FRONTEND_URL}/register/{github_name}")
-        redirect.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            # TODO Activate when deploy
-            secure=True,
-            # samesite="Lax",
-            samesite="none",
-            max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
-            path="/",
-        )
+
+        if IS_LOCAL:
+            redirect.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                samesite="lax",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
+                path="/",
+            )
+        else:
+            redirect.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="none",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
+                path="/",
+            )
 
     return redirect
 
