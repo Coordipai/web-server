@@ -64,8 +64,9 @@ async def github_callback(
             value=access_token,
             httponly=True,
             # TODO Activate when deploy
-            # secure=True,
-            samesite="Lax",
+            secure=True,
+            # samesite="Lax",
+            samesite="none",
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
             path="/",
         )
@@ -83,8 +84,9 @@ async def github_callback(
             value=access_token,
             httponly=True,
             # TODO Activate when deploy
-            # secure=True,
-            samesite="Lax",
+            secure=True,
+            # samesite="Lax",
+            samesite="none",
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
             path="/",
         )
