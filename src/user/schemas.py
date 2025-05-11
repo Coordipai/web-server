@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 class UserReq(BaseModel):
     name: str
-    discord_id: int
+    discord_id: str
     github_id: int
     github_name: str
     category: str
@@ -16,7 +16,7 @@ class UserReq(BaseModel):
 class UserRes(BaseModel):
     id: int
     name: str
-    discord_id: int
+    discord_id: str
     github_id: int
     github_name: str
     category: str

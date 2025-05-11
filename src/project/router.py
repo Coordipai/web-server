@@ -25,7 +25,7 @@ router = APIRouter(prefix="/project", tags=["Project"])
     summary="Create a new project",
     response_model=SuccessResponse[ProjectRes],
 )
-def create_project(
+async def create_project(
     request: Request,
     project_req: str = Form(
         ...,
@@ -34,11 +34,11 @@ def create_project(
             "example:\n\n"
             "{\n\n"
             '  "name": "My Project",\n\n'
-            '  "repo_fullname": "my-repo",\n\n'
+            '  "repo_fullname": "owner/my-repo",\n\n'
             '  "start_date": "2025-01-01T00:00:00Z",\n\n'
             '  "end_date": "2025-03-01T00:00:00Z",\n\n'
-            '  "sprint_unit": 2,\n\n'
-            '  "discord_chnnel_id": 1234567890,\n\n'
+            '  "sprint_unit": 7,\n\n'
+            '  "discord_channel_id": "1234567890",\n\n'
             '  "members": [\n\n'
             '   {"id": 1, "role": "backend"},\n\n'
             '   {"id": 2, "role": "frontend"}\n\n'
@@ -50,7 +50,7 @@ def create_project(
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = service.create_project(
+    data = await service.create_project(
         user_id, parse_project_req_str(project_req), db, files
     )
     return project_create_success(data)
@@ -124,5 +124,3 @@ def parse_project_req_str(project_req: str = Form(...)):
         raise InvalidJsonFormat()
     except ValueError as e:
         raise InvalidJsonDataFormat()
-    
-

@@ -39,7 +39,7 @@ class ProjectReq(BaseModel):
     start_date: datetime
     end_date: datetime
     sprint_unit: int
-    discord_chnnel_id: int
+    discord_channel_id: str
     members: List[ProjectUserReq]
 
 
@@ -51,7 +51,7 @@ class ProjectRes(BaseModel):
     start_date: datetime
     end_date: datetime
     sprint_unit: int
-    discord_channel_id: int
+    discord_channel_id: str
     members: List[ProjectUserRes]
     design_docs: List[str]
 
@@ -59,7 +59,11 @@ class ProjectRes(BaseModel):
 
     @classmethod
     def from_project(
-        cls, project: Project, owner: User, project_members: list[ProjectUserRes], list_of_design_docs: list[str]
+        cls,
+        project: Project,
+        owner: User,
+        project_members: list[ProjectUserRes],
+        list_of_design_docs: list[str],
     ) -> "ProjectRes":
         return cls(
             id=project.id,
