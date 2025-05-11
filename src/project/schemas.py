@@ -53,6 +53,7 @@ class ProjectRes(BaseModel):
     sprint_unit: int
     discord_channel_id: int
     members: List[ProjectUserRes]
+    design_doc_paths: List[str]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -70,6 +71,7 @@ class ProjectRes(BaseModel):
             sprint_unit=project.sprint_unit,
             discord_channel_id=project.discord_channel_id,
             members=project_members,
+            design_doc_paths=project.design_doc_paths,
         )
 
 
