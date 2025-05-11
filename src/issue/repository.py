@@ -86,8 +86,10 @@ def return_issue_res(issue_json, db: Session):
     return issue_res
 
 
-def create_issue(user_id: int, issue_req: IssueCreateReq, db: Session):
-    repos_url = f"https://api.github.com/repos/{issue_req.repo_fullname}/issues"
+def create_issue(
+    user_id: int, repo_fullname: str, issue_req: IssueCreateReq, db: Session
+):
+    repos_url = f"https://api.github.com/repos/{repo_fullname}/issues"
     req_data = {
         "title": issue_req.title,
         "body": add_hidden_metadata(
@@ -140,8 +142,12 @@ def find_all_issues_by_project_id(user_id: int, repo_fullname: str, db: Session)
     ]
 
 
-def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
-    repos_url = f"https://api.github.com/repos/{issue_req.repo_fullname}/issues/{issue_req.issue_number}"
+def update_issue(
+    user_id: int, repo_fullname: str, issue_req: IssueUpdateReq, db: Session
+):
+    repos_url = (
+        f"https://api.github.com/repos/{repo_fullname}/issues/{issue_req.issue_number}"
+    )
     req_data = {
         "title": issue_req.title,
         "body": add_hidden_metadata(
@@ -162,11 +168,13 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
     return return_issue_res(issue_json, db)
 
 
-def close_issue(user_id: int, issue_req: IssueCloseReq, db: Session):
-    repos_url = f"https://api.github.com/repos/{issue_req.repo_fullname}/issues/{issue_req.issue_number}"
-    req_data = {
-        "state": "close",
-    }
+def close_issue(
+    user_id: int, repo_fullname: str, issue_req: IssueCloseReq, db: Session
+):
+    repos_url = (
+        f"https://api.github.com/repos/{repo_fullname}/issues/{issue_req.issue_number}"
+    )
+    req_data = {"state": "close"}
 
     issue_response = requests.patch(
         repos_url, headers=get_github_headers(user_id, db), json=req_data
