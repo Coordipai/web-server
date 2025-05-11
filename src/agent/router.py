@@ -1,9 +1,10 @@
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from src.agent import chain
 from src.agent.schemas import (
+    AssessStatReq,
     AssessStatRes,
     AssignedIssueListRes,
     AssignIssueReq,
@@ -38,16 +39,16 @@ async def generate_issues():
 
 
 @router.get(
-        "/assess_stat/{user_id}",
+        "/assess_stat",
         summary="Assess Stat",
         response_model=SuccessResponse[AssessStatRes]
         )
-async def assess_stat(user_id: str, db: Session = Depends(get_db)):
+async def assess_stat(request: Request, assess_stat_req: AssessStatReq, db: Session = Depends(get_db)):
     """
     Assess the competency of a user based on their GitHub activity.
     """
     executor = chain.CustomAgentExecutor()
-    result = await executor.assess_competency(user_id, db)
+    result = await executor.assess_competency(request.state.user_id, assess_stat_req.selected_repos, db)
 
     return assess_success(result)
 
