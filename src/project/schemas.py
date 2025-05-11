@@ -71,3 +71,13 @@ class ProjectRes(BaseModel):
             discord_channel_id=project.discord_channel_id,
             members=project_members,
         )
+
+
+class ProjectListRes(BaseModel):
+    id: int
+    name: str
+    start_date: datetime
+    end_date: datetime
+    sprint_unit: int
+
+    model_config = ConfigDict(from_attributes=True)

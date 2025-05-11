@@ -47,6 +47,16 @@ def find_project_by_name(db: Session, project_name: str) -> Project | None:
         raise SQLError()
 
 
+def find_project_by_owner(db: Session, owner: str) -> list[Project]:
+    try:
+        result = db.execute(select(Project).filter(Project.owner == owner))
+        return result.scalars().all()
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
 def update_project(db: Session, project: Project) -> Project:
     try:
         db.commit()
