@@ -43,7 +43,7 @@ async def generate_issues():
         summary="Assess Stat",
         response_model=SuccessResponse[AssessStatRes]
         )
-async def assess_stat(user_id: str, request: Request, assess_stat_req: AssessStatReq, db: Session = Depends(get_db)):
+async def assess_stat(request: Request, assess_stat_req: AssessStatReq, db: Session = Depends(get_db)):
     """
     Assess the competency of a user based on their GitHub activity.
     """
