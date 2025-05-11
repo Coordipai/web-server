@@ -39,16 +39,16 @@ async def generate_issues():
 
 
 @router.get(
-        "/assess_stat",
+        "/assess_stat/{user_id}",
         summary="Assess Stat",
         response_model=SuccessResponse[AssessStatRes]
         )
-async def assess_stat(request: AssessStatReq, db: Session = Depends(get_db)):
+async def assess_stat(user_id: str, request: AssessStatReq, db: Session = Depends(get_db)):
     """
     Assess the competency of a user based on their GitHub activity.
     """
     executor = chain.CustomAgentExecutor()
-    result = await executor.assess_competency(request.user_id, request.selected_repos, db)
+    result = await executor.assess_competency(user_id, request.selected_repos, db)
 
     return assess_success(result)
 
