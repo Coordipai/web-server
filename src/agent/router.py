@@ -48,7 +48,7 @@ async def assess_stat(request: Request, assess_stat_req: AssessStatReq, db: Sess
     Assess the competency of a user based on their GitHub activity.
     """
     executor = chain.CustomAgentExecutor()
-    result = await executor.assess_competency(request.user_id, assess_stat_req.selected_repos, db)
+    result = await executor.assess_competency(request.state.user_id, assess_stat_req.selected_repos, db)
 
     return assess_success(result)
 
