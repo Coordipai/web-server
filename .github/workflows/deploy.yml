@@ -10,7 +10,6 @@ permissions:
   id-token: write
 
 jobs:
-  # Executes after build if request is pushing to main branch
   deploy:
     runs-on: ubuntu-latest
 
