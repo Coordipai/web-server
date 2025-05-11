@@ -188,7 +188,7 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
     return text
 
 
-async def get_github_activation_info(token: str, selected_repos: list):
+async def get_github_activation_info(token: str, selected_repos: list[str]):
     """
     Get GitHub information using the agent executor.
     """
@@ -198,14 +198,14 @@ async def get_github_activation_info(token: str, selected_repos: list):
     user_info = await auth_service.get_github_user_info(token)
     user_name = user_info["login"]
 
-    for repo in repo_list:
-        if repo["name"] in selected_repos:
-            prs = stat_service.get_pull_requests(repo["name"], user_name, token)
-            commits = stat_service.get_commits(repo["name"], user_name, token)
-            repo["prs"] = prs
-            repo["commits"] = commits
-            
-    return repo_list
+    selected_repo_list = [repo for repo in selected_repos if repo in [repo["name"] for repo in repo_list]]
+    for selected_repo in selected_repo_list:
+        prs = stat_service.get_pull_requests(selected_repo["name"], user_name, token)
+        commits = stat_service.get_commits(selected_repo["name"], user_name, token)
+        selected_repo["prs"] = prs
+        selected_repo["commits"] = commits
+
+    return selected_repo_list
 
 
 async def assess_with_data(user: User, github_activation_data: list):
@@ -234,7 +234,7 @@ async def assess_with_data(user: User, github_activation_data: list):
     return competency_data
 
 
-async def assign_issues_to_users(project_info: Project, user_stat_list: list, issues: GenerateIssueListRes):
+async def assign_issues_to_users(project_info: Project, user_stat_list: list[str], issues: GenerateIssueListRes):
     """
     Assign issues to users based on their competency.
     """
