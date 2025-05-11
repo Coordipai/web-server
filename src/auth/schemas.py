@@ -5,7 +5,7 @@ from src.user.schemas import UserRes
 
 class AuthReq(BaseModel):
     name: str
-    discord_id: int
+    discord_id: str
     category: str
     career: str
 

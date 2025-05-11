@@ -22,7 +22,7 @@ from src.response.error_definitions import (
 from src.user.repository import find_user_by_user_id
 
 
-def create_project(
+async def create_project(
     user_id: int,
     project_req: ProjectReq,
     db: Session,
@@ -37,9 +37,8 @@ def create_project(
 
     if existing_project:
         raise ProjectAlreadyExist()
-    
-    design_doc_paths = upload_file(
-        existing_project, files, db)
+
+    design_doc_paths = await upload_file(existing_project, files, db)
 
     project = Project(
         name=project_req.name,
@@ -48,7 +47,7 @@ def create_project(
         start_date=project_req.start_date,
         end_date=project_req.end_date,
         sprint_unit=project_req.sprint_unit,
-        discord_channel_id=project_req.discord_chnnel_id,
+        discord_channel_id=project_req.discord_channel_id,
         design_doc_paths=design_doc_paths,
     )
 
@@ -93,7 +92,9 @@ def get_project(project_id: int, db: Session):
         project_members.append(project_member)
 
     design_docs = list_files_in_directory(existing_project.name)
-    project_res = ProjectRes.from_project(existing_project, owner_user, project_members, design_docs)
+    project_res = ProjectRes.from_project(
+        existing_project, owner_user, project_members, design_docs
+    )
 
     return project_res
 
@@ -141,7 +142,7 @@ def update_project(
     existing_project.start_date = (project_req.start_date,)
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)
-    existing_project.discord_channel_id = (project_req.discord_chnnel_id,)
+    existing_project.discord_channel_id = (project_req.discord_channel_id,)
     existing_project.design_doc_paths = (project_req.design_doc_paths,)
 
     saved_project = repository.update_project(db, existing_project)
@@ -203,6 +204,7 @@ async def upload_file(project: Project, files: List[UploadFile], db: Session):
     await db.commit()
     return uploaded_paths
 
+
 async def list_files_in_directory(project_name: str):
     """
     List all files in the given directory
@@ -216,7 +218,8 @@ async def list_files_in_directory(project_name: str):
         return files
     except FileNotFoundError:
         raise FileNotFoundError
-    
+
+
 async def delete_file(file_path: str):
     """
     Delete a file from the given path

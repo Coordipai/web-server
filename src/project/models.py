@@ -16,7 +16,7 @@ class Project(Base):
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     sprint_unit = Column(Integer)
-    discord_channel_id = Column(Integer, index=True)
+    discord_channel_id = Column(String(50))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     design_doc_paths = Column(JSON)
 
