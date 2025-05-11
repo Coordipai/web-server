@@ -14,6 +14,7 @@ from src.project_user.repository import (
     find_all_projects_by_user_id,
 )
 from src.response.error_definitions import (
+    FileDeleteError,
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,
@@ -91,7 +92,8 @@ def get_project(project_id: int, db: Session):
         project_member = ProjectUserRes.from_user(found_user, project_user.role)
         project_members.append(project_member)
 
-    project_res = ProjectRes.from_project(existing_project, owner_user, project_members)
+    design_docs = list_files_in_directory(existing_project.name)
+    project_res = ProjectRes.from_project(existing_project, owner_user, project_members, design_docs)
 
     return project_res
 
@@ -200,3 +202,30 @@ async def upload_file(project: Project, files: List[UploadFile], db: Session):
 
     await db.commit()
     return uploaded_paths
+
+async def list_files_in_directory(project_name: str):
+    """
+    List all files in the given directory
+    """
+
+    project_dir = os.path.join("design_docs", project_name)
+    try:
+        files = os.listdir(project_dir)
+        # parse the file names to get the original file names
+        files = [file.split("_", 1)[-1] for file in files]
+        return files
+    except FileNotFoundError:
+        raise FileNotFoundError
+    
+async def delete_file(file_path: str):
+    """
+    Delete a file from the given path
+    """
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return True
+        else:
+            return False
+    except Exception as e:
+        raise FileDeleteError()
