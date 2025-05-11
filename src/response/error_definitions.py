@@ -187,3 +187,8 @@ class GitHubApiError(InternalServerErrorException):
 class GitHubActivationInfoError(InternalServerErrorException):
     def __init__(self):
         super().__init__("GitHub Activation Info를 가져오는 중에 문제가 발생했습니다.")
+
+
+class FileDeleteError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__("파일 삭제 중 문제가 발생했습니다.")
