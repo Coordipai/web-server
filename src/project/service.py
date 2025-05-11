@@ -38,7 +38,7 @@ async def create_project(
     if existing_project:
         raise ProjectAlreadyExist()
 
-    design_doc_paths = await upload_file(existing_project, files, db)
+    design_doc_paths = await upload_file(project_req.name, files, db)
 
     project = Project(
         name=project_req.name,
@@ -177,12 +177,12 @@ def delete_project(user_id: int, project_id: int, db: Session):
         raise ProjectOwnerMismatched()
 
 
-async def upload_file(project: Project, files: List[UploadFile], db: Session):
+async def upload_file(project_name: str, files: List[UploadFile], db: Session):
     """
     Upload design documents to the project directory
     """
 
-    project_dir = os.path.join("design_docs", project.name)
+    project_dir = os.path.join("design_docs", project_name)
     os.makedirs(project_dir, exist_ok=True)
 
     uploaded_paths = []
@@ -197,11 +197,6 @@ async def upload_file(project: Project, files: List[UploadFile], db: Session):
 
         uploaded_paths.append(file_path)
 
-    if project.design_doc_paths is None:
-        project.design_doc_paths = []
-    project.design_doc_paths.extend(uploaded_paths)
-
-    await db.commit()
     return uploaded_paths
 
 
