@@ -3,8 +3,6 @@ name: Deploy
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 permissions:
   packages: write
@@ -15,8 +13,6 @@ jobs:
   # Executes after build if request is pushing to main branch
   deploy:
     runs-on: ubuntu-latest
-
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout source code
