@@ -53,13 +53,13 @@ class ProjectRes(BaseModel):
     sprint_unit: int
     discord_channel_id: int
     members: List[ProjectUserRes]
-    design_doc_paths: List[str]
+    design_docs: List[str]
 
     model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_project(
-        cls, project: Project, owner: User, project_members: list[ProjectUserRes]
+        cls, project: Project, owner: User, project_members: list[ProjectUserRes], list_of_design_docs: list[str]
     ) -> "ProjectRes":
         return cls(
             id=project.id,
@@ -71,7 +71,7 @@ class ProjectRes(BaseModel):
             sprint_unit=project.sprint_unit,
             discord_channel_id=project.discord_channel_id,
             members=project_members,
-            design_doc_paths=project.design_doc_paths,
+            design_doc_paths=list_of_design_docs,
         )
 
 
