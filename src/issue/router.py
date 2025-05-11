@@ -35,51 +35,48 @@ def create_issue(
 
 
 @router.get(
-    "/detail/{owner}/{repo}/{issue_number}",
+    "/detail",
     summary="Get existing issue",
     response_model=SuccessResponse[IssueRes],
 )
 def get_issue(
     request: Request,
-    owner: str,
-    repo: str,
+    project_id: int,
     issue_number: int,
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = service.get_issue(user_id, f"{owner}/{repo}", issue_number, db)
+    data = service.get_issue(user_id, project_id, issue_number, db)
     return issue_read_success(data)
 
 
 @router.get(
-    "/summary/{owner}/{repo}",
+    "/summary",
     summary="Get issue summary of project",
     response_model=SuccessResponse[ProjectIssueSummary],
 )
 def get_project_issue_summary(
     request: Request,
-    owner: str,
-    repo: str,
+    project_id: int,
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = service.get_project_issue_summary(user_id, f"{owner}/{repo}", db)
+    data = service.get_project_issue_summary(user_id, project_id, db)
     return issue_read_success(data)
 
 
 @router.get(
-    "/{owner}/{repo}",
+    "/",
     summary="Get all existing issues",
     response_model=SuccessResponse[List[IssueRes]],
 )
 def get_all_issues(
     request: Request,
-    owner: str,
-    repo: str,
+    project_id: int,
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = service.get_all_issues(user_id, f"{owner}/{repo}", db)
+    data = service.get_all_issues(user_id, project_id, db)
     return issue_read_success(data)
 
 

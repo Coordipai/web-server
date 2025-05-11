@@ -6,7 +6,7 @@ from src.user.schemas import UserRes
 
 
 class IssueCreateReq(BaseModel):
-    repo_fullname: str
+    project_id: int
     title: str
     body: str
     assignees: List[str]
@@ -16,7 +16,7 @@ class IssueCreateReq(BaseModel):
 
 
 class IssueUpdateReq(BaseModel):
-    repo_fullname: str
+    project_id: int
     issue_number: int
     title: str
     body: str
@@ -27,7 +27,7 @@ class IssueUpdateReq(BaseModel):
 
 
 class IssueCloseReq(BaseModel):
-    repo_fullname: str
+    project_id: int
     issue_number: int
 
 
