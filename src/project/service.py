@@ -4,9 +4,12 @@ from fastapi import File, UploadFile
 from sqlalchemy.orm import Session
 
 from project import repository
-from project.schemas import ProjectReq, ProjectRes, ProjectUserRes
+from project.schemas import ProjectListRes, ProjectReq, ProjectRes, ProjectUserRes
 from src.models import Project, ProjectUser
-from src.project_user.repository import create_project_user
+from src.project_user.repository import (
+    create_project_user,
+    find_all_projects_by_user_id,
+)
 from src.response.error_definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
@@ -84,6 +87,32 @@ def get_project(project_id: int, db: Session):
     project_res = ProjectRes.from_project(existing_project, owner_user, project_members)
 
     return project_res
+
+
+def get_all_projects(user_id: int, db: Session):
+    """
+    Get all existing projects that user owns or participates in
+
+    Returns list of projects
+    """
+    owned_projects = repository.find_project_by_owner(db, user_id)
+    participated_projects = find_all_projects_by_user_id(db, user_id)
+
+    project_list = []
+    added_project_ids = set()
+
+    for project in owned_projects:
+        if project.id not in added_project_ids:
+            project_list.append(ProjectListRes.model_validate(project))
+            added_project_ids.add(project.id)
+
+    for project_user in participated_projects:
+        project = repository.find_project_by_id(db, project_user.project_id)
+        if project.id not in added_project_ids:
+            project_list.append(ProjectListRes.model_validate(project))
+            added_project_ids.add(project.id)
+
+    return project_list
 
 
 def update_project(

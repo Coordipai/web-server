@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from project import service
 from src.config.database import get_db
-from src.project.schemas import ProjectReq, ProjectRes
+from src.project.schemas import ProjectListRes, ProjectReq, ProjectRes
 from src.response.error_definitions import InvalidJsonDataFormat, InvalidJsonFormat
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
@@ -54,6 +54,17 @@ def create_project(
         user_id, parse_project_req_str(project_req), db, files
     )
     return project_create_success(data)
+
+
+@router.get(
+    "/",
+    summary="Get all projects that user owns or participates in",
+    response_model=SuccessResponse[List[ProjectListRes]],
+)
+def get_all_project(request: Request, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    data = service.get_all_projects(user_id, db)
+    return project_read_success(data)
 
 
 @router.get(
