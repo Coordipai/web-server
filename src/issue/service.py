@@ -1,7 +1,12 @@
 from sqlalchemy.orm import Session
 
 from src.issue import repository
-from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueUpdateReq
+from src.issue.schemas import (
+    IssueCloseReq,
+    IssueCreateReq,
+    IssueUpdateReq,
+    ProjectIssueSummary,
+)
 
 
 def create_issue(user_id: int, issue_req: IssueCreateReq, db: Session):
@@ -31,6 +36,31 @@ def get_all_issues(user_id: int, repo_fullname: str, db: Session):
     Returns list of issue data
     """
     return repository.find_all_issues_by_project_id(user_id, repo_fullname, db)
+
+
+def get_project_issue_summary(
+    user_id: int, repo_fullname: str, db: Session
+) -> ProjectIssueSummary:
+    """
+    Get summary of project issues (number of opend/closed/all issues)
+    """
+    all_issues = repository.find_all_issues_by_project_id(user_id, repo_fullname, db)
+
+    opened_issues = 0
+    closed_issues = 0
+
+    for issue in all_issues:
+        if issue.closed:
+            closed_issues += 1
+        else:
+            opened_issues += 1
+
+    summary = ProjectIssueSummary(
+        opened_issues=opened_issues,
+        closed_issues=closed_issues,
+        all_issues=opened_issues + closed_issues,
+    )
+    return summary
 
 
 def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):

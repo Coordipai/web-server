@@ -5,7 +5,13 @@ from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.issue import service
-from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
+from src.issue.schemas import (
+    IssueCloseReq,
+    IssueCreateReq,
+    IssueRes,
+    IssueUpdateReq,
+    ProjectIssueSummary,
+)
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_close_success,
@@ -29,7 +35,7 @@ def create_issue(
 
 
 @router.get(
-    "/{owner}/{repo}/{issue_number}",
+    "/detail/{owner}/{repo}/{issue_number}",
     summary="Get existing issue",
     response_model=SuccessResponse[IssueRes],
 )
@@ -42,6 +48,22 @@ def get_issue(
 ):
     user_id = request.state.user_id
     data = service.get_issue(user_id, f"{owner}/{repo}", issue_number, db)
+    return issue_read_success(data)
+
+
+@router.get(
+    "/summary/{owner}/{repo}",
+    summary="Get issue summary of project",
+    response_model=SuccessResponse[ProjectIssueSummary],
+)
+def get_project_issue_summary(
+    request: Request,
+    owner: str,
+    repo: str,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user_id
+    data = service.get_project_issue_summary(user_id, f"{owner}/{repo}", db)
     return issue_read_success(data)
 
 

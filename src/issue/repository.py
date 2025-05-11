@@ -5,7 +5,11 @@ import requests
 from sqlalchemy.orm import Session
 
 from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
-from src.response.error_definitions import GitHubApiError, InvalidReqFormat
+from src.response.error_definitions import (
+    GitHubApiError,
+    InvalidReqFormat,
+    IssueNotFound,
+)
 from src.user.repository import find_all_users_by_github_names, find_user_by_user_id
 from src.user.schemas import UserRes
 
@@ -60,6 +64,8 @@ def add_hidden_metadata(body: str, priority: str, iteration: int) -> str:
 
 
 def return_issue_res(issue_json, db: Session):
+    if issue_json.get("pull_request") is not None:
+        return None
     priority, iteration = retrieve_hidden_metadata(issue_json["body"])
 
     github_names = [assignee["login"] for assignee in issue_json.get("assignees", [])]
@@ -112,17 +118,26 @@ def find_issue_by_issue_number(
         raise GitHubApiError(issue_response.status_code)
 
     issue_json = issue_response.json()
-    return return_issue_res(issue_json, db)
+    issue_data = return_issue_res(issue_json, db)
+
+    if not issue_data:
+        raise IssueNotFound()
+
+    return issue_data
 
 
 def find_all_issues_by_project_id(user_id: int, repo_fullname: str, db: Session):
-    repos_url = f"https://api.github.com/repos/{repo_fullname}/issues"
+    repos_url = f"https://api.github.com/repos/{repo_fullname}/issues?state=all"
     response = requests.get(repos_url, headers=get_github_headers(user_id, db))
     if response.status_code != 200:
         raise GitHubApiError(response.status_code)
 
     issue_list_json = response.json()
-    return [return_issue_res(issue_json) for issue_json in issue_list_json]
+    return [
+        return_issue_res(issue_json, db)
+        for issue_json in issue_list_json
+        if return_issue_res(issue_json, db) is not None
+    ]
 
 
 def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):

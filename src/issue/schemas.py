@@ -41,3 +41,9 @@ class IssueRes(BaseModel):
     iteration: int
     labels: List[str]
     closed: bool
+
+
+class ProjectIssueSummary(BaseModel):
+    opened_issues: int
+    closed_issues: int
+    all_issues: int
