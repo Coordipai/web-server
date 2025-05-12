@@ -64,7 +64,7 @@ async def create_project(
         project_members.append(project_member)
 
     owner_user = find_user_by_user_id(db, user_id)
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, design_doc_paths)
 
     return project_res
 
@@ -221,3 +221,4 @@ async def delete_file(file_path: str):
             return False
     except Exception as e:
         raise FileDeleteError()
+    
