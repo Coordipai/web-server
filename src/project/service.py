@@ -66,10 +66,6 @@ async def create_project(
     owner_user = find_user_by_user_id(db, user_id)
     project_res = ProjectRes.from_project(saved_project, owner_user, project_members, design_doc_paths)
 
-    # TODO Embedding project files
-    # Check files exist
-    # saved_files = await upload_file(saved_project.project_name, files)
-
     return project_res
 
 
