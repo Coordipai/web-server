@@ -13,7 +13,7 @@ from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
 from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
 from src.config.database import initialize_database
-from src.config.middleware import jwt_authentication_middleware
+from src.config.middleware import JWTAuthenticationMiddleware
 from src.response.error_definitions import BaseAppException
 from src.response.handler import exception_handler
 from user.router import router as user_router
@@ -36,7 +36,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.middleware("http")(jwt_authentication_middleware)
+app.add_middleware(JWTAuthenticationMiddleware)
 
 security = HTTPBasic()
 
