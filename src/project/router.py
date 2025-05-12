@@ -21,7 +21,7 @@ router = APIRouter(prefix="/project", tags=["Project"])
 
 
 @router.post(
-    "/",
+    "",
     summary="Create a new project",
     response_model=SuccessResponse[ProjectRes],
 )
@@ -57,7 +57,7 @@ async def create_project(
 
 
 @router.get(
-    "/",
+    "",
     summary="Get all projects that user owns or participates in",
     response_model=SuccessResponse[List[ProjectListRes]],
 )

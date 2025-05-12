@@ -23,9 +23,7 @@ from src.response.success_definitions import (
 router = APIRouter(prefix="/issue", tags=["Issue"])
 
 
-@router.post(
-    "/", summary="Create a new issue", response_model=SuccessResponse[IssueRes]
-)
+@router.post("", summary="Create a new issue", response_model=SuccessResponse[IssueRes])
 def create_issue(
     request: Request, issue_req: IssueCreateReq, db: Session = Depends(get_db)
 ):
@@ -66,7 +64,7 @@ def get_project_issue_summary(
 
 
 @router.get(
-    "/",
+    "",
     summary="Get all existing issues",
     response_model=SuccessResponse[List[IssueRes]],
 )
@@ -81,7 +79,7 @@ def get_all_issues(
 
 
 @router.put(
-    "/", summary="Update the existing issue", response_model=SuccessResponse[IssueRes]
+    "", summary="Update the existing issue", response_model=SuccessResponse[IssueRes]
 )
 def update_issue(
     request: Request, issue_req: IssueUpdateReq, db: Session = Depends(get_db)
@@ -91,7 +89,7 @@ def update_issue(
     return issue_update_success(data)
 
 
-@router.patch("/", summary="Close the existing issue", response_model=SuccessResponse)
+@router.patch("", summary="Close the existing issue", response_model=SuccessResponse)
 def close_issue(
     request: Request, issue_req: IssueCloseReq, db: Session = Depends(get_db)
 ):
