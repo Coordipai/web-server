@@ -17,7 +17,7 @@ router = APIRouter(prefix="/user-repo", tags=["User Repository"])
 
 
 @router.post(
-    "/",
+    "",
     summary="Create a new repository",
     response_model=SuccessResponse[UserRepositoryRes],
 )
@@ -33,7 +33,7 @@ def sync_user_repositories(
 
 
 @router.get(
-    "/",
+    "",
     summary="Get all existing selected repository",
     response_model=SuccessResponse[List[UserRepositoryRes]],
 )

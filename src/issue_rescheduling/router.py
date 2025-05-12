@@ -18,7 +18,7 @@ router = APIRouter(prefix="/issue-reschedule", tags=["Issue Rescheduling"])
 
 
 @router.post(
-    "/",
+    "",
     summary="Create a new issue rescheduling",
     response_model=SuccessResponse[IssueReschedulingRes],
 )
@@ -44,7 +44,7 @@ def get_all_issue_reschedulings(
 
 
 @router.put(
-    "/",
+    "",
     summary="Update the existing issue rescheduling",
     response_model=SuccessResponse[IssueReschedulingRes],
 )
