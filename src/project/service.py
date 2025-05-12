@@ -38,7 +38,7 @@ async def create_project(
     if existing_project:
         raise ProjectAlreadyExist()
 
-    design_doc_paths = await upload_file(existing_project, files, db)
+    design_doc_paths = await upload_file(project_req.name, files)
 
     project = Project(
         name=project_req.name,
@@ -64,11 +64,7 @@ async def create_project(
         project_members.append(project_member)
 
     owner_user = find_user_by_user_id(db, user_id)
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
-
-    # TODO Embedding project files
-    # Check files exist
-    # saved_files = await upload_file(saved_project.project_name, files)
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, design_doc_paths)
 
     return project_res
 
@@ -143,12 +139,8 @@ def update_project(
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)
     existing_project.discord_channel_id = (project_req.discord_channel_id,)
-    existing_project.design_doc_paths = (project_req.design_doc_paths,)
 
     saved_project = repository.update_project(db, existing_project)
-
-    # TODO Embedding project files
-    # saved_files = await upload_file(saved_project.project_name, files)
 
     owner_user = find_user_by_user_id(db, saved_project.owner)
 
@@ -177,12 +169,14 @@ def delete_project(user_id: int, project_id: int, db: Session):
         raise ProjectOwnerMismatched()
 
 
-async def upload_file(project: Project, files: List[UploadFile], db: Session):
+async def upload_file(project_name: str, files: List[UploadFile]):
     """
     Upload design documents to the project directory
     """
+    if not files:
+        return []
 
-    project_dir = os.path.join("design_docs", project.name)
+    project_dir = os.path.join("design_docs", project_name)
     os.makedirs(project_dir, exist_ok=True)
 
     uploaded_paths = []
@@ -197,11 +191,6 @@ async def upload_file(project: Project, files: List[UploadFile], db: Session):
 
         uploaded_paths.append(file_path)
 
-    if project.design_doc_paths is None:
-        project.design_doc_paths = []
-    project.design_doc_paths.extend(uploaded_paths)
-
-    await db.commit()
     return uploaded_paths
 
 
@@ -232,3 +221,4 @@ async def delete_file(file_path: str):
             return False
     except Exception as e:
         raise FileDeleteError()
+    

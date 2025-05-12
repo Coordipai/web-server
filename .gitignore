@@ -56,3 +56,6 @@ app_credentials.json
 # For chroma database files
 **/chroma_db/
 
+# For document files
+design_docs/
+
