@@ -3,6 +3,7 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict
 
+from src.project import service
 from src.project.models import Project
 from src.user.models import User
 from src.user.schemas import UserRes
@@ -63,7 +64,6 @@ class ProjectRes(BaseModel):
         project: Project,
         owner: User,
         project_members: list[ProjectUserRes],
-        list_of_design_docs: list[str] = [],
     ) -> "ProjectRes":
         return cls(
             id=project.id,
@@ -75,7 +75,7 @@ class ProjectRes(BaseModel):
             sprint_unit=project.sprint_unit,
             discord_channel_id=project.discord_channel_id,
             members=project_members,
-            design_doc_paths=list_of_design_docs,
+            design_docs=service.list_files_in_directory(project.name),
         )
 
 

@@ -64,7 +64,7 @@ async def create_project(
         project_members.append(project_member)
 
     owner_user = find_user_by_user_id(db, user_id)
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, design_doc_paths)
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
 
     return project_res
 
@@ -139,12 +139,8 @@ def update_project(
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)
     existing_project.discord_channel_id = (project_req.discord_channel_id,)
-    existing_project.design_doc_paths = (project_req.design_doc_paths,)
 
     saved_project = repository.update_project(db, existing_project)
-
-    # TODO Embedding project files
-    # saved_files = await upload_file(saved_project.project_name, files)
 
     owner_user = find_user_by_user_id(db, saved_project.owner)
 
