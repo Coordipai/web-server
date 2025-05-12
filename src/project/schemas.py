@@ -63,7 +63,7 @@ class ProjectRes(BaseModel):
         project: Project,
         owner: User,
         project_members: list[ProjectUserRes],
-        list_of_design_docs: list[str],
+        list_of_design_docs: list[str] = [],
     ) -> "ProjectRes":
         return cls(
             id=project.id,
