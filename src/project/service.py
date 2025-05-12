@@ -181,6 +181,8 @@ async def upload_file(project_name: str, files: List[UploadFile], db: Session):
     """
     Upload design documents to the project directory
     """
+    if not files:
+        return []
 
     project_dir = os.path.join("design_docs", project_name)
     os.makedirs(project_dir, exist_ok=True)
