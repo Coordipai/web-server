@@ -1,4 +1,3 @@
-from datetime import datetime
 
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -53,9 +52,11 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             return response
         except BaseAppException as exc:
-            now = datetime.now().isoformat()
             logger.error(f"{exc.status_code} - {exc.message}")
             return JSONResponse(
                 status_code=exc.status_code,
-                content=ErrorResponse(message=exc.message, timestamp=now).model_dump(),
+                headers={"Access-Control-Allow-Origin": "http://localhost:5173"},
+                content=ErrorResponse(
+                    method=request.method, path=request.url.path, message=exc.message
+                ).model_dump(),
             )
