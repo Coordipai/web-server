@@ -71,6 +71,17 @@ def update_user_stat(db: Session, user: User, stat: dict) -> User:
         raise SQLError()
 
 
+def update_user(db: Session, user: User) -> User:
+    try:
+        db.commit()
+        db.refresh(user)
+        return user
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
 def delete_user(db: Session, user: User):
     try:
         db.delete(user)

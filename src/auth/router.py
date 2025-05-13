@@ -15,7 +15,9 @@ from src.response.success_definitions import (
     refresh_token_success,
     register_success,
     unregister_success,
+    user_update_success,
 )
+from src.user.schemas import UserRes
 
 GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
 
@@ -72,6 +74,18 @@ async def login(
 async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
     data = await service.refresh(db, refresh_token.refresh_token)
     return refresh_token_success(data)
+
+
+@router.put(
+    "/update", summary="Update existing user", response_model=SuccessResponse[UserRes]
+)
+async def update(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user_id
+    data = await service.update(user_id, db)
+    return user_update_success(data)
 
 
 @router.post(
