@@ -25,6 +25,10 @@ def logout_success():
     return success_handler(200, "로그아웃 성공")
 
 
+def unregister_success():
+    return success_handler(200, "탈퇴 성공")
+
+
 """
 Project Success Responses
 """
