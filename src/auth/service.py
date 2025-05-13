@@ -21,7 +21,12 @@ from src.response.error_definitions import (
     UserAlreadyExist,
     UserNotFound,
 )
-from src.user.repository import find_user_by_github_id, find_user_by_user_id
+from src.user.repository import (
+    delete_user,
+    find_user_by_github_id,
+    find_user_by_user_id,
+    update_user,
+)
 from src.user.schemas import UserReq, UserRes
 from src.user.service import create_user
 
@@ -219,6 +224,17 @@ async def refresh(db: Session, refresh_token: str):
     return AuthRes(user=user, access_token=access_token, refresh_token=refresh_token)
 
 
+async def update(user_id: int, db: Session):
+    """
+    Update user info
+
+    Returns updated user data
+    """
+    user = find_user_by_user_id(db, user_id)
+    updated_user = update_user(db, user)
+    return UserRes.model_validate(updated_user)
+
+
 async def logout(user_id: int):
     """
     Logout user
@@ -228,3 +244,16 @@ async def logout(user_id: int):
     # Delete existing refresh token stored in redis
     redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
     await delete_token_from_redis(redis_refresh_token)
+
+
+async def unregister(user_id: int, db: Session):
+    """
+    Unregister user
+    """
+    # Delete existing refresh token stored in redis
+    redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
+    await delete_token_from_redis(redis_refresh_token)
+
+    # Delete existing user from db
+    user = find_user_by_user_id(db, user_id)
+    delete_user(user)

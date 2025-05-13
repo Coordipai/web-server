@@ -14,7 +14,10 @@ from src.response.success_definitions import (
     logout_success,
     refresh_token_success,
     register_success,
+    unregister_success,
+    user_update_success,
 )
+from src.user.schemas import UserRes
 
 GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
 
@@ -73,9 +76,21 @@ async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
     return refresh_token_success(data)
 
 
+@router.put(
+    "/update", summary="Update existing user", response_model=SuccessResponse[UserRes]
+)
+async def update(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user_id
+    data = await service.update(user_id, db)
+    return user_update_success(data)
+
+
 @router.post(
     "/logout",
-    summary="Get new token using refresh token",
+    summary="Logout from the server",
     response_model=SuccessResponse,
 )
 async def logout(request: Request):
@@ -84,4 +99,12 @@ async def logout(request: Request):
     return logout_success()
 
 
-# TODO Unregister
+@router.delete(
+    "/unregister",
+    summary="Unregister from the server",
+    response_model=SuccessResponse,
+)
+async def unregister(request: Request, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    await service.unregister(user_id, db)
+    return unregister_success()

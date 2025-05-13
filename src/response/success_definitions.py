@@ -21,8 +21,16 @@ def refresh_token_success(data: T):
     return success_handler(200, "리프레시 토큰 재발급 성공", data)
 
 
+def user_update_success():
+    return success_handler(200, "사용자 정보 업데이트 성공")
+
+
 def logout_success():
     return success_handler(200, "로그아웃 성공")
+
+
+def unregister_success():
+    return success_handler(200, "탈퇴 성공")
 
 
 """
