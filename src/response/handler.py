@@ -17,7 +17,9 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     logger.error(f"{exc.status_code} - {exc.message}")
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(message=exc.message).model_dump(),
+        content=ErrorResponse(
+            method=request.method, path=request.url.path, message=exc.message
+        ).model_dump(),
     )
 
 
