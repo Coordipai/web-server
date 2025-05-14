@@ -256,4 +256,4 @@ async def unregister(user_id: int, db: Session):
 
     # Delete existing user from db
     user = find_user_by_user_id(db, user_id)
-    delete_user(user)
+    delete_user(db, user)
