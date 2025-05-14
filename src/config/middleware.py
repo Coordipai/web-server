@@ -1,4 +1,3 @@
-
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -23,6 +22,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             "/auth/github/callback",
             "/auth/login",
             "/auth/register",
+            "/auth/refresh",
         ]
         api_docs_allow_paths = ["/docs", "/openapi.json"]
 
