@@ -224,15 +224,29 @@ async def refresh(db: Session, refresh_token: str):
     return AuthRes(user=user, access_token=access_token, refresh_token=refresh_token)
 
 
-async def update(user_id: int, db: Session):
+async def update(user_id: int, auth_req: AuthReq, db: Session):
     """
     Update user info
 
     Returns updated user data
     """
     user = find_user_by_user_id(db, user_id)
-    updated_user = update_user(db, user)
-    return UserRes.model_validate(updated_user)
+
+    if not user:
+        raise UserNotFound()
+
+    github_user = await get_github_user_info(user.github_access_token)
+
+    new_user = UserReq(
+        **auth_req.model_dump(),
+        github_id=github_user["id"],
+        github_name=github_user["login"],
+        profile_img=github_user["avatar_url"],
+    )
+    saved_user = update_user(db, new_user)
+    updated_user = UserRes.model_validate(saved_user)
+
+    return updated_user
 
 
 async def logout(user_id: int):

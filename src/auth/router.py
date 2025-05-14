@@ -80,11 +80,12 @@ async def refresh(refresh_token: RefreshReq, db: Session = Depends(get_db)):
     "/update", summary="Update existing user", response_model=SuccessResponse[UserRes]
 )
 async def update(
+    auth_req: AuthReq,
     request: Request,
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = await service.update(user_id, db)
+    data = await service.update(user_id, auth_req, db)
     return user_update_success(data)
 
 
