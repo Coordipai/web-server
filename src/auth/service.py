@@ -25,10 +25,9 @@ from src.user.repository import (
     delete_user,
     find_user_by_github_id,
     find_user_by_user_id,
-    update_user,
 )
 from src.user.schemas import UserReq, UserRes
-from src.user.service import create_user
+from src.user.service import create_user, update_user
 
 GITHUB_OAUTH_REDIS = "github_oauth"
 REFRESH_TOKEN_REDIS = "refresh_token"
@@ -237,16 +236,16 @@ async def update(user_id: int, auth_req: AuthReq, db: Session):
 
     github_user = await get_github_user_info(user.github_access_token)
 
-    new_user = UserReq(
+    updating_user = UserReq(
         **auth_req.model_dump(),
         github_id=github_user["id"],
         github_name=github_user["login"],
         profile_img=github_user["avatar_url"],
     )
-    saved_user = update_user(db, new_user)
-    updated_user = UserRes.model_validate(saved_user)
+    updated_user = await update_user(db, updating_user)
+    data = UserRes.model_validate(updated_user)
 
-    return updated_user
+    return data
 
 
 async def logout(user_id: int):
