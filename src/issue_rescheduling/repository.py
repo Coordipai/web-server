@@ -64,7 +64,7 @@ def find_all_issue_rescheduling_by_project_id(db: Session, project_id: int):
     try:
         result = (
             db.query(IssueRescheduling)
-            .filter(IssueRescheduling.project_id.in_(project_id))
+            .filter(IssueRescheduling.project_id.in_([project_id]))
             .all()
         )
         return result
