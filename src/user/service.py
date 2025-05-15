@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from auth.util.redis import get_token_from_redis
 from src.models import User
-from src.response.error_definitions import UserAlreadyExist
+from src.response.error_definitions import UserAlreadyExist, UserNotFound
 from user import repository
 from user.schemas import UserReq, UserRes
 
@@ -30,6 +30,25 @@ async def create_user(db: Session, user_req: UserReq):
 
     saved_user = repository.create_user(db, new_user)
     return saved_user
+
+
+async def update_user(db: Session, user_req: UserReq):
+    """
+    Update existing user
+    """
+    existing_user = repository.find_user_by_github_id(db, user_req.github_id)
+    if not existing_user:
+        raise UserNotFound()
+
+    existing_user.name = user_req.name
+    existing_user.discord_id = user_req.discord_id
+    existing_user.github_name = user_req.github_name
+    existing_user.category = user_req.category
+    existing_user.career = user_req.career
+    existing_user.profile_img = user_req.profile_img
+
+    updated_user = repository.update_user(db, existing_user)
+    return updated_user
 
 
 def search_users_by_name(user_name: str, db: Session):
