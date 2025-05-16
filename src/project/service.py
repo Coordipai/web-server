@@ -49,7 +49,7 @@ async def create_project(
         sprint_unit=project_req.sprint_unit,
         discord_channel_id=project_req.discord_channel_id,
         design_doc_paths=design_doc_paths,
-    )
+    )    
 
     saved_project = repository.create_project(db, project)
     project_members = []
@@ -194,7 +194,7 @@ async def upload_file(project_name: str, files: List[UploadFile]):
     return uploaded_paths
 
 
-async def list_files_in_directory(project_name: str):
+def list_files_in_directory(project_name: str):
     """
     List all files in the given directory
     """
