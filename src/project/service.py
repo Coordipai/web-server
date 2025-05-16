@@ -22,7 +22,7 @@ from src.response.error_definitions import (
 from src.user.repository import find_user_by_user_id
 
 
-async def create_project(
+def create_project(
     user_id: int,
     project_req: ProjectReq,
     db: Session,
@@ -38,7 +38,7 @@ async def create_project(
     if existing_project:
         raise ProjectAlreadyExist()
 
-    design_doc_paths = await upload_file(project_req.name, files)
+    design_doc_paths = upload_file(project_req.name, files)
 
     project = Project(
         name=project_req.name,
@@ -132,6 +132,8 @@ def update_project(
     existing_project = repository.find_project_by_id(db, project_id)
     if not existing_project:
         raise ProjectNotFound()
+    
+    updated_design_doc_paths = update_file(existing_project.name, files, project_req.design_docs)
 
     existing_project.name = (project_req.name,)
     existing_project.repo_fullname = (project_req.repo_fullname,)
@@ -139,6 +141,7 @@ def update_project(
     existing_project.end_date = (project_req.end_date,)
     existing_project.sprint_unit = (project_req.sprint_unit,)
     existing_project.discord_channel_id = (project_req.discord_channel_id,)
+    existing_project.design_doc_paths = updated_design_doc_paths
 
     saved_project = repository.update_project(db, existing_project)
 
@@ -160,16 +163,18 @@ def delete_project(user_id: int, project_id: int, db: Session):
     Delete the existing project by project id
     """
     existing_project = repository.find_project_by_id(db, project_id)
+    
     if not existing_project:
         raise ProjectNotFound()
 
     if existing_project.owner == int(user_id):
+        delete_file(os.path.join("design_docs", existing_project.name))
         repository.delete_project(db, existing_project)
     else:
         raise ProjectOwnerMismatched()
 
 
-async def upload_file(project_name: str, files: List[UploadFile]):
+def upload_file(project_name: str, files: List[UploadFile]):
     """
     Upload design documents to the project directory
     """
@@ -179,7 +184,6 @@ async def upload_file(project_name: str, files: List[UploadFile]):
     project_dir = os.path.join("design_docs", project_name)
     os.makedirs(project_dir, exist_ok=True)
 
-    uploaded_paths = []
     for file in files:
         safe_filename = file.filename.replace("/", "_").replace("\\", "_")
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -189,8 +193,8 @@ async def upload_file(project_name: str, files: List[UploadFile]):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        uploaded_paths.append(file_path)
-
+    uploaded_paths = list_files_in_directory(project_name)
+    
     return uploaded_paths
 
 
@@ -207,14 +211,37 @@ def list_files_in_directory(project_name: str):
         return files
     except FileNotFoundError:
         raise FileNotFoundError
-
-
-async def delete_file(file_path: str):
+    
+def update_file(project_name: str, files: List[UploadFile], updated_file_names: List[str] = []):
     """
-    Delete a file from the given path
+    Update a file in the given directory
+    """
+    if updated_file_names != []:
+        existing_file_names = list_files_in_directory(project_name)
+        for existing_file_name in existing_file_names:
+            if existing_file_name not in updated_file_names:
+                # delete the file if it is not in the updated file names
+                file_path = os.path.join("design_docs", project_name, existing_file_name)
+                delete_file(file_path)
+    
+    if not files:
+        return list_files_in_directory(project_name)
+        
+    updated_paths = upload_file(project_name, files)
+
+    return updated_paths
+
+
+
+def delete_file(file_path: str):
+    """
+    Delete a path or file from the given path
     """
     try:
-        if os.path.exists(file_path):
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+            return True
+        elif os.path.exists(file_path):
             os.remove(file_path)
             return True
         else:

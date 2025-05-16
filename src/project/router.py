@@ -85,7 +85,7 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
 def update_project(
     project_id: int,
     project_req: str = Form(...),
-    files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
     data = service.update_project(
