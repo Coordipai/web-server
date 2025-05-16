@@ -212,6 +212,7 @@ def list_files_in_directory(project_name: str):
     except FileNotFoundError:
         raise FileNotFoundError
     
+    
 def update_file(project_name: str, files: List[UploadFile], updated_file_names: List[str] = []):
     """
     Update a file in the given directory
@@ -231,7 +232,6 @@ def update_file(project_name: str, files: List[UploadFile], updated_file_names: 
     updated_paths = upload_file(project_name, files)
 
     return updated_paths
-
 
 
 def delete_file(file_path: str):
