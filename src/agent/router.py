@@ -23,17 +23,17 @@ router = APIRouter(prefix="/agent", tags=["Agent"])
 
 
 @router.get(
-    "/generate_issues",
+    "/generate_issues/{project_id}",
     summary="Generate issues",
     response_model=SuccessResponse[GenerateIssueListRes],
 )
-async def generate_issues():
+async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     """
     Generate issues using the agent executor.
     """
 
     executor = chain.CustomAgentExecutor()
-    result = await executor.generate_issues()
+    result = await executor.generate_issues(project_id, db)
 
     return issue_generate_success(result)
 

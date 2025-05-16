@@ -106,6 +106,10 @@ class IssueNotFound(NotFoundException):
     def __init__(self):
         super().__init__("이슈 정보를 찾을 수 없습니다.")
 
+class DesignDocNotFound(NotFoundException):
+    def __init__(self):
+        super().__init__("설계 문서 정보를 찾을 수 없습니다.")
+
 
 """
 405 METHOD_NOT_ALLOWED
