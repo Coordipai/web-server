@@ -38,8 +38,10 @@ async def generate_issues():
     return issue_generate_success(result)
 
 
-@router.get(
-    "/assess_stat", summary="Assess Stat", response_model=SuccessResponse[AssessStatRes]
+@router.post(
+    "/assess_stat", 
+    summary="Assess Stat", 
+    response_model=SuccessResponse[AssessStatRes]
 )
 async def assess_stat(
     request: Request, assess_stat_req: AssessStatReq, db: Session = Depends(get_db)
