@@ -12,6 +12,7 @@ from src.agent.schemas import (
     GenerateIssueRes,
 )
 from src.project import repository as project_repository
+from src.project import service as project_service
 from src.response.error_definitions import (
     GitHubActivationInfoError,
     ProjectNotFound,
@@ -24,18 +25,26 @@ class CustomAgentExecutor:
     def __init__(self):
         pass
 
-    async def generate_issues(self):
+    async def generate_issues(self, project_id: int, db: Session):
         """
         Generate issues using the agent executor.
         """
-        
-        # TODO: Get documents and issue template from database
 
-        # Load documents with file path (pdf, docx)
-        test_file_path = Path("/Users/junhyung85920/Desktop/KNU/25-1/종합설계프로젝트1/web-server/test_docs.pdf")
-        with open(test_file_path, "rb") as f:
-            upload_file = FastUploadFile(filename=test_file_path.name, file=f)
-            text = await tool.extract_text_from_documents(upload_file)
+        # Get project information
+        project = project_repository.find_project_by_id(db, project_id)
+        files = project_service.list_files_in_directory(project.name)
+
+        extracted_texts = ""
+        for file in files:
+            # Load documents with file path (pdf, docx)
+            file_path = Path(file)
+            with open(file_path, "rb") as f:
+                upload_file = FastUploadFile(filename=file_path.name, file=f)
+                text = await tool.extract_text_from_documents(upload_file)
+                extracted_texts += file_path.name
+                extracted_texts += "\n"
+                extracted_texts += text
+                extracted_texts += "\n\n"
 
         features = await tool.define_features(text)
         issues = await tool.make_issues(text, features)
