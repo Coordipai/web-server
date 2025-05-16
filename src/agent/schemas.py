@@ -12,9 +12,6 @@ class GenerateIssueRes(BaseModel):
 class GenerateIssueListRes(BaseModel):
     issues: list[GenerateIssueRes]
 
-class AssessStatReq(BaseModel):
-    selected_repos: list[str]
-
 class AssessStatRes(BaseModel):
     name: str
     field: str

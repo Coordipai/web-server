@@ -22,8 +22,9 @@ from src.config.config import (
     VERTEX_PROJECT_ID,
 )
 from src.models import Project, User
-from src.response.error_definitions import InvalidFileType
+from src.response.error_definitions import InvalidFileType, RepositoryNotFoundInGitHub
 from src.stat import service as stat_service
+from src.user_repository import service as user_repository_service
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -188,17 +189,24 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
     return text
 
 
-async def get_github_activation_info(token: str, selected_repos: list[str]):
+async def get_github_activation_info(token: str):
     """
     Get GitHub information using the agent executor.
     """
     repo_list = stat_service.get_repositories(token)
+    selected_repo_names = user_repository_service.get_all_selected_repositories(token)
 
     # get user name from token
     user_info = await auth_service.get_github_user_info(token)
     user_name = user_info["login"]
 
-    selected_repo_list = [repo for repo in selected_repos if repo in [repo["name"] for repo in repo_list]]
+    repo_names_from_github = [repo["name"] for repo in repo_list]
+    for selected_repo in selected_repo_names:
+        if selected_repo.repo_fullname not in repo_names_from_github:
+            raise RepositoryNotFoundInGitHub(selected_repo.repo_fullname)
+    
+    selected_repo_list = [repo for repo in repo_list if repo["name"] in [repo.repo_fullname for repo in selected_repo_names]]
+
     for selected_repo in selected_repo_list:
         prs = stat_service.get_pull_requests(selected_repo["name"], user_name, token)
         commits = stat_service.get_commits(selected_repo["name"], user_name, token)

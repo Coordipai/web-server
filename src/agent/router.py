@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from src.agent import chain
 from src.agent.schemas import (
-    AssessStatReq,
     AssessStatRes,
     AssignedIssueListRes,
     AssignIssueReq,
@@ -13,11 +12,9 @@ from src.config.database import get_db
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     assess_success,
-    assessment_read_success,
     issue_assign_success,
     issue_generate_success,
 )
-from src.user import repository as user_repository
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 
@@ -44,41 +41,17 @@ async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     response_model=SuccessResponse[AssessStatRes]
 )
 async def assess_stat(
-    request: Request, assess_stat_req: AssessStatReq, db: Session = Depends(get_db)
+    request: Request, db: Session = Depends(get_db)
 ):
     """
     Assess the competency of a user based on their GitHub activity.
     """
     executor = chain.CustomAgentExecutor()
     result = await executor.assess_competency(
-        request.state.user_id, assess_stat_req.selected_repos, db
+        request.state.user_id, db
     )
 
     return assess_success(result)
-
-
-@router.get(
-    "/read_stat/{user_id}",
-    summary="Read Stat",
-    response_model=SuccessResponse[AssessStatRes],
-)
-async def get_stat(user_id: str, db: Session = Depends(get_db)):
-    """
-    Read stat from the database
-    """
-    user = user_repository.find_user_by_user_id(db, user_id)
-    if not user:
-        raise ValueError("User not found")
-
-    return assessment_read_success(
-        AssessStatRes(
-            name=user.stat["Name"],
-            field=user.stat["Field"],
-            experience=user.stat["Experience"],
-            evaluation_scores=user.stat["evaluation_scores"],
-            implemented_features=user.stat["implemented_features"],
-        )
-    )
 
 
 @router.post(
