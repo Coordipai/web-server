@@ -216,13 +216,14 @@ def update_file(project_name: str, files: List[UploadFile], updated_file_names: 
     """
     Update a file in the given directory
     """
-    if updated_file_names != []:
-        existing_file_names = list_files_in_directory(project_name)
-        for existing_file_name in existing_file_names:
-            if existing_file_name not in updated_file_names:
-                # delete the file if it is not in the updated file names
-                file_path = os.path.join("design_docs", project_name, existing_file_name)
-                delete_file(file_path)
+    if updated_file_names:  
+        existing_files = set(list_files_in_directory(project_name))  
+        updated_files = set(updated_file_names)  
+        files_to_delete = existing_files - updated_files  
+
+        for file_name in files_to_delete:  
+            file_path = os.path.join("design_docs", project_name, file_name)  
+            delete_file(file_path) 
     
     if not files:
         return list_files_in_directory(project_name)
