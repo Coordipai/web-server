@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from fastapi.datastructures import UploadFile as FastUploadFile
@@ -12,8 +13,8 @@ from src.agent.schemas import (
     GenerateIssueRes,
 )
 from src.project import repository as project_repository
-from src.project import service as project_service
 from src.response.error_definitions import (
+    DesignDocNotFound,
     GitHubActivationInfoError,
     ProjectNotFound,
     UserNotFound,
@@ -32,7 +33,13 @@ class CustomAgentExecutor:
 
         # Get project information
         project = project_repository.find_project_by_id(db, project_id)
-        files = project_service.list_files_in_directory(project.name)
+        project_dir = os.path.join("design_docs", project.name)
+
+        file_names = os.listdir(project_dir)
+        if not file_names:
+            raise DesignDocNotFound()
+        
+        files = [os.path.join(project_dir, file_name) for file_name in file_names]
 
         extracted_texts = ""
         for file in files:
