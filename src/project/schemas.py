@@ -41,6 +41,7 @@ class ProjectReq(BaseModel):
     sprint_unit: int
     discord_channel_id: str
     members: List[ProjectUserReq]
+    design_docs: List[str] = []
 
 
 class ProjectRes(BaseModel):
