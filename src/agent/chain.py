@@ -73,7 +73,7 @@ class CustomAgentExecutor:
         return GenerateIssueListRes(issues=issueResList)
     
 
-    async def assess_competency(self, user_id: int, selected_repos: list[str], db: Session):
+    async def assess_competency(self, user_id: int, db: Session):
         """
         Assess the competency of a user based on their GitHub activity.
         """
