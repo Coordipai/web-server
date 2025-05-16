@@ -110,6 +110,10 @@ class DesignDocNotFound(NotFoundException):
     def __init__(self):
         super().__init__("설계 문서 정보를 찾을 수 없습니다.")
 
+class RepositoryNotFoundInGitHub(NotFoundException):
+    def __init__(self, repo_fullname: str):
+        super().__init__(f"GitHub 레포지토리 '{repo_fullname}'을 찾을 수 없습니다.")
+
 
 """
 405 METHOD_NOT_ALLOWED

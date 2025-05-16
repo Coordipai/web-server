@@ -22,7 +22,7 @@ from src.config.config import (
     VERTEX_PROJECT_ID,
 )
 from src.models import Project, User
-from src.response.error_definitions import InvalidFileType
+from src.response.error_definitions import InvalidFileType, RepositoryNotFoundInGitHub
 from src.stat import service as stat_service
 from src.user_repository import service as user_repository_service
 
@@ -203,7 +203,7 @@ async def get_github_activation_info(token: str):
     repo_names_from_github = [repo["name"] for repo in repo_list]
     for selected_repo in selected_repo_names:
         if selected_repo.repo_fullname not in repo_names_from_github:
-            raise ValueError(f"Repository {selected_repo.repo_fullname} not found in GitHub")
+            raise RepositoryNotFoundInGitHub(selected_repo.repo_fullname)
     
     selected_repo_list = [repo for repo in repo_list if repo["name"] in [repo.repo_fullname for repo in selected_repo_names]]
 
