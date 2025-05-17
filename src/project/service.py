@@ -49,7 +49,7 @@ def create_project(
         sprint_unit=project_req.sprint_unit,
         discord_channel_id=project_req.discord_channel_id,
         design_doc_paths=design_doc_paths,
-    )    
+    )
 
     saved_project = repository.create_project(db, project)
     project_members = []
@@ -64,7 +64,9 @@ def create_project(
         project_members.append(project_member)
 
     owner_user = find_user_by_user_id(db, user_id)
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, design_doc_paths)
+    project_res = ProjectRes.from_project(
+        saved_project, owner_user, project_members, design_doc_paths
+    )
 
     return project_res
 
@@ -132,8 +134,10 @@ def update_project(
     existing_project = repository.find_project_by_id(db, project_id)
     if not existing_project:
         raise ProjectNotFound()
-    
-    updated_design_doc_paths = update_file(existing_project.name, files, project_req.design_docs)
+
+    updated_design_doc_paths = update_file(
+        existing_project.name, files, project_req.design_docs
+    )
 
     existing_project.name = (project_req.name,)
     existing_project.repo_fullname = (project_req.repo_fullname,)
@@ -147,10 +151,15 @@ def update_project(
 
     owner_user = find_user_by_user_id(db, saved_project.owner)
 
+    existing_project.members.clear()
     project_members = []
-    for project_user in saved_project.members:
-        found_user = find_user_by_user_id(db, project_user.user_id)
-        project_member = ProjectUserRes.from_user(found_user, project_user.role)
+    for req_member in project_req.members:
+        found_user = find_user_by_user_id(db, req_member.id)
+        project_user = ProjectUser(
+            user=found_user, project=saved_project, role=req_member.role
+        )
+        saved_project_user = create_project_user(db, project_user)
+        project_member = ProjectUserRes.from_user(found_user, saved_project_user.role)
         project_members.append(project_member)
 
     project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
@@ -163,7 +172,7 @@ def delete_project(user_id: int, project_id: int, db: Session):
     Delete the existing project by project id
     """
     existing_project = repository.find_project_by_id(db, project_id)
-    
+
     if not existing_project:
         raise ProjectNotFound()
 
@@ -194,7 +203,7 @@ def upload_file(project_name: str, files: List[UploadFile]):
             shutil.copyfileobj(file.file, buffer)
 
     uploaded_paths = list_files_in_directory(project_name)
-    
+
     return uploaded_paths
 
 
@@ -211,23 +220,25 @@ def list_files_in_directory(project_name: str):
         return files
     except FileNotFoundError:
         raise FileNotFoundError
-    
-    
-def update_file(project_name: str, files: List[UploadFile], updated_file_names: List[str] = []):
+
+
+def update_file(
+    project_name: str, files: List[UploadFile], updated_file_names: List[str] = []
+):
     """
     Update a file in the given directory
     """
-    existing_files = set(list_files_in_directory(project_name))  
-    updated_files = set(updated_file_names)  
-    files_to_delete = existing_files - updated_files  
+    existing_files = set(list_files_in_directory(project_name))
+    updated_files = set(updated_file_names)
+    files_to_delete = existing_files - updated_files
 
-    for file_name in files_to_delete:  
-        file_path = os.path.join("design_docs", project_name, file_name)  
-        delete_file(file_path) 
-    
+    for file_name in files_to_delete:
+        file_path = os.path.join("design_docs", project_name, file_name)
+        delete_file(file_path)
+
     if not files:
         return list_files_in_directory(project_name)
-        
+
     updated_paths = upload_file(project_name, files)
 
     return updated_paths
@@ -248,4 +259,3 @@ def delete_file(file_path: str):
             return False
     except Exception as e:
         raise FileDeleteError()
-    
