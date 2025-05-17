@@ -65,12 +65,12 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             response.headers["X-Trace-ID"] = trace_id
             return response
         except BaseAppException as exc:
-            logger.error(f"{exc.status_code} - {exc.message}")
+            logger.error(f"{exc.status_code} - {exc.title}")
             response = JSONResponse(
                 status_code=exc.status_code,
                 headers={"Access-Control-Allow-Origin": "http://localhost:5173"},
                 content=ErrorResponse(
-                    method=request.method, path=request.url.path, message=exc.message
+                    method=request.method, path=request.url.path, message=exc.title
                 ).model_dump(),
             )
             response.headers["X-Trace-ID"] = trace_id
