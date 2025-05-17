@@ -153,7 +153,7 @@ def update_project(
         project_member = ProjectUserRes.from_user(found_user, project_user.role)
         project_members.append(project_member)
 
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members)
+    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, updated_design_doc_paths)
 
     return project_res
 
