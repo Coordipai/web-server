@@ -33,6 +33,6 @@ def get_db():
     try:
         yield db
     except SQLAlchemyError as e:
-        raise SQLError()
+        raise SQLError(detail=str(e))
     finally:
         db.close()

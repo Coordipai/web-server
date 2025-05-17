@@ -9,8 +9,8 @@ def get_repositories(token):
     """
     headers = {"Authorization": f"token {token}"}
     repos_url = f"https://api.github.com/user/repos?visibility=all&affiliation=owner,collaborator,organization_member"
-    repos_response = requests.get(repos_url, headers=headers)
-    repos_json = repos_response.json()
+    response = requests.get(repos_url, headers=headers)
+    repos_json = response.json()
 
     repo_list = []
     for repo in repos_json:
@@ -22,8 +22,12 @@ def get_repositories(token):
         }
         repo_list.append(data)
 
-    if repos_response.status_code != 200:
-        raise GitHubApiError(repos_response.status_code)
+    if response.status_code != 200:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
     return repo_list
 
@@ -34,23 +38,31 @@ def get_pull_requests(repo_fullname, user_name, token):
     """
     headers = {"Authorization": f"token {token}"}
     prs_url = f"https://api.github.com/repos/{repo_fullname}/pulls?state=all"
-    prs_response = requests.get(prs_url, headers=headers)
+    response = requests.get(prs_url, headers=headers)
 
-    if prs_response.status_code != 200:
-        raise GitHubApiError(prs.response.status_code)
+    if response.status_code != 200:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
-    prs = prs_response.json()
+    prs = response.json()
 
     pr_list = []
     for pr in prs:
         if pr["user"]["login"] == user_name and pr["merged_at"]:
             pr_details_url = pr["url"]
-            pr_details_response = requests.get(pr_details_url, headers=headers)
+            response = requests.get(pr_details_url, headers=headers)
 
-            if pr_details_response.status_code != 200:
-                raise GitHubApiError(pr_details_response.status_code)
+            if response.status_code != 200:
+                try:
+                    error_message = response.json().get("message", "")
+                except Exception:
+                    error_message = response.text or "No error message provided"
+                raise GitHubApiError(response.status_code, detail=error_message)
 
-            pr_details = pr_details_response.json()
+            pr_details = response.json()
 
             # Parse related_issues (close # format)
             body = pr_details.get("body", "")  # Set blank if body is empty
@@ -86,14 +98,18 @@ def get_commits(repo_fullname, user_name, token):
     commits_url = (
         f"https://api.github.com/repos/{repo_fullname}/commits?author={user_name}"
     )
-    commits_response = requests.get(commits_url, headers=headers)
+    response = requests.get(commits_url, headers=headers)
 
-    if commits_response.status_code != 200:
-        if commits_response.json()["message"] == "Git Repository is empty.":
+    if response.status_code != 200:
+        if response.json()["message"] == "Git Repository is empty.":
             return []
-        raise GitHubApiError(commits_response.status_code)
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
-    commits = commits_response.json()
+    commits = response.json()
 
     commit_list = []
     for commit in commits:

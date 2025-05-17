@@ -112,6 +112,23 @@ def delete_project(
 def parse_project_req_str(project_req: str = Form(...)):
     try:
         project_req_data = json.loads(project_req)
+
+        required_fields = [
+            "name",
+            "repo_fullname",
+            "start_date",
+            "end_date",
+            "sprint_unit",
+            "discord_channel_id",
+            "members",
+        ]
+        missing_fields = [
+            field for field in required_fields if field not in project_req_data
+        ]
+
+        if missing_fields:
+            raise InvalidJsonDataFormat(missing_fields)
+
         project_req_data["start_date"] = datetime.fromisoformat(
             project_req_data["start_date"].replace("Z", "+00:00")
         )

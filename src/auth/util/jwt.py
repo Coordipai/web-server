@@ -50,12 +50,12 @@ def parse_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         if payload is None:
-            raise InvalidJwtToken()
+            raise InvalidJwtToken("디코딩 결과가 비어 있습니다.")
         user_id = payload.get("sub")
         if user_id is None:
-            raise InvalidJwtToken()
+            raise InvalidJwtToken("토큰에서 사용자 정보를 찾을 수 없습니다.")
         return user_id
     except jwt.ExpiredSignatureError:
         raise ExpiredJwtToken()
-    except jwt.JWTError:
-        raise InvalidJwtToken()
+    except jwt.JWTError as e:
+        raise InvalidJwtToken(reason=str(e))
