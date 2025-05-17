@@ -62,6 +62,14 @@ class InvalidPriority(BadRequestException):
         )
 
 
+class InvalidReschedulingType(BadRequestException):
+    def __init__(self, type):
+        super().__init__(
+            title="잘못된 요청 형식",
+            detail=f"이슈 변경 요청서 결과 값은 Approve, Disapprove 중 하나입니다. (요청 값: {type})",
+        )
+
+
 """
 401 UNAUTHORIZED
 """
@@ -294,6 +302,7 @@ class FileDeleteError(InternalServerErrorException):
             title="파일 삭제 오류",
             detail="서버 내 파일 삭제 작업 도중 오류가 발생했습니다. 파일 경로나 권한 문제를 점검해 주세요.",
         )
+
 
 class IssueGenerateError(InternalServerErrorException):
     def __init__(self):

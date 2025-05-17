@@ -58,12 +58,13 @@ def update_issue_rescheduling(
 
 @router.delete(
     "/{id}",
-    summary="Delete the existing issue rescheduling",
+    summary="Approve or Disapprove the existing issue rescheduling",
     response_model=SuccessResponse,
 )
 def delete_issue_rescheduling(
     id: int,
+    type: str,
     db: Session = Depends(get_db),
 ):
-    service.delete_issue_rescheduling(id, db)
+    service.delete_issue_rescheduling(id, type, db)
     return issue_rescheduling_delete_success()
