@@ -14,12 +14,10 @@ add_daily_file_handler(logger)
 def create_project(db: Session, project: Project) -> Project:
     try:
         db.add(project)
-        db.commit()
-        db.refresh(project)
+        db.flush()
         return project
     except SQLAlchemyError as e:
         logger.error(f"Database error during project creation: {e}")
-        db.rollback()
         raise SQLError()
 
 

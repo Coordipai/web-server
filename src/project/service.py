@@ -18,6 +18,8 @@ from src.response.error_definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,
+    SQLError,
+    UserNotFound,
 )
 from src.user.repository import find_user_by_user_id
 
@@ -33,42 +35,53 @@ def create_project(
 
     Returns project data
     """
-    existing_project = repository.find_project_by_name(db, project_req.name)
+    try:
+        existing_project = repository.find_project_by_name(db, project_req.name)
 
-    if existing_project:
-        raise ProjectAlreadyExist()
+        if existing_project:
+            raise ProjectAlreadyExist()
 
-    design_doc_paths = upload_file(project_req.name, files)
+        design_doc_paths = upload_file(project_req.name, files)
 
-    project = Project(
-        name=project_req.name,
-        owner=user_id,
-        repo_fullname=project_req.repo_fullname,
-        start_date=project_req.start_date,
-        end_date=project_req.end_date,
-        sprint_unit=project_req.sprint_unit,
-        discord_channel_id=project_req.discord_channel_id,
-        design_doc_paths=design_doc_paths,
-    )
-
-    saved_project = repository.create_project(db, project)
-    project_members = []
-
-    for req_member in project_req.members:
-        found_user = find_user_by_user_id(db, req_member.id)
-        project_user = ProjectUser(
-            user=found_user, project=saved_project, role=req_member.role
+        project = Project(
+            name=project_req.name,
+            owner=user_id,
+            repo_fullname=project_req.repo_fullname,
+            start_date=project_req.start_date,
+            end_date=project_req.end_date,
+            sprint_unit=project_req.sprint_unit,
+            discord_channel_id=project_req.discord_channel_id,
+            design_doc_paths=design_doc_paths,
         )
-        saved_project_user = create_project_user(db, project_user)
-        project_member = ProjectUserRes.from_user(found_user, saved_project_user.role)
-        project_members.append(project_member)
 
-    owner_user = find_user_by_user_id(db, user_id)
-    project_res = ProjectRes.from_project(
-        saved_project, owner_user, project_members, design_doc_paths
-    )
+        saved_project = repository.create_project(db, project)
+        project_members = []
 
-    return project_res
+        for req_member in project_req.members:
+            found_user = find_user_by_user_id(db, req_member.id)
+            if not found_user:
+                raise UserNotFound()
+            project_user = ProjectUser(
+                user=found_user, project=saved_project, role=req_member.role
+            )
+            saved_project_user = create_project_user(db, project_user)
+            project_member = ProjectUserRes.from_user(
+                found_user, saved_project_user.role
+            )
+            project_members.append(project_member)
+
+        owner_user = find_user_by_user_id(db, user_id)
+        project_res = ProjectRes.from_project(
+            saved_project, owner_user, project_members, design_doc_paths
+        )
+
+        db.commit()
+        return project_res
+    except SQLError as e:
+        raise SQLError()
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
 def get_project(project_id: int, db: Session):
@@ -139,6 +152,10 @@ def update_project(
         existing_project.name, files, project_req.design_docs
     )
 
+    updated_design_doc_paths = update_file(
+        existing_project.name, files, project_req.design_docs
+    )
+
     existing_project.name = (project_req.name,)
     existing_project.repo_fullname = (project_req.repo_fullname,)
     existing_project.start_date = (project_req.start_date,)
@@ -162,7 +179,9 @@ def update_project(
         project_member = ProjectUserRes.from_user(found_user, saved_project_user.role)
         project_members.append(project_member)
 
-    project_res = ProjectRes.from_project(saved_project, owner_user, project_members, updated_design_doc_paths)
+    project_res = ProjectRes.from_project(
+        saved_project, owner_user, project_members, updated_design_doc_paths
+    )
 
     return project_res
 
