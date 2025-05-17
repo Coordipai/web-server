@@ -24,7 +24,6 @@ from src.config.config import (
 from src.models import Project, User
 from src.response.error_definitions import InvalidFileType, RepositoryNotFoundInGitHub
 from src.stat import service as stat_service
-from src.user_repository import service as user_repository_service
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -189,12 +188,11 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
     return text
 
 
-async def get_github_activation_info(token: str):
+async def get_github_activation_info(selected_repo_names: list[str],token: str):
     """
     Get GitHub information using the agent executor.
     """
     repo_list = stat_service.get_repositories(token)
-    selected_repo_names = user_repository_service.get_all_selected_repositories(token)
 
     # get user name from token
     user_info = await auth_service.get_github_user_info(token)
@@ -256,7 +254,7 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list[str
     for i in range(0, len(issues.issues), interval):
         response = await communicate_with_llm_tool(prompts.assign_issue_template.format(
             input_file=prompts.assign_input_template.format(
-                project_name="project_info.name",
+                project_name=project_info.name,
                 project_overview="project overview",
                 issues=issues.issues[i:i+interval],
                 stats=user_stat_list
