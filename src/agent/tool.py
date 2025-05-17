@@ -121,7 +121,6 @@ async def define_features(design_documents: str) -> dict:
     for i in range(len(llm_response)):
         llm_response[i] = llm_response[i].replace('"', "")
         features[i] = llm_response[i][1:]
-    print(features)
     return features
 
 
