@@ -9,7 +9,8 @@ T = TypeVar("T")
 class ErrorResponse(BaseModel):
     method: str
     path: str
-    message: str
+    title: str
+    detail: str
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
