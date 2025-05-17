@@ -17,7 +17,9 @@ add_daily_file_handler(logger)
 T = TypeVar("T")
 
 
-async def exception_handler(request: Request, exc: BaseAppException) -> JSONResponse:
+async def base_app_exception_handler(
+    request: Request, exc: BaseAppException
+) -> JSONResponse:
     trace_id = get_trace_id()
     type = exc.type
     title = exc.title
@@ -41,6 +43,38 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
             method=method,
             trace=stack_trace,
         )
+
+    return JSONResponse(
+        status_code=status_code,
+        content=ErrorResponse(
+            method=method, path=path, title=title, detail=detail
+        ).model_dump(),
+    )
+
+
+async def global_exception_handler(request: Request, exc: Exception):
+    trace_id = get_trace_id()
+    type = exc.__class__.__name__
+    title = "Internal Server Error"
+    status_code = 500
+    path = request.url.path
+    detail = str(exc)
+    method = request.method
+    stack_trace = traceback.format_exc()
+
+    logger.error(f"{status_code} - {title} - {detail}")
+
+    await report_error_to_discord(
+        discord_channel_id=DISCORD_CHANNEL_ID,
+        trace_id=trace_id,
+        type=type,
+        title=title,
+        status=status_code,
+        detail=detail,
+        instance=path,
+        method=method,
+        trace=stack_trace,
+    )
 
     return JSONResponse(
         status_code=status_code,
