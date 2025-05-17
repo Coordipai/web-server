@@ -1,9 +1,12 @@
+import uuid
+
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
 from src.auth.util.jwt import parse_token
 from src.config.logger_config import add_daily_file_handler, setup_logger
+from src.config.trace_config import set_trace_id
 from src.response.error_definitions import (
     BaseAppException,
     InvalidJwtToken,
@@ -17,6 +20,9 @@ add_daily_file_handler(logger)
 
 class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        trace_id = str(uuid.uuid4())
+        set_trace_id(trace_id)
+
         auth_allow_paths = [
             "/auth/github/login",
             "/auth/github/callback",
@@ -27,13 +33,19 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
         api_docs_allow_paths = ["/docs", "/openapi.json"]
 
         if any(request.url.path.startswith(path) for path in auth_allow_paths):
-            return await call_next(request)
+            response = await call_next(request)
+            response.headers["X-Trace-ID"] = trace_id
+            return response
 
         if any(request.url.path.startswith(path) for path in api_docs_allow_paths):
-            return await call_next(request)
+            response = await call_next(request)
+            response.headers["X-Trace-ID"] = trace_id
+            return response
 
         if request.method == "OPTIONS":
-            return await call_next(request)
+            response = await call_next(request)
+            response.headers["X-Trace-ID"] = trace_id
+            return response
 
         try:
             # Extract Authorization header
@@ -50,13 +62,16 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 raise InvalidJwtToken()
 
             response = await call_next(request)
+            response.headers["X-Trace-ID"] = trace_id
             return response
         except BaseAppException as exc:
             logger.error(f"{exc.status_code} - {exc.message}")
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=exc.status_code,
                 headers={"Access-Control-Allow-Origin": "http://localhost:5173"},
                 content=ErrorResponse(
                     method=request.method, path=request.url.path, message=exc.message
                 ).model_dump(),
             )
+            response.headers["X-Trace-ID"] = trace_id
+            return response
