@@ -10,6 +10,7 @@ async def report_error(
     detail: str,
     instance: str,
     method: str,
+    trace: str,
 ) -> None:
     url = "https://errorping.jhssong.com/report-error"
     payload = {
@@ -23,6 +24,7 @@ async def report_error(
             "instance": instance,
             "method": method,
         },
+        "trace": trace,
     }
 
     async with httpx.AsyncClient() as client:
