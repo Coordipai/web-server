@@ -22,7 +22,11 @@ from src.config.config import (
     VERTEX_PROJECT_ID,
 )
 from src.models import Project, User
-from src.response.error_definitions import InvalidFileType, RepositoryNotFoundInGitHub
+from src.response.error_definitions import (
+    InvalidFileType,
+    IssueGenerateError,
+    RepositoryNotFoundInGitHub,
+)
 from src.stat import service as stat_service
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
@@ -117,7 +121,6 @@ async def define_features(design_documents: str) -> dict:
     for i in range(len(llm_response)):
         llm_response[i] = llm_response[i].replace('"', "")
         features[i] = llm_response[i][1:]
-    print(features)
     return features
 
 
@@ -137,6 +140,8 @@ async def make_issues(design_documents: str, features : dict):
             issue_template=prompts.issue_template,
             features=list(features.values())[i:i+interval]
         ))
+        if not issues:
+            raise IssueGenerateError()
         issues = issues.replace("```json", "")
         issues = issues.replace("```", "")
         issues = json.loads(issues)

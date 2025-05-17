@@ -294,3 +294,10 @@ class FileDeleteError(InternalServerErrorException):
             title="파일 삭제 오류",
             detail="서버 내 파일 삭제 작업 도중 오류가 발생했습니다. 파일 경로나 권한 문제를 점검해 주세요.",
         )
+
+class IssueGenerateError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__(
+            title="이슈 생성 오류",
+            detail="이슈를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
+        )
