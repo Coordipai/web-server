@@ -262,12 +262,10 @@ class GitHubAccessTokenError(InternalServerErrorException):
 
 
 class SQLError(InternalServerErrorException):
-    def __init__(
-        self, detail: str = "데이터베이스 처리 중 알 수 없는 오류가 발생했습니다."
-    ):
+    def __init__(self):
         super().__init__(
             title="데이터베이스 오류",
-            detail=detail,
+            detail="요청을 처리하는 중 데이터베이스에서 문제가 발생했습니다. 관리자에게 문의해 주세요.",
         )
 
 
