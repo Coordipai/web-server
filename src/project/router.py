@@ -50,7 +50,7 @@ async def create_project(
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = await service.create_project(
+    data = service.create_project(
         user_id, parse_project_req_str(project_req), db, files
     )
     return project_create_success(data)
