@@ -4,6 +4,7 @@ from src.issue_rescheduling import repository
 from src.issue_rescheduling.models import IssueRescheduling
 from src.issue_rescheduling.schemas import IssueReschedulingReq, IssueReschedulingRes
 from src.response.error_definitions import (
+    InvalidReschedulingType,
     IssueReschedulingAlreadyExist,
     IssueReschedulingNotFound,
 )
@@ -82,6 +83,13 @@ def update_issue_rescheduling(
     return issue_rescheduling_res
 
 
-def delete_issue_rescheduling(id: int, db: Session):
-    existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
-    repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
+def delete_issue_rescheduling(id: int, type: str, db: Session):
+    # TODO Connect with discord bot
+    if type == "Approve":
+        existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
+        repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
+    elif type == "disapprove":
+        existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
+        repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
+    else:
+        raise InvalidReschedulingType(type)
