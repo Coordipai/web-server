@@ -20,6 +20,7 @@ from src.response.error_definitions import (
     UserNotFound,
 )
 from src.user import repository as user_repository
+from src.user_repository import service as user_repository_service
 
 
 class CustomAgentExecutor:
@@ -33,8 +34,10 @@ class CustomAgentExecutor:
 
         # Get project information
         project = project_repository.find_project_by_id(db, project_id)
+        if not project:
+            raise ProjectNotFound()
+        
         project_dir = os.path.join("design_docs", project.name)
-
         file_names = os.listdir(project_dir)
         if not file_names:
             raise DesignDocNotFound()
@@ -83,7 +86,8 @@ class CustomAgentExecutor:
         if not user:
             raise UserNotFound()
         
-        activity_info = await tool.get_github_activation_info(user.github_access_token)
+        selected_repo_names = user_repository_service.get_all_selected_repositories(user_id, db)
+        activity_info = await tool.get_github_activation_info(selected_repo_names, user.github_access_token)
         if not activity_info:
             raise GitHubActivationInfoError()
         
