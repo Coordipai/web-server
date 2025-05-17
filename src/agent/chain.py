@@ -32,7 +32,7 @@ class CustomAgentExecutor:
         Generate issues using the agent executor.
         """
 
-        # Get project information
+        # Get project information   
         project = project_repository.find_project_by_id(db, project_id)
         if not project:
             raise ProjectNotFound()
@@ -56,8 +56,8 @@ class CustomAgentExecutor:
                 extracted_texts += text
                 extracted_texts += "\n\n"
 
-        features = await tool.define_features(text)
-        issues = await tool.make_issues(text, features)
+        features = await tool.define_features(extracted_texts)
+        issues = await tool.make_issues(extracted_texts, features)
 
         # for each issue into IssueRes
         issueResList = list()
@@ -71,7 +71,6 @@ class CustomAgentExecutor:
                 body=issue["body"]
             )
             issueResList.append(issueRes)
-            
 
         return GenerateIssueListRes(issues=issueResList)
     
