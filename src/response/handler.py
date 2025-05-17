@@ -45,7 +45,7 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     return JSONResponse(
         status_code=status_code,
         content=ErrorResponse(
-            trace_id=trace_id, method=method, path=path, title=title, detail=detail
+            method=method, path=path, title=title, detail=detail
         ).model_dump(),
     )
 
