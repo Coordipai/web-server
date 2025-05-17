@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -57,11 +58,7 @@ class CustomAgentExecutor:
                 extracted_texts += "\n\n"
 
         features = await tool.define_features(extracted_texts)
-        issues = await tool.make_issues(extracted_texts, features)
-
-        # for each issue into IssueRes
-        issueResList = list()
-        for issue in issues:
+        async for issue in tool.make_issues(extracted_texts, features):
             issueRes = GenerateIssueRes(
                 type=issue["type"],
                 name=issue["name"],
@@ -70,9 +67,7 @@ class CustomAgentExecutor:
                 labels=issue["labels"],
                 body=issue["body"]
             )
-            issueResList.append(issueRes)
-
-        return GenerateIssueListRes(issues=issueResList)
+            yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)
     
 
     async def assess_competency(self, user_id: int, db: Session):
