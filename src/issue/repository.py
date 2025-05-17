@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
 from src.response.error_definitions import (
     GitHubApiError,
-    InvalidReqFormat,
+    InvalidPriority,
     IssueNotFound,
 )
 from src.user.repository import find_all_users_by_github_names, find_user_by_user_id
@@ -50,7 +50,7 @@ def add_hidden_metadata(body: str, priority: str, iteration: int) -> str:
     """
     # Check priority is one of M, S, C, W and iteration is valid integer
     if priority not in ["M", "S", "C", "W"] or iteration < 0:
-        raise InvalidReqFormat()
+        raise InvalidPriority(priority)
     metadata_pattern = re.compile(r"<!--\s*priority:\s*\w+\s*iteration:\s*\d+\s*-->")
 
     new_metadata = f"<!--\npriority: {priority}\niteration: {iteration}\n-->"
@@ -99,14 +99,18 @@ def create_issue(
         "labels": issue_req.labels,
     }
 
-    issue_response = requests.post(
+    response = requests.post(
         repos_url, headers=get_github_headers(user_id, db), json=req_data
     )
 
-    if issue_response.status_code != 201:
-        raise GitHubApiError(issue_response.status_code)
+    if response.status_code != 201:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
-    issue_json = issue_response.json()
+    issue_json = response.json()
     return return_issue_res(issue_json, db)
 
 
@@ -114,12 +118,16 @@ def find_issue_by_issue_number(
     user_id: int, repo_fullname: str, issue_number: int, db: Session
 ):
     repos_url = f"https://api.github.com/repos/{repo_fullname}/issues/{issue_number}"
-    issue_response = requests.get(repos_url, headers=get_github_headers(user_id, db))
+    response = requests.get(repos_url, headers=get_github_headers(user_id, db))
 
-    if issue_response.status_code != 200:
-        raise GitHubApiError(issue_response.status_code)
+    if response.status_code != 200:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
-    issue_json = issue_response.json()
+    issue_json = response.json()
     issue_data = return_issue_res(issue_json, db)
 
     if not issue_data:
@@ -132,7 +140,11 @@ def find_all_issues_by_project_id(user_id: int, repo_fullname: str, db: Session)
     repos_url = f"https://api.github.com/repos/{repo_fullname}/issues?state=all"
     response = requests.get(repos_url, headers=get_github_headers(user_id, db))
     if response.status_code != 200:
-        raise GitHubApiError(response.status_code)
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
     issue_list_json = response.json()
     return [
@@ -157,14 +169,18 @@ def update_issue(
         "labels": issue_req.labels,
     }
 
-    issue_response = requests.patch(
+    response = requests.patch(
         repos_url, headers=get_github_headers(user_id, db), json=req_data
     )
 
-    if issue_response.status_code != 200:
-        raise GitHubApiError(issue_response.status_code)
+    if response.status_code != 200:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)
 
-    issue_json = issue_response.json()
+    issue_json = response.json()
     return return_issue_res(issue_json, db)
 
 
@@ -176,9 +192,13 @@ def close_issue(
     )
     req_data = {"state": "close"}
 
-    issue_response = requests.patch(
+    response = requests.patch(
         repos_url, headers=get_github_headers(user_id, db), json=req_data
     )
 
-    if issue_response.status_code != 200:
-        raise GitHubApiError(issue_response.status_code)
+    if response.status_code != 200:
+        try:
+            error_message = response.json().get("message", "")
+        except Exception:
+            error_message = response.text or "No error message provided"
+        raise GitHubApiError(response.status_code, detail=error_message)

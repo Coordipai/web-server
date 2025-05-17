@@ -20,7 +20,7 @@ def create_user(db: Session, user: User) -> User:
     except SQLAlchemyError as e:
         logger.error(f"Database error during user creation: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_user_by_github_id(db: Session, github_id: str) -> User | None:
@@ -32,7 +32,7 @@ def find_user_by_github_id(db: Session, github_id: str) -> User | None:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_all_users_by_github_names(db: Session, github_names: list[str]) -> User | None:
@@ -44,7 +44,7 @@ def find_all_users_by_github_names(db: Session, github_names: list[str]) -> User
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_user_by_user_id(db: Session, user_id: str) -> User | None:
@@ -56,7 +56,7 @@ def find_user_by_user_id(db: Session, user_id: str) -> User | None:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def update_user_stat(db: Session, user: User, stat: dict) -> User:
@@ -68,7 +68,7 @@ def update_user_stat(db: Session, user: User, stat: dict) -> User:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def update_user(db: Session, user: User) -> User:
@@ -79,7 +79,7 @@ def update_user(db: Session, user: User) -> User:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def delete_user(db: Session, user: User):
@@ -89,4 +89,4 @@ def delete_user(db: Session, user: User):
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))

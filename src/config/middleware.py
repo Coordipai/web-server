@@ -58,8 +58,8 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             try:
                 user_id = parse_token(access_token)
                 request.state.user_id = user_id
-            except ValueError:
-                raise InvalidJwtToken()
+            except ValueError as e:
+                raise InvalidJwtToken(reason=str(e))
 
             response = await call_next(request)
             response.headers["X-Trace-ID"] = trace_id

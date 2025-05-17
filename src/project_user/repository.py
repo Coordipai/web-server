@@ -19,7 +19,7 @@ def create_project_user(db: Session, project_user: ProjectUser) -> ProjectUser:
     except SQLAlchemyError as e:
         logger.error(f"Database error during project_user creation: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_all_projects_by_user_id(db: Session, user_id: int) -> list[ProjectUser]:
@@ -29,4 +29,4 @@ def find_all_projects_by_user_id(db: Session, user_id: int) -> list[ProjectUser]
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))

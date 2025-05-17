@@ -20,7 +20,7 @@ def create_project(db: Session, project: Project) -> Project:
     except SQLAlchemyError as e:
         logger.error(f"Database error during project creation: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_project_by_id(db: Session, project_id: int) -> Project | None:
@@ -32,7 +32,7 @@ def find_project_by_id(db: Session, project_id: int) -> Project | None:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_project_by_name(db: Session, project_name: str) -> Project | None:
@@ -44,7 +44,7 @@ def find_project_by_name(db: Session, project_name: str) -> Project | None:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def find_project_by_owner(db: Session, owner: str) -> list[Project]:
@@ -54,7 +54,7 @@ def find_project_by_owner(db: Session, owner: str) -> list[Project]:
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def update_project(db: Session, project: Project) -> Project:
@@ -65,7 +65,7 @@ def update_project(db: Session, project: Project) -> Project:
     except SQLAlchemyError as e:
         logger.error(f"Database error during project creation: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
 
 
 def delete_project(db: Session, project: Project):
@@ -75,4 +75,4 @@ def delete_project(db: Session, project: Project):
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError()
+        raise SQLError(detail=str(e))
