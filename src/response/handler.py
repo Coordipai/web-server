@@ -32,7 +32,7 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     if status_code >= 500:
         await report_error_to_discord(
             discord_channel_id=DISCORD_CHANNEL_ID,
-            traceId=trace_id,
+            trace_id=trace_id,
             type=type,
             title=title,
             status=status_code,
@@ -45,7 +45,7 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     return JSONResponse(
         status_code=status_code,
         content=ErrorResponse(
-            method=method, path=path, title=title, detail=detail
+            trace_id=trace_id, method=method, path=path, title=title, detail=detail
         ).model_dump(),
     )
 

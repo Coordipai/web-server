@@ -3,7 +3,7 @@ import httpx
 
 async def report_error_to_discord(
     discord_channel_id: str,
-    traceId: str,
+    trace_id: str,
     type: str,
     title: str,
     status: int,
@@ -16,7 +16,7 @@ async def report_error_to_discord(
     payload = {
         "discordChannelId": discord_channel_id,
         "error": {
-            "traceId": traceId,
+            "traceId": trace_id,
             "type": type,
             "title": title,
             "status": status,

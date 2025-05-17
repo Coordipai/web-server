@@ -7,6 +7,7 @@ T = TypeVar("T")
 
 
 class ErrorResponse(BaseModel):
+    trace_id: str
     method: str
     path: str
     title: str
