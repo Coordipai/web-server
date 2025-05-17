@@ -14,8 +14,8 @@ from auth.util.redis import (
 )
 from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL, IS_LOCAL
 from src.response.error_definitions import (
+    AccessTokenNotFound,
     GitHubAccessTokenError,
-    GitHubAccessTokenNotFound,
     GitHubCredentialCodeNotFound,
     InvalidRefreshToken,
     UserAlreadyExist,
@@ -125,7 +125,7 @@ async def register(
     Returns user data and access & refresh token
     """
     if not access_token:
-        raise GitHubAccessTokenNotFound()
+        raise AccessTokenNotFound()
 
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
@@ -167,7 +167,7 @@ async def login(db: Session, access_token: Optional[str] = Cookie(None)):
     Returns user data and access & refresh token
     """
     if not access_token:
-        raise GitHubAccessTokenNotFound()
+        raise AccessTokenNotFound()
 
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)

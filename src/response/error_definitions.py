@@ -128,7 +128,7 @@ class GitHubCredentialCodeNotFound(NotFoundException):
         )
 
 
-class GitHubAccessTokenNotFound(NotFoundException):
+class AccessTokenNotFound(NotFoundException):
     def __init__(self):
         super().__init__(
             title="인증 정보 누락", detail="쿠키에서 AccessToken을 찾을 수 없습니다."
