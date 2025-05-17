@@ -7,8 +7,8 @@ from fastapi.responses import JSONResponse
 from src.config.config import DISCORD_CHANNEL_ID
 from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.config.trace_config import get_trace_id
-from src.response import report_error
 from src.response.error_definitions import BaseAppException
+from src.response.report_error import report_error_to_discord
 from src.response.schemas import ErrorResponse, SuccessContent, SuccessResponse
 
 logger = setup_logger(__name__)
@@ -30,7 +30,7 @@ async def exception_handler(request: Request, exc: BaseAppException) -> JSONResp
     logger.error(f"{status_code} - {title} - {detail}")
 
     if status_code >= 500:
-        await report_error(
+        await report_error_to_discord(
             discord_channel_id=DISCORD_CHANNEL_ID,
             traceId=trace_id,
             type=type,

@@ -1,7 +1,7 @@
 import httpx
 
 
-async def report_error(
+async def report_error_to_discord(
     discord_channel_id: str,
     traceId: str,
     type: str,
