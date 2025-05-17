@@ -22,7 +22,7 @@ def create_issue_rescheduling(
     except SQLAlchemyError as e:
         logger.error(f"Database error during issue rescheduling creation: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def find_issue_scheduling_by_id(db: Session, issue_rescheduling_id: int):
@@ -38,7 +38,7 @@ def find_issue_scheduling_by_id(db: Session, issue_rescheduling_id: int):
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def find_issue_scheduling_by_project_id_and_issue_number(
@@ -57,7 +57,7 @@ def find_issue_scheduling_by_project_id_and_issue_number(
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def find_all_issue_rescheduling_by_project_id(db: Session, project_id: int):
@@ -73,7 +73,7 @@ def find_all_issue_rescheduling_by_project_id(db: Session, project_id: int):
     except SQLAlchemyError as e:
         logger.error(f"Database error during issue rescheduling retrive: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def update_issue_rescheduling(
@@ -86,7 +86,7 @@ def update_issue_rescheduling(
     except SQLAlchemyError as e:
         logger.error(f"Database error during issue rescheduling update: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def delete_issue_rescheduling(db: Session, issue_rescheduling: IssueRescheduling):
@@ -96,4 +96,4 @@ def delete_issue_rescheduling(db: Session, issue_rescheduling: IssueRescheduling
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()

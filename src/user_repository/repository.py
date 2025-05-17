@@ -38,7 +38,7 @@ def sync_user_repositories(db: Session, user_id: int, repo_names: list[str]) -> 
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
 
 
 def find_all_repositories_by_user_id(db: Session, user_id: int) -> UserRepository:
@@ -48,4 +48,4 @@ def find_all_repositories_by_user_id(db: Session, user_id: int) -> UserRepositor
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
-        raise SQLError(detail=str(e))
+        raise SQLError()
