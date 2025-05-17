@@ -129,8 +129,8 @@ async def make_issues(design_documents: str, features : dict):
     Make issues based on features.
     """
     issue_list = list()
-    if(len(features) >= 10):
-        interval = 10
+    if(len(features) >= 5):
+        interval = 5
     else:
         interval = len(features)
 
@@ -146,9 +146,8 @@ async def make_issues(design_documents: str, features : dict):
         issues = issues.replace("```", "")
         issues = json.loads(issues)
 
-        issue_list.extend(issues)
-
-    return issue_list
+        for issue in issues:
+            yield issue
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:

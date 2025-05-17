@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from src.agent import chain
@@ -10,11 +11,7 @@ from src.agent.schemas import (
 )
 from src.config.database import get_db
 from src.response.schemas import SuccessResponse
-from src.response.success_definitions import (
-    assess_success,
-    issue_assign_success,
-    issue_generate_success,
-)
+from src.response.success_definitions import assess_success, issue_assign_success
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 
@@ -22,7 +19,7 @@ router = APIRouter(prefix="/agent", tags=["Agent"])
 @router.get(
     "/generate_issues/{project_id}",
     summary="Generate issues",
-    response_model=SuccessResponse[GenerateIssueListRes],
+    response_model=GenerateIssueListRes,
 )
 async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     """
@@ -30,9 +27,10 @@ async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     """
 
     executor = chain.CustomAgentExecutor()
-    result = await executor.generate_issues(project_id, db)
-
-    return issue_generate_success(result)
+    return StreamingResponse(
+        executor.generate_issues(project_id, db),
+        media_type="application/json",
+    )
 
 
 @router.post(
