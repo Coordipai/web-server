@@ -24,7 +24,7 @@ from src.config.database import initialize_database
 from src.config.logger_config import setup_logger
 from src.config.middleware import JWTAuthenticationMiddleware
 from src.response.error_definitions import BaseAppException
-from src.response.handler import exception_handler
+from src.response.handler import base_app_exception_handler, global_exception_handler
 from user.router import router as user_router
 from user_repository.router import router as user_repository_router
 
@@ -80,7 +80,9 @@ app = FastAPI(
 
 initialize_database()
 
-app.add_exception_handler(BaseAppException, exception_handler)
+app.add_exception_handler(BaseAppException, base_app_exception_handler)
+# Should be lower than any other exception handlers
+app.add_exception_handler(Exception, global_exception_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[FRONTEND_URL],
