@@ -1,5 +1,7 @@
 import secrets
+from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, security, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -11,13 +13,61 @@ from auth.router import router as auth_router
 from issue.router import router as issue_router
 from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
-from src.config.config import FRONTEND_URL, SWAGGER_PASSWORD, SWAGGER_USERNAME
+from src.config.config import (
+    DISCORD_CHANNEL_ID,
+    FRONTEND_URL,
+    IS_LOCAL,
+    SWAGGER_PASSWORD,
+    SWAGGER_USERNAME,
+)
 from src.config.database import initialize_database
+from src.config.logger_config import setup_logger
 from src.config.middleware import JWTAuthenticationMiddleware
 from src.response.error_definitions import BaseAppException
 from src.response.handler import exception_handler
 from user.router import router as user_router
 from user_repository.router import router as user_repository_router
+
+logger = setup_logger(__name__)
+
+
+async def send_server_info(status: str):
+    if IS_LOCAL:
+        return
+
+    message = ""
+    if status == "start":
+        message = "The server is now online."
+    elif status == "stop":
+        message = "The server is shutting down."
+    else:
+        print("Unknown status")
+        return
+
+    url = "https://errorping.jhssong.com/info"
+    payload = {
+        "discordChannelId": DISCORD_CHANNEL_ID,
+        "info": {"message": message},
+    }
+
+    async with httpx.AsyncClient() as client:
+        res = await client.post(url, json=payload)
+
+        if res.status_code != 200:
+            print(f"Failed to report error: {res.status_code} - {res.text}")
+        logger.info(f"✅ {message}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # When server started
+    await send_server_info("start")
+
+    yield
+
+    # When server stopped
+    await send_server_info("stop")
+
 
 app = FastAPI(
     title="Coordipai Web Server",
@@ -25,9 +75,11 @@ app = FastAPI(
     version="1.0.0",
     docs_url=None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
 initialize_database()
+
 app.add_exception_handler(BaseAppException, exception_handler)
 app.add_middleware(
     CORSMiddleware,
