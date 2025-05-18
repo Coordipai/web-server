@@ -148,6 +148,12 @@ async def make_issues(design_documents: str, features : dict):
         issues = extract_json_dict_from_response(issues)
 
         for issue in issues:
+            # check if issue contains "type", "name", "description", "title", "labels", "body"
+            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "body"]):
+                print("------------Invalid issue format------------")
+                print(issue)
+                raise IssueGenerateError()
+
             yield issue
 
 

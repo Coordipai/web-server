@@ -19,16 +19,15 @@ class AssessStatRes(BaseModel):
     evaluation_scores: dict
     implemented_features: list[str]
 
-class AssignedIssueRes(BaseModel):
+class RecommendAssigneeRes(BaseModel):
     issue: str
     assignee: str
     description: list[str]
 
-class AssignedIssueListRes(BaseModel):
-    issues: list[AssignedIssueRes]
+class RecommendAssigneeListRes(BaseModel):
+    issues: list[RecommendAssigneeRes]
 
-class AssignIssueReq(BaseModel):
-    user_names: list[str]
+class RecommendAssigneeReq(BaseModel):
     issues: GenerateIssueListRes
 
 class FeedbackReq(BaseModel):

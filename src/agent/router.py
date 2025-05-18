@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from src.agent import chain
 from src.agent.schemas import (
     AssessStatRes,
-    AssignedIssueListRes,
-    AssignIssueReq,
     FeedbackReq,
     FeedbackRes,
     GenerateIssueListRes,
+    RecommendAssigneeListRes,
+    RecommendAssigneeReq,
 )
 from src.config.database import get_db
 from src.response.schemas import SuccessResponse
@@ -59,19 +59,19 @@ async def assess_stat(
 
 
 @router.post(
-    "/assign_issues/{project_id}",
-    summary="Assign issues to users",
-    response_model=SuccessResponse[AssignedIssueListRes],
+    "/recommend_assignees/{project_id}",
+    summary="Recommend assignees for issues",
+    response_model=SuccessResponse[RecommendAssigneeListRes],
 )
-async def assign_issues(
-    project_id: int, request: AssignIssueReq, db: Session = Depends(get_db)
+async def recommend_assignees(
+    project_id: int, recommendAssigneeReq: RecommendAssigneeReq, db: Session = Depends(get_db)
 ):
     """
-    Assign issues to users based on their competency.
+    Recommend assignees for issues based on their competency.
     """
     executor = chain.CustomAgentExecutor()
-    result = await executor.assign_issue_to_users(
-        db, project_id, request.user_names, request.issues
+    result = await executor.recommend_assignees(
+        db, project_id, recommendAssigneeReq.issues
     )
 
     return issue_assign_success(result)

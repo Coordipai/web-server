@@ -251,7 +251,7 @@ make_issue_template = PromptTemplate(
         "Write the implementation steps for each feature.\n"
         "Write any additional information and reference materials required to implement each feature.\n"
         "Write the criteria for the personnel required for each feature in terms of scores, based on the score table.\n"
-        "Each task should be written according to the issue template.\n"
+        "Each task should be written according to the issue template.(Must include contents of type, name, description, title, labels, body)\n"
         "All contents in the issue template should be written in Korean.\n"
         "Name(right of ':'), description on the top in the issue template should be written in Korean.\n"
         
