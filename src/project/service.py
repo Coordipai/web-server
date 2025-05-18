@@ -1,6 +1,5 @@
 import os
 import shutil
-from datetime import datetime
 from typing import List, Optional
 
 from fastapi import File, UploadFile
@@ -225,11 +224,13 @@ def upload_file(project_name: str, files: List[UploadFile]):
     project_dir = os.path.join("design_docs", project_name)
     os.makedirs(project_dir, exist_ok=True)
 
+    existing_files = set(os.listdir(project_dir))
+
     for file in files:
         safe_filename = file.filename.replace("/", "_").replace("\\", "_")
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        saved_filename = f"{timestamp}_{safe_filename}"
-        file_path = os.path.join(project_dir, saved_filename)
+        if safe_filename in existing_files:  # check if file already exists
+            continue
+        file_path = os.path.join(project_dir, safe_filename)
 
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -247,8 +248,6 @@ def list_files_in_directory(project_name: str):
     project_dir = os.path.join("design_docs", project_name)
     try:
         files = os.listdir(project_dir)
-        # parse the file names to get the original file names
-        files = [file.split("_", 1)[-1] for file in files]
         return files
     except FileNotFoundError:
         raise FileNotFoundError
