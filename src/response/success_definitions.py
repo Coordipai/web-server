@@ -74,10 +74,14 @@ def issue_generate_success(data: T):
 
 def assess_success(data: T):
     return success_handler(200, "역량 평가 성공", data)
-
+ 
 
 def issue_assign_success(data: T):
     return success_handler(200, "이슈 할당 성공", data)
+
+
+def feedback_success(data: T):
+    return success_handler(200, "피드백 성공", data)
 
 
 """

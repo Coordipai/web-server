@@ -2,16 +2,22 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from src.agent import chain
+from src.agent import chain, tool
 from src.agent.schemas import (
     AssessStatRes,
     AssignedIssueListRes,
     AssignIssueReq,
+    FeedbackReq,
+    FeedbackRes,
     GenerateIssueListRes,
 )
 from src.config.database import get_db
 from src.response.schemas import SuccessResponse
-from src.response.success_definitions import assess_success, issue_assign_success
+from src.response.success_definitions import (
+    assess_success,
+    feedback_success,
+    issue_assign_success,
+)
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 
@@ -69,3 +75,24 @@ async def assign_issues(
     )
 
     return issue_assign_success(result)
+
+@router.get(
+    "/feedback",
+    summary="Get feedback for issue rescheduling",
+    response_model=SuccessResponse[FeedbackRes],
+)
+async def get_feedback(feedbackReq: FeedbackReq, db: Session = Depends(get_db)):
+    """
+    Get feedback for issue rescheduling.
+    """
+    executor = chain.CustomAgentExecutor()
+    result = await executor.get_feedback(feedbackReq.project_id, feedbackReq.issue_rescheduling_id, db)
+
+    return feedback_success(result)
+
+@router.get(
+    "/test",
+)
+async def test():
+    result = await tool.get_feedback(None, None, None, None)
+    return result

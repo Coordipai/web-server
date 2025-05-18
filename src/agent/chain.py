@@ -10,13 +10,18 @@ from src.agent.schemas import (
     AssessStatRes,
     AssignedIssueListRes,
     AssignedIssueRes,
+    FeedbackRes,
     GenerateIssueListRes,
     GenerateIssueRes,
 )
+from src.issue import repository as issue_repository
+from src.issue_rescheduling import repository as issue_rescheduling_repository
 from src.project import repository as project_repository
 from src.response.error_definitions import (
     DesignDocNotFound,
     GitHubActivationInfoError,
+    IssueNotFound,
+    IssueReschedulingNotFound,
     ProjectNotFound,
     UserNotFound,
 )
@@ -130,4 +135,42 @@ class CustomAgentExecutor:
         return AssignedIssueListRes(issues=assigned_issue_list_res)
 
 
+    async def get_feedback(self, project_id: int, issue_rescheduling_id: int, db: Session):
+        """
+        Get feedback for issue rescheduling.
+        """
 
+        # Get project information from database
+        project = project_repository.find_project_by_id(db, project_id)
+        if not project:
+            raise ProjectNotFound()
+
+        # Get issue rescheduling information from database
+        issue_rescheduling = issue_rescheduling_repository.find_issue_scheduling_by_id(db, issue_rescheduling_id)
+        if not issue_rescheduling:
+            raise IssueReschedulingNotFound()
+        
+        # Get user stat from database
+        members = project.members
+        user_stat_list = list()
+        for member in members:
+            user = user_repository.find_user_by_user_id(db, member.user_id)
+            if not user:
+                raise UserNotFound()
+            user_stat_list.append(user.stat)
+
+        # Get issue information from database
+        issue = issue_repository.find_issue_by_issue_number(
+            project.owner, project.repo_fullname, issue_rescheduling.issue_number, db
+        )
+        if not issue:
+            raise IssueNotFound
+
+        feedback = await tool.get_feedback(project, user_stat_list, issue_rescheduling, issue)
+        
+        return FeedbackRes(
+            suggested_assignees=feedback['suggestions']["new_assignee"]["name"],
+            suggested_sprints=feedback['suggestions']["new_sprint"]["sprint"],
+            reason_for_assignees=feedback['suggestions']["new_assignee"]["reason"],
+            reason_for_sprints=feedback['suggestions']["new_sprint"]["reason"]
+        )

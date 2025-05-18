@@ -21,7 +21,8 @@ from src.config.config import (
     VERTEX_EMBEDDING_MODEL,
     VERTEX_PROJECT_ID,
 )
-from src.models import Project, User
+from src.issue.schemas import IssueRes
+from src.models import IssueRescheduling, Project, User
 from src.response.error_definitions import (
     InvalidFileType,
     IssueGenerateError,
@@ -272,3 +273,21 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list[str
         assigned_issues.extend(response)
     
     return assigned_issues
+
+async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
+    """
+    Get feedback for issue rescheduling.
+    """
+    feedback = await communicate_with_llm_tool(prompts.feedback_template.format(
+        project_info=json.dumps(project, ensure_ascii=False),
+        reason=issue_rescheduling.reason,
+        issue=json.dumps(issue, ensure_ascii=False),
+        stats=user_stat_list,
+        output_example=prompts.feedback_output_example
+    ))
+
+    feedback = feedback.replace("```json", "")
+    feedback = feedback.replace("```", "")
+    feedback = json.loads(feedback)
+    
+    return feedback
