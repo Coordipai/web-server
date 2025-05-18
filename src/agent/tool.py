@@ -26,6 +26,7 @@ from src.models import IssueRescheduling, Project, User
 from src.response.error_definitions import (
     InvalidFileType,
     IssueGenerateError,
+    LLMResponseFormatError,
     RepositoryNotFoundInGitHub,
 )
 from src.stat import service as stat_service
@@ -145,7 +146,11 @@ async def make_issues(design_documents: str, features : dict):
             raise IssueGenerateError()
         issues = issues.replace("```json", "")
         issues = issues.replace("```", "")
-        issues = json.loads(issues)
+
+        try:
+            issues = json.loads(issues)
+        except json.JSONDecodeError:
+            raise LLMResponseFormatError()
 
         for issue in issues:
             yield issue
@@ -233,7 +238,12 @@ async def assess_with_data(user: User, github_activation_data: list):
 
     competency = competency.replace("```json", "")
     competency = competency.replace("```", "")
-    competency = json.loads(competency)
+
+    try:
+        competency = json.loads(competency)
+    except json.JSONDecodeError:
+        raise LLMResponseFormatError()
+    
     competency_data = {
         "Name": competency["Name"],
         "Field": competency["Field"],
@@ -269,9 +279,12 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list[str
 
         response = response.replace("```json", "")
         response = response.replace("```", "")
-        response = json.loads(response)
-        assigned_issues.extend(response)
-    
+        try:
+            response = json.loads(response)
+            assigned_issues.extend(response)
+        except json.JSONDecodeError:
+            raise LLMResponseFormatError()
+        
     return assigned_issues
 
 async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
@@ -288,6 +301,8 @@ async def get_feedback(project: Project, user_stat_list: list[str], issue_resche
 
     feedback = feedback.replace("```json", "")
     feedback = feedback.replace("```", "")
-    feedback = json.loads(feedback)
-    
-    return feedback
+    try:
+        feedback = json.loads(feedback)
+        return feedback
+    except json.JSONDecodeError:
+        raise LLMResponseFormatError()

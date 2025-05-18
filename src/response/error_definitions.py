@@ -310,3 +310,10 @@ class IssueGenerateError(InternalServerErrorException):
             title="이슈 생성 오류",
             detail="이슈를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
         )
+
+class LLMResponseFormatError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__(
+            title="LLM 응답 형식 오류",
+            detail="LLM의 응답 형식이 올바르지 않습니다. 요청 형식을 확인해 주세요.",
+        )
