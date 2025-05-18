@@ -37,6 +37,9 @@ class CustomAgentExecutor:
         """
         Generate issues using the agent executor.
         """
+        print("--------------------------------------------")
+        print("Starting issue generation...")
+        print("--------------------------------------------")
 
         # Get project information   
         project = project_repository.find_project_by_id(db, project_id)
@@ -73,12 +76,18 @@ class CustomAgentExecutor:
                 body=issue["body"]
             )
             yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)
+
+        print("--------------------------------------------")
+        print("Issues generated successfully.")
+        print("--------------------------------------------")
     
 
     async def assess_competency(self, user_id: int, db: Session):
         """
         Assess the competency of a user based on their GitHub activity.
         """
+
+        print("Starting competency assessment...")
 
         # get user
         user = user_repository.find_user_by_user_id(db, user_id)
@@ -93,6 +102,10 @@ class CustomAgentExecutor:
         stat = await tool.assess_with_data(user, activity_info)
         user_repository.update_user_stat(db, user, stat)
 
+        print("--------------------------------------------")
+        print("Competency assessment completed.")
+        print("--------------------------------------------")
+
         return AssessStatRes(
             name=stat["Name"],
             field=stat["Field"],
@@ -106,6 +119,10 @@ class CustomAgentExecutor:
         """
         Assign issues to users.
         """
+
+        print("--------------------------------------------")
+        print("Starting issue assignment...")
+        print("--------------------------------------------")
 
         # Get project information from database
         project = project_repository.find_project_by_id(db, project_id)
@@ -131,6 +148,10 @@ class CustomAgentExecutor:
                 description=issue["description"]
             )
             assigned_issue_list_res.append(assigned_issue_res)
+
+        print("--------------------------------------------")
+        print("Issue assignment completed.")
+        print("--------------------------------------------")
             
         return AssignedIssueListRes(issues=assigned_issue_list_res)
 
@@ -139,6 +160,10 @@ class CustomAgentExecutor:
         """
         Get feedback for issue rescheduling.
         """
+
+        print("--------------------------------------------")
+        print("Starting feedback generation...")
+        print("--------------------------------------------")
 
         # Get project information from database
         project = project_repository.find_project_by_id(db, project_id)
@@ -167,6 +192,10 @@ class CustomAgentExecutor:
             raise IssueNotFound
 
         feedback = await tool.get_feedback(project, user_stat_list, issue_rescheduling, issue)
+
+        print("--------------------------------------------")
+        print("Feedback generation completed.")
+        print("--------------------------------------------")
         
         return FeedbackRes(
             suggested_assignees=feedback['suggestions']["new_assignee"]["name"],

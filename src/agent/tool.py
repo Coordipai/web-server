@@ -95,7 +95,7 @@ async def communicate_with_llm_tool(prompt: str) -> str:
     """
 
     message = [
-        SystemMessage(content="You are a professional project manger"),
+        SystemMessage(content="You are a professional project manager"),
         HumanMessage(content=prompt)
     ]
     response = await llm.agenerate([message])
@@ -131,7 +131,6 @@ async def make_issues(design_documents: str, features : dict):
     """
     Make issues based on features.
     """
-    issue_list = list()
     if(len(features) >= 5):
         interval = 5
     else:
