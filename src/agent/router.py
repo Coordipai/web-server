@@ -70,7 +70,7 @@ async def recommend_assignees(
     Recommend assignees for issues based on their competency.
     """
     executor = chain.CustomAgentExecutor()
-    result = await executor.recommend_assignees(
+    result = await executor.recommend_assignees_for_issues(
         db, project_id, recommendAssigneeReq.issues
     )
 
