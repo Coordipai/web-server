@@ -115,7 +115,7 @@ class CustomAgentExecutor:
         )
     
 
-    async def assign_issue_to_users(self, db: Session, project_id: str, user_ids: list[str], issues: GenerateIssueListRes):
+    async def assign_issue_to_users(self, db: Session, project_id: str, issues: GenerateIssueListRes):
         """
         Assign issues to users.
         """
@@ -129,13 +129,8 @@ class CustomAgentExecutor:
         if not project:
             raise ProjectNotFound()
 
-        # Get user stat from database
-        user_stat_list = list()
-        for user_id in user_ids:
-            user = user_repository.find_user_by_user_id(db, user_id)
-            if not user:
-                raise UserNotFound()
-            user_stat_list.append(user.stat)
+        # Get user stats
+        user_stat_list = [user.stat for user in project.members]
 
         # Assign issues to users
         assigned_issues = await tool.assign_issues_to_users("project", user_stat_list, issues)

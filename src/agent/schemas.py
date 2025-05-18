@@ -28,7 +28,6 @@ class AssignedIssueListRes(BaseModel):
     issues: list[AssignedIssueRes]
 
 class AssignIssueReq(BaseModel):
-    user_names: list[str]
     issues: GenerateIssueListRes
 
 class FeedbackReq(BaseModel):

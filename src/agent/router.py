@@ -64,14 +64,14 @@ async def assess_stat(
     response_model=SuccessResponse[AssignedIssueListRes],
 )
 async def assign_issues(
-    project_id: int, request: AssignIssueReq, db: Session = Depends(get_db)
+    project_id: int, assignIssueReq: AssignIssueReq, db: Session = Depends(get_db)
 ):
     """
     Assign issues to users based on their competency.
     """
     executor = chain.CustomAgentExecutor()
     result = await executor.assign_issue_to_users(
-        db, project_id, request.user_names, request.issues
+        db, project_id, assignIssueReq.issues
     )
 
     return issue_assign_success(result)
