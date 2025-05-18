@@ -172,6 +172,9 @@ def update_project(
     project_members = []
     for req_member in project_req.members:
         found_user = find_user_by_user_id(db, req_member.id)
+        if not found_user:
+            raise UserNotFound()
+
         project_user = ProjectUser(
             user=found_user, project=saved_project, role=req_member.role
         )
