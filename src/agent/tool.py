@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -26,7 +27,7 @@ from src.models import IssueRescheduling, Project, User
 from src.response.error_definitions import (
     InvalidFileType,
     IssueGenerateError,
-    LLMResponseFormatError,
+    ParseJsonFromResponseError,
     RepositoryNotFoundInGitHub,
 )
 from src.stat import service as stat_service
@@ -144,13 +145,8 @@ async def make_issues(design_documents: str, features : dict):
         ))
         if not issues:
             raise IssueGenerateError()
-        issues = issues.replace("```json", "")
-        issues = issues.replace("```", "")
-
-        try:
-            issues = json.loads(issues)
-        except json.JSONDecodeError:
-            raise LLMResponseFormatError()
+        
+        issues = extract_json_dict_from_response(issues)
 
         for issue in issues:
             yield issue
@@ -197,6 +193,18 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
 
     return text
 
+def extract_json_dict_from_response(response_text: str) -> dict:
+    """
+    Extracts a JSON dictionary from the response text.
+    """
+    pattern = r'```json(.*?)```'
+    match = re.search(pattern, response_text, re.DOTALL)
+    json_str = match.group(1)
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        raise ParseJsonFromResponseError()
+
 
 async def get_github_activation_info(selected_repo_names: list[str],token: str):
     """
@@ -236,13 +244,7 @@ async def assess_with_data(user: User, github_activation_data: list):
         output_example=prompts.define_stat_output_example
     ))
 
-    competency = competency.replace("```json", "")
-    competency = competency.replace("```", "")
-
-    try:
-        competency = json.loads(competency)
-    except json.JSONDecodeError:
-        raise LLMResponseFormatError()
+    competency = extract_json_dict_from_response(competency)
     
     competency_data = {
         "Name": competency["Name"],
@@ -277,14 +279,9 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list[str
             output_example=prompts.assign_output_example
         ))
 
-        response = response.replace("```json", "")
-        response = response.replace("```", "")
-        try:
-            response = json.loads(response)
-            assigned_issues.extend(response)
-        except json.JSONDecodeError:
-            raise LLMResponseFormatError()
+        response = extract_json_dict_from_response(response)
         
+        assigned_issues.extend(response)
     return assigned_issues
 
 async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
@@ -299,10 +296,6 @@ async def get_feedback(project: Project, user_stat_list: list[str], issue_resche
         output_example=prompts.feedback_output_example
     ))
 
-    feedback = feedback.replace("```json", "")
-    feedback = feedback.replace("```", "")
-    try:
-        feedback = json.loads(feedback)
-        return feedback
-    except json.JSONDecodeError:
-        raise LLMResponseFormatError()
+    feedback = extract_json_dict_from_response(feedback)
+
+    return feedback

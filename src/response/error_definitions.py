@@ -311,9 +311,9 @@ class IssueGenerateError(InternalServerErrorException):
             detail="이슈를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
         )
 
-class LLMResponseFormatError(InternalServerErrorException):
+class ParseJsonFromResponseError(InternalServerErrorException):
     def __init__(self):
         super().__init__(
-            title="LLM 응답 형식 오류",
-            detail="LLM의 응답 형식이 잘못되었습니다.",
+            title="JSON 파싱 오류",
+            detail="서버에서 응답을 JSON 형식으로 파싱하는 중 문제가 발생했습니다. 서버 로그를 확인해 주세요.",
         )
