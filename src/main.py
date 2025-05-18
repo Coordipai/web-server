@@ -13,6 +13,7 @@ from auth.router import router as auth_router
 from issue.router import router as issue_router
 from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
+from src.config import volume_config
 from src.config.config import (
     DISCORD_CHANNEL_ID,
     FRONTEND_URL,
@@ -61,6 +62,7 @@ async def send_server_info(status: str):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # When server started
+    volume_config.clear_design_docs()
     await send_server_info("start")
 
     yield
