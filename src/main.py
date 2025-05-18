@@ -116,9 +116,6 @@ async def get_documentation(
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
 
 
-
-    
-
 # Include routers
 app.include_router(auth_router)
 app.include_router(project_router)
