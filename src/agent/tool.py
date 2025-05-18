@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -21,10 +22,12 @@ from src.config.config import (
     VERTEX_EMBEDDING_MODEL,
     VERTEX_PROJECT_ID,
 )
-from src.models import Project, User
+from src.issue.schemas import IssueRes
+from src.models import IssueRescheduling, Project, User
 from src.response.error_definitions import (
     InvalidFileType,
     IssueGenerateError,
+    ParseJsonFromResponseError,
     RepositoryNotFoundInGitHub,
 )
 from src.stat import service as stat_service
@@ -142,9 +145,8 @@ async def make_issues(design_documents: str, features : dict):
         ))
         if not issues:
             raise IssueGenerateError()
-        issues = issues.replace("```json", "")
-        issues = issues.replace("```", "")
-        issues = json.loads(issues)
+        
+        issues = extract_json_dict_from_response(issues)
 
         for issue in issues:
             yield issue
@@ -191,6 +193,18 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
 
     return text
 
+def extract_json_dict_from_response(response_text: str) -> dict:
+    """
+    Extracts a JSON dictionary from the response text.
+    """
+    pattern = r'```json(.*?)```'
+    match = re.search(pattern, response_text, re.DOTALL)
+    json_str = match.group(1)
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        raise ParseJsonFromResponseError()
+
 
 async def get_github_activation_info(selected_repo_names: list[str],token: str):
     """
@@ -230,9 +244,8 @@ async def assess_with_data(user: User, github_activation_data: list):
         output_example=prompts.define_stat_output_example
     ))
 
-    competency = competency.replace("```json", "")
-    competency = competency.replace("```", "")
-    competency = json.loads(competency)
+    competency = extract_json_dict_from_response(competency)
+    
     competency_data = {
         "Name": competency["Name"],
         "Field": competency["Field"],
@@ -266,9 +279,23 @@ async def assign_issues_to_users(project_info: Project, user_stat_list: list[str
             output_example=prompts.assign_output_example
         ))
 
-        response = response.replace("```json", "")
-        response = response.replace("```", "")
-        response = json.loads(response)
+        response = extract_json_dict_from_response(response)
+        
         assigned_issues.extend(response)
-    
     return assigned_issues
+
+async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
+    """
+    Get feedback for issue rescheduling.
+    """
+    feedback = await communicate_with_llm_tool(prompts.feedback_template.format(
+        project_info=json.dumps(project, ensure_ascii=False),
+        reason=issue_rescheduling.reason,
+        issue=json.dumps(issue, ensure_ascii=False),
+        stats=user_stat_list,
+        output_example=prompts.feedback_output_example
+    ))
+
+    feedback = extract_json_dict_from_response(feedback)
+
+    return feedback

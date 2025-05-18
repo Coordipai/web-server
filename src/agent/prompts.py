@@ -1,6 +1,48 @@
 from langchain.prompts import PromptTemplate
 
 # -------------------------------------------------------------------------------
+# Prompts for feedback generation
+# -------------------------------------------------------------------------------
+
+feedback_template = PromptTemplate(
+    input_variables=["project_info", "reason", "issue", "stats", "output_example"],
+    template=(
+        "project_info: {project_info}\n"
+        "reason for rescheduling: {reason}\n"
+        "issue: {issue}\n"
+        "stats: {stats}\n\n"
+        "Due to the reason for modification, either the assignee or the due date of the issue needs to be updated.\n"
+        "Based on the issue content and team member skill profiles, please suggest the following two options:\n"
+        "	1.	Propose a new assignee who is suitable for handling this issue.\n"
+        "	2.	Instead of changing the assignee, propose a new due date that aligns with the team’s defined sprint interval.\n" \
+        "Refer to sprint unit from project_info, and suggest a new sprint number.\n"
+        "Please provide a detailed explanation for each suggestion in output format not outside of belowing format, including the reasons for the proposed changes.\n"
+        "Output must be in the following format:\n"
+        "{output_example}\n"
+        "You must not include your analysis beside the output.\n"
+    )
+)
+
+feedback_output_example = (
+    """
+        {
+            "issue_id": "ISSUE-123",
+            "modification_reason": "The original assignee is overloaded during this sprint.",
+            "suggestions": {
+                "new_assignee": {
+                "name": "Alice Kim",
+                "reason": "Alice has prior experience with similar issues and has available capacity this sprint."
+                },
+                "new_sprint": {
+                "sprint": 4,
+                "reason": "Extending the deadline by one sprint cycle (2 weeks) to accommodate current workload."
+                }
+            }
+        }
+    """
+)
+
+# -------------------------------------------------------------------------------
 # Prompts for Developer Assignment
 # -------------------------------------------------------------------------------
 

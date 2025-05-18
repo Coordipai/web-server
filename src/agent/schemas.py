@@ -30,3 +30,13 @@ class AssignedIssueListRes(BaseModel):
 class AssignIssueReq(BaseModel):
     user_names: list[str]
     issues: GenerateIssueListRes
+
+class FeedbackReq(BaseModel):
+    project_id: int
+    issue_rescheduling_id: int
+    
+class FeedbackRes(BaseModel):
+    suggested_assignees: str
+    suggested_iteration: int
+    reason_for_assignees: str
+    reason_for_iterations: str
