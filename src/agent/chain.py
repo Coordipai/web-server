@@ -130,7 +130,12 @@ class CustomAgentExecutor:
             raise ProjectNotFound()
 
         # Get user stats
-        user_stat_list = [user.stat for user in project.members]
+        user_stat_list = list()
+        for projectUser in project.members:
+            user = user_repository.find_user_by_user_id(db, projectUser.user_id)
+            if not user:
+                raise UserNotFound()
+            user_stat_list.append(user.stat)
 
         # Assign issues to users
         assigned_issues = await tool.recommend_assignees_for_issues("project", user_stat_list, issues)
