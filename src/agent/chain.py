@@ -11,6 +11,8 @@ from src.agent.schemas import (
     FeedbackRes,
     GenerateIssueListRes,
     GenerateIssueRes,
+    RecommendAssigneeListRes,
+    RecommendAssigneeRes,
 )
 from src.issue import repository as issue_repository
 from src.issue_rescheduling import repository as issue_rescheduling_repository
@@ -131,11 +133,11 @@ class CustomAgentExecutor:
         user_stat_list = [user.stat for user in project.members]
 
         # Assign issues to users
-        assigned_issues = await tool.assign_issues_to_users("project", user_stat_list, issues)
+        assigned_issues = await tool.recommend_assignees_for_issues("project", user_stat_list, issues)
 
         assigned_issue_list_res = list()
         for issue in assigned_issues:
-            assigned_issue_res = AssignedIssueRes(
+            assigned_issue_res = RecommendAssigneeRes(
                 issue=issue["issue"],
                 assignee=issue["assignee"],
                 description=issue["description"]
@@ -146,7 +148,7 @@ class CustomAgentExecutor:
         print("Issue assignment completed.")
         print("--------------------------------------------")
             
-        return AssignedIssueListRes(issues=assigned_issue_list_res)
+        return RecommendAssigneeListRes(issues=assigned_issue_list_res)
 
 
     async def get_feedback(self, project_id: int, issue_rescheduling_id: int, db: Session):

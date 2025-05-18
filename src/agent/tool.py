@@ -262,9 +262,9 @@ async def assess_with_data(user: User, github_activation_data: list):
     return competency_data
 
 
-async def assign_issues_to_users(project_info: Project, user_stat_list: list[str], issues: GenerateIssueListRes):
+async def recommend_assignees_for_issues(project_info: Project, user_stat_list: list[str], issues: GenerateIssueListRes):
     """
-    Assign issues to users based on their competency.
+    Recommend assignees for issues based on their competency.
     """
 
     assigned_issues = list()
