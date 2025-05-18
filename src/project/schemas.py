@@ -14,6 +14,7 @@ class ProjectUserReq(BaseModel):
 
 
 class ProjectUserRes(BaseModel):
+    id: int
     name: str
     github_id: int
     github_name: str
@@ -24,6 +25,7 @@ class ProjectUserRes(BaseModel):
     @classmethod
     def from_user(cls, user: User, role: str) -> "ProjectUserRes":
         return cls(
+            id=user.id,
             name=user.name,
             github_id=user.github_id,
             github_name=user.github_name,
