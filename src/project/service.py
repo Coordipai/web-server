@@ -144,49 +144,59 @@ def update_project(
 
     Returns project data
     """
-    existing_project = repository.find_project_by_id(db, project_id)
-    if not existing_project:
-        raise ProjectNotFound()
+    try:
+        existing_project = repository.find_project_by_id(db, project_id)
+        if not existing_project:
+            raise ProjectNotFound()
 
-    updated_design_doc_paths = update_file(
-        existing_project.name, files, project_req.design_docs
-    )
-
-    updated_design_doc_paths = update_file(
-        existing_project.name, files, project_req.design_docs
-    )
-
-    existing_project.name = (project_req.name,)
-    existing_project.repo_fullname = (project_req.repo_fullname,)
-    existing_project.start_date = (project_req.start_date,)
-    existing_project.end_date = (project_req.end_date,)
-    existing_project.sprint_unit = (project_req.sprint_unit,)
-    existing_project.discord_channel_id = (project_req.discord_channel_id,)
-    existing_project.design_doc_paths = updated_design_doc_paths
-
-    saved_project = repository.update_project(db, existing_project)
-
-    owner_user = find_user_by_user_id(db, saved_project.owner)
-
-    existing_project.members.clear()
-    project_members = []
-    for req_member in project_req.members:
-        found_user = find_user_by_user_id(db, req_member.id)
-        if not found_user:
-            raise UserNotFound()
-
-        project_user = ProjectUser(
-            user=found_user, project=saved_project, role=req_member.role
+        updated_design_doc_paths = update_file(
+            existing_project.name, files, project_req.design_docs
         )
-        saved_project_user = create_project_user(db, project_user)
-        project_member = ProjectUserRes.from_user(found_user, saved_project_user.role)
-        project_members.append(project_member)
 
-    project_res = ProjectRes.from_project(
-        saved_project, owner_user, project_members, updated_design_doc_paths
-    )
+        updated_design_doc_paths = update_file(
+            existing_project.name, files, project_req.design_docs
+        )
 
-    return project_res
+        existing_project.name = (project_req.name,)
+        existing_project.repo_fullname = (project_req.repo_fullname,)
+        existing_project.start_date = (project_req.start_date,)
+        existing_project.end_date = (project_req.end_date,)
+        existing_project.sprint_unit = (project_req.sprint_unit,)
+        existing_project.discord_channel_id = (project_req.discord_channel_id,)
+        existing_project.design_doc_paths = updated_design_doc_paths
+
+        saved_project = repository.update_project(db, existing_project)
+
+        owner_user = find_user_by_user_id(db, saved_project.owner)
+
+        existing_project.members.clear()
+        project_members = []
+        for req_member in project_req.members:
+            found_user = find_user_by_user_id(db, req_member.id)
+            if not found_user:
+                raise UserNotFound()
+
+            project_user = ProjectUser(
+                user=found_user, project=saved_project, role=req_member.role
+            )
+            saved_project_user = create_project_user(db, project_user)
+            project_member = ProjectUserRes.from_user(
+                found_user, saved_project_user.role
+            )
+            project_members.append(project_member)
+
+        project_res = ProjectRes.from_project(
+            saved_project, owner_user, project_members, updated_design_doc_paths
+        )
+
+        db.commit()
+        return project_res
+
+    except SQLError as e:
+        raise SQLError()
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
 def delete_project(user_id: int, project_id: int, db: Session):
