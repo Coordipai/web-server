@@ -8,8 +8,6 @@ from sqlalchemy.orm import Session
 from src.agent import tool
 from src.agent.schemas import (
     AssessStatRes,
-    AssignedIssueListRes,
-    AssignedIssueRes,
     FeedbackRes,
     GenerateIssueListRes,
     GenerateIssueRes,
@@ -115,9 +113,9 @@ class CustomAgentExecutor:
         )
     
 
-    async def assign_issue_to_users(self, db: Session, project_id: str, issues: GenerateIssueListRes):
+    async def recommend_assignees_for_issues(self, db: Session, project_id: str, issues: GenerateIssueListRes):
         """
-        Assign issues to users.
+        Recommend assignees for issues.
         """
 
         print("--------------------------------------------")
