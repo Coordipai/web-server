@@ -315,5 +315,5 @@ class LLMResponseFormatError(InternalServerErrorException):
     def __init__(self):
         super().__init__(
             title="LLM 응답 형식 오류",
-            detail="LLM의 응답 형식이 올바르지 않습니다. 요청 형식을 확인해 주세요.",
+            detail="LLM의 응답 형식이 잘못되었습니다.",
         )
