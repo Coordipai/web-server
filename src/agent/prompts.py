@@ -325,7 +325,11 @@ feature_example = (
     "[Feat]: Implement Login Request Endpoint\n",
     "[Feat]: Store User Information\n",
     "[Feat]: Embed User Information\n",
-    "[Feat]: Generate Issue Template\n"
+    "[Feat]: Generate Issue Template\n",
+    "[Refactor]: Refactor User Information Storage\n",
+    "[Refactor]: Refactor User Information Embedding\n",
+    "[Test]: Test Login Button\n",
+    "[Test]: Test Login Request Endpoint\n",
 )
 
 # -------------------------------------------------------------------------------
