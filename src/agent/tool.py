@@ -269,7 +269,7 @@ async def assess_with_data(user: User, github_activation_data: list):
     return competency_data
 
 
-async def recommend_assignees_for_issues(project_info: Project, user_names: list[str], user_stat_list: list[str], issues: GenerateIssueListRes):
+async def recommend_assignees_for_issues(project_info: Project, user_stat_list: list[str], issues: GenerateIssueListRes):
     """
     Recommend assignees for issues based on their competency.
     """
@@ -285,7 +285,6 @@ async def recommend_assignees_for_issues(project_info: Project, user_names: list
             input_file=prompts.assign_input_template.format(
                 project_name=project_info.name,
                 project_overview="project overview",
-                user_names=user_names,
                 issues=issues.issues[i:i+interval],
                 stats=user_stat_list
             ),
