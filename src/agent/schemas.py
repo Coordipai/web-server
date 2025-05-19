@@ -7,6 +7,7 @@ class GenerateIssueRes(BaseModel):
     description: str
     title: str
     labels: list[str]
+    sprint: int
     body: list
 
 class GenerateIssueListRes(BaseModel):

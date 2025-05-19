@@ -66,13 +66,14 @@ class CustomAgentExecutor:
                 extracted_texts += "\n\n"
 
         features = await tool.define_features(extracted_texts)
-        async for issue in tool.make_issues(extracted_texts, features):
+        async for issue in tool.make_issues(project, extracted_texts, features):
             issueRes = GenerateIssueRes(
                 type=issue["type"],
                 name=issue["name"],
                 description=issue["description"],
                 title=issue["title"],
                 labels=issue["labels"],
+                sprint=issue["sprint"],
                 body=issue["body"]
             )
             yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)

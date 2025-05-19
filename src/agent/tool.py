@@ -127,10 +127,18 @@ async def define_features(design_documents: str) -> dict:
     return features
 
 
-async def make_issues(design_documents: str, features : dict):
+async def make_issues(project: Project, design_documents: str, features: dict):
     """
     Make issues based on features.
     """
+    project_info = {
+        "name": project.name,
+        "repo_fullname": project.repo_fullname,
+        "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
+        "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
+        "sprint_unit": project.sprint_unit
+    }
+    print("Project info: ", project_info)
     if(len(features) >= 5):
         interval = 5
     else:
@@ -138,6 +146,7 @@ async def make_issues(design_documents: str, features : dict):
 
     for i in range(0, len(features), interval):
         issues = await communicate_with_llm_tool(prompts.make_issue_template.format(
+            project_info=project_info,
             documents=design_documents,
             issue_template=prompts.issue_template,
             features=list(features.values())[i:i+interval]
@@ -148,8 +157,8 @@ async def make_issues(design_documents: str, features : dict):
         issues = extract_json_dict_from_response(issues)
 
         for issue in issues:
-            # check if issue contains "type", "name", "description", "title", "labels", "body"
-            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "body"]):
+            # check if issue contains "type", "name", "description", "title", "labels", "sprint", "body"
+            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "sprint", "body"]):
                 print("------------Invalid issue format------------")
                 print(issue)
                 raise IssueGenerateError()
