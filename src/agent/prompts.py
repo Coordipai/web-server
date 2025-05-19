@@ -227,15 +227,20 @@ define_stat_output_example = (
 # -------------------------------------------------------------------------------
 
 define_feature_template = PromptTemplate(
-    input_variables=["example", "documents"],
+    input_variables=["project_info", "example", "documents"],
     template=(
         "Analyze the planning/design documents.\n"
         "Break down and define the development tasks needed to complete the project.\n"
         "Divide the tasks such that each task can be completed within one hour.\n"
+        "You must define the tasks in order of development sequence.\n"
+        "You must define the tasks in a way that they can be completed within one sprint.\n"
+        "The sprint unit is defined in the project information.\n"
         "List the divided tasks in order of development sequence.\n"
         "Each task should be written in task name\n"
         "Define necessary tasks for the project.\n"
         "The output should be a list of task names in json.\n\n"
+
+        "Project information: {project_info}\n\n"
 
         "Output example: {example}"
 
@@ -316,11 +321,11 @@ issue_template = PromptTemplate(
 )
 
 feature_example = (
-    "Web UI: Implement Login Button\n",
-    "Web Server: Implement Login Request Endpoint\n",
-    "Vector DB: Store User Information\n",
-    "Embedding Model: Embed User Information\n",
-    "Gemini: Generate Issue Template\n"
+    "[Feat]: Implement Login Button\n",
+    "[Feat]: Implement Login Request Endpoint\n",
+    "[Feat]: Store User Information\n",
+    "[Feat]: Embed User Information\n",
+    "[Feat]: Generate Issue Template\n"
 )
 
 # -------------------------------------------------------------------------------

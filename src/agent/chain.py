@@ -46,6 +46,14 @@ class CustomAgentExecutor:
         if not project:
             raise ProjectNotFound()
         
+        project_info = {
+            "name": project.name,
+            "repo_fullname": project.repo_fullname,
+            "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
+            "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
+            "sprint_unit": project.sprint_unit
+        }
+        
         project_dir = os.path.join("design_docs", project.name)
         file_names = os.listdir(project_dir)
         if not file_names:
@@ -65,8 +73,8 @@ class CustomAgentExecutor:
                 extracted_texts += text
                 extracted_texts += "\n\n"
 
-        features = await tool.define_features(extracted_texts)
-        async for issue in tool.make_issues(project, extracted_texts, features):
+        features = await tool.define_features(project_info, extracted_texts)
+        async for issue in tool.make_issues(project_info, extracted_texts, features):
             issueRes = GenerateIssueRes(
                 type=issue["type"],
                 name=issue["name"],

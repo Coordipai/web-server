@@ -103,12 +103,13 @@ async def communicate_with_llm_tool(prompt: str) -> str:
     return response.generations[0][0].text
 
 
-async def define_features(design_documents: str) -> dict:
+async def define_features(project_info: dict, design_documents: str) -> dict:
     """
     Define features based on design documents and feature example.
     """
 
     llm_response = await communicate_with_llm_tool(prompts.define_feature_template.format(
+        project_info=project_info,
         documents= design_documents,
         example= prompts.feature_example
     ))
@@ -127,17 +128,10 @@ async def define_features(design_documents: str) -> dict:
     return features
 
 
-async def make_issues(project: Project, design_documents: str, features: dict):
+async def make_issues(project_info: dict, design_documents: str, features: dict):
     """
     Make issues based on features.
     """
-    project_info = {
-        "name": project.name,
-        "repo_fullname": project.repo_fullname,
-        "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
-        "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
-        "sprint_unit": project.sprint_unit
-    }
     
     if(len(features) >= 5):
         interval = 5
