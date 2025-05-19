@@ -78,8 +78,7 @@ assign_issue_template = PromptTemplate(
 
         "**Real-World Constraints and Exceptions**\n"
         "- If **no developer exactly meets** all score thresholds for an issue, assign the **most suitable developer(s)** who come **closest** to the requirements, and explain why they were chosen anyway.\n"
-        "- If the issue appears **complex or multi-step**, consider assigning **more than one developer**, especially if their expertise complements each other.\n"
-        "- If absolutely no reasonable candidate exists, only then set the issue as `Unassigned` and provide an explanation.\n\n"
+        "- If the issue appears **complex or multi-step**, consider assigning **more than one developer**, especially if their expertise complements each other.\n\n"
 
         "**Task**\n"
         "For each issue in the input file, assign the most appropriate 1–2 developers from the provided developer list.\n"  
@@ -239,7 +238,7 @@ define_feature_template = PromptTemplate(
         "The sprint unit is defined in the project information.\n"
         "List the divided tasks in order of development sequence.\n"
         "Each task should be written in task name\n"
-        "Define necessary tasks for the project.\n"
+        "Define only 10 tasks for the project.\n"
         "The output should be a list of task names in json.\n\n"
 
         "Project information: {project_info}\n\n"
