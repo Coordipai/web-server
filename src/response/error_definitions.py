@@ -111,6 +111,13 @@ class InvalidRefreshToken(UnauthorizedException):
         )
 
 
+class AccessTokenNotFound(UnauthorizedException):
+    def __init__(self):
+        super().__init__(
+            title="인증 정보 누락", detail="쿠키에서 AccessToken을 찾을 수 없습니다."
+        )
+
+
 class ProjectOwnerMismatched(UnauthorizedException):
     def __init__(self):
         super().__init__(
@@ -133,13 +140,6 @@ class GitHubCredentialCodeNotFound(NotFoundException):
     def __init__(self):
         super().__init__(
             title="인증 정보 누락", detail="GitHub 인가 코드를 찾을 수 없습니다."
-        )
-
-
-class AccessTokenNotFound(NotFoundException):
-    def __init__(self):
-        super().__init__(
-            title="인증 정보 누락", detail="쿠키에서 AccessToken을 찾을 수 없습니다."
         )
 
 
@@ -310,6 +310,7 @@ class IssueGenerateError(InternalServerErrorException):
             title="이슈 생성 오류",
             detail="이슈를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
         )
+
 
 class ParseJsonFromResponseError(InternalServerErrorException):
     def __init__(self):
