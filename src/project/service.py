@@ -144,6 +144,13 @@ def update_project(
     Returns project data
     """
     try:
+        check_project_name_duplicated = repository.find_project_by_name(
+            db, project_req.name
+        )
+
+        if check_project_name_duplicated:
+            raise ProjectAlreadyExist()
+
         existing_project = repository.find_project_by_id(db, project_id)
         if not existing_project:
             raise ProjectNotFound()
