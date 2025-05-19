@@ -96,11 +96,10 @@ assign_issue_template = PromptTemplate(
 )
 
 assign_input_template = PromptTemplate(
-    input_variables=["project_name", "project_overview", "user_names", "issues", "stats"],
+    input_variables=["project_name", "project_overview", "issues", "stats"],
     template=(
         "project_name: {project_name}\n"
         "project_overview: {project_overview}\n"
-        "user_names: {user_names}\n"
         "issues: {issues}\n"
         "stats: {stats}\n\n"
     )
