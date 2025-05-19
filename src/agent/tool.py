@@ -292,6 +292,8 @@ async def recommend_assignees_for_issues(project_info: Project, user_stat_list: 
         ))
 
         response = extract_json_dict_from_response(response)
+
+        print(response)
         
         assigned_issues.extend(response)
     return assigned_issues
