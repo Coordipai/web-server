@@ -138,7 +138,7 @@ class CustomAgentExecutor:
             user_stat_list.append(user.stat)
 
         # Assign issues to users
-        assigned_issues = await tool.recommend_assignees_for_issues("project", user_stat_list, issues)
+        assigned_issues = await tool.recommend_assignees_for_issues(project, user_stat_list, issues)
 
         assigned_issue_list_res = list()
         for issue in assigned_issues:
