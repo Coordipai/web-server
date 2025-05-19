@@ -88,6 +88,7 @@ assign_issue_template = PromptTemplate(
         "Try to minimize overloading any single developer with too many tasks, unless necessary.\n\n"
         
         "Do not include your analysis or reasoning in the output.\n"
+        "Write issue title, name of assigned developers, and their description in the output.\n"
         "Output must be in following format:\n"
         "**Output Format**\n"
         "{output_example}"
@@ -95,10 +96,11 @@ assign_issue_template = PromptTemplate(
 )
 
 assign_input_template = PromptTemplate(
-    input_variables=["project_name", "project_overview", "issues", "stats"],
+    input_variables=["project_name", "project_overview", "user_names", "issues", "stats"],
     template=(
         "project_name: {project_name}\n"
         "project_overview: {project_overview}\n"
+        "user_names: {user_names}\n"
         "issues: {issues}\n"
         "stats: {stats}\n\n"
     )
