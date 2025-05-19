@@ -10,6 +10,17 @@ class GenerateIssueRes(BaseModel):
     sprint: int
     body: list
 
+    @classmethod
+    def from_issue(cls, issue: dict) -> "GenerateIssueRes":
+        return cls(
+            type=issue["type"],
+            name=issue["name"],
+            description=issue["description"],
+            title=issue["title"],
+            labels=issue["labels"],
+            body=issue["body"]
+        )
+
 class GenerateIssueListRes(BaseModel):
     issues: list[GenerateIssueRes]
 
@@ -20,10 +31,29 @@ class AssessStatRes(BaseModel):
     evaluation_scores: dict
     implemented_features: list[str]
 
+    @classmethod
+    def from_stat(cls, stat: dict) -> "AssessStatRes":
+        return cls(
+            name=stat["Name"],
+            field=stat["Field"],
+            experience=stat["Experience"],
+            evaluation_scores=stat["evaluation_scores"],
+            implemented_features=stat["implemented_features"]
+        )
+
 class RecommendAssigneeRes(BaseModel):
     issue: str
     assignee: str
     description: list[str]
+
+    @classmethod
+    def from_recommendation(cls, recommendation: dict) -> "RecommendAssigneeRes":
+        return cls(
+            issue=recommendation["issue"],
+            assignee=recommendation["assignee"],
+            description=recommendation["description"]
+        )
+
 
 class RecommendAssigneeListRes(BaseModel):
     issues: list[RecommendAssigneeRes]
@@ -40,3 +70,12 @@ class FeedbackRes(BaseModel):
     suggested_iteration: int
     reason_for_assignees: str
     reason_for_iterations: str
+
+    @classmethod
+    def from_feedback(cls, feedback: dict) -> "FeedbackRes":
+        return cls(
+            suggested_assignees=feedback['suggestions']["new_assignee"]["name"],
+            suggested_iterations=feedback['suggestions']["new_sprint"]["sprint"],
+            reason_for_assignees=feedback['suggestions']["new_assignee"]["reason"],
+            reason_for_iterations=feedback['suggestions']["new_sprint"]["reason"]
+        )

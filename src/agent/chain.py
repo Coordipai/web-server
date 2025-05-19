@@ -72,18 +72,11 @@ class CustomAgentExecutor:
                 extracted_texts += "\n"
                 extracted_texts += text
                 extracted_texts += "\n\n"
+                
+        features = await tool.define_features(extracted_texts)
+        async for issue in tool.make_issues(extracted_texts, features):
+            issueRes = GenerateIssueRes.from_issue(issue)
 
-        features = await tool.define_features(project_info, extracted_texts)
-        async for issue in tool.make_issues(project_info, extracted_texts, features):
-            issueRes = GenerateIssueRes(
-                type=issue["type"],
-                name=issue["name"],
-                description=issue["description"],
-                title=issue["title"],
-                labels=issue["labels"],
-                sprint=issue["sprint"],
-                body=issue["body"]
-            )
             yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)
 
         print("--------------------------------------------")
@@ -115,13 +108,7 @@ class CustomAgentExecutor:
         print("Competency assessment completed.")
         print("--------------------------------------------")
 
-        return AssessStatRes(
-            name=stat["Name"],
-            field=stat["Field"],
-            experience=stat["Experience"],
-            evaluation_scores=stat["evaluation_scores"],
-            implemented_features=stat["implemented_features"]
-        )
+        return AssessStatRes.from_stat(stat)
     
 
     async def recommend_assignees_for_issues(self, db: Session, project_id: str, issues: GenerateIssueListRes):
@@ -154,11 +141,7 @@ class CustomAgentExecutor:
 
         assigned_issue_list_res = list()
         for issue in assigned_issues:
-            assigned_issue_res = RecommendAssigneeRes(
-                issue=issue["issue"],
-                assignee=issue["assignee"],
-                description=issue["description"]
-            )
+            assigned_issue_res = RecommendAssigneeRes.from_recommendation(issue)
             assigned_issue_list_res.append(assigned_issue_res)
 
         print("--------------------------------------------")
@@ -209,9 +192,4 @@ class CustomAgentExecutor:
         print("Feedback generation completed.")
         print("--------------------------------------------")
         
-        return FeedbackRes(
-            suggested_assignees=feedback['suggestions']["new_assignee"]["name"],
-            suggested_sprints=feedback['suggestions']["new_sprint"]["sprint"],
-            reason_for_assignees=feedback['suggestions']["new_assignee"]["reason"],
-            reason_for_sprints=feedback['suggestions']["new_sprint"]["reason"]
-        )
+        return FeedbackRes.from_feedback(feedback)
