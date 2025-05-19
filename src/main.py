@@ -62,6 +62,8 @@ async def send_server_info(status: str):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # When server started
+    if IS_LOCAL:
+        initialize_database()
     volume_config.clear_design_docs()
     await send_server_info("start")
 
@@ -79,8 +81,6 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
-
-initialize_database()
 
 app.add_exception_handler(BaseAppException, base_app_exception_handler)
 # Should be lower than any other exception handlers
@@ -115,9 +115,6 @@ async def get_documentation(
 ):
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
 
-
-
-    
 
 # Include routers
 app.include_router(auth_router)
