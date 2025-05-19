@@ -138,7 +138,7 @@ async def make_issues(project: Project, design_documents: str, features: dict):
         "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
         "sprint_unit": project.sprint_unit
     }
-    print("Project info: ", project_info)
+    
     if(len(features) >= 5):
         interval = 5
     else:
