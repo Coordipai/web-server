@@ -146,6 +146,9 @@ class CustomAgentExecutor:
                 raise UserNotFound()
             user_stat_list.append(user.stat)
 
+        print("---------------------------------------------")
+        print(user_stat_list)
+        print("---------------------------------------------")
         # Assign issues to users
         assigned_issues = await tool.recommend_assignees_for_issues(project, user_stat_list, issues)
 
