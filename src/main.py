@@ -64,7 +64,7 @@ async def lifespan(app: FastAPI):
     # When server started
     if IS_LOCAL:
         initialize_database()
-    volume_config.clear_design_docs()
+        volume_config.clear_design_docs()
     await send_server_info("start")
 
     yield
