@@ -18,6 +18,7 @@ class GenerateIssueRes(BaseModel):
             description=issue["description"],
             title=issue["title"],
             labels=issue["labels"],
+            sprint=issue["sprint"],
             body=issue["body"]
         )
 
