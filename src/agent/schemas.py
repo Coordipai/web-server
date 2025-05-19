@@ -8,6 +8,7 @@ class GenerateIssueRes(BaseModel):
     title: str
     labels: list[str]
     sprint: int
+    priority: str
     body: list
 
     @classmethod
@@ -19,6 +20,7 @@ class GenerateIssueRes(BaseModel):
             title=issue["title"],
             labels=issue["labels"],
             sprint=issue["sprint"],
+            priority="must have",
             body=issue["body"]
         )
 
