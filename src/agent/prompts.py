@@ -110,7 +110,7 @@ assign_output_example = (
         [
             {
                 "issue": "Issue title",
-                "assignee": "Developer1, Developer2",
+                "assignee": "Assigned Developer Names will be here",
                 "description": [
                     "Developer1: Backend, experience with API development and session management. Troubleshooting: 85, Contribution: 90. Assigned due to strong alignment with backend stack and history of relevant features.",
                     "Developer2: Frontend, worked on dashboard UI and error handling. Troubleshooting: 78, Contribution: 75. Assigned to support interface integration and ensure reliability."
