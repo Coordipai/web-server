@@ -89,6 +89,7 @@ assign_issue_template = PromptTemplate(
         "Do not include your analysis or reasoning in the output.\n"
         "Write issue title, name of assigned developers, and their description in the output.\n"
         "names of assigned developers should be ones of the developers in the user stats.\n"
+        "You must assign at least one developer to each issue.\n"
         "Output must be in following format:\n"
         "**Output Format**\n"
         "{output_example}"

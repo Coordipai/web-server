@@ -73,8 +73,8 @@ class CustomAgentExecutor:
                 extracted_texts += text
                 extracted_texts += "\n\n"
                 
-        features = await tool.define_features(project_info, extracted_texts)
-        async for issue in tool.make_issues(project_info, extracted_texts, features):
+        features = await tool.define_features(extracted_texts)
+        async for issue in tool.make_issues(extracted_texts, features):
             issueRes = GenerateIssueRes.from_issue(issue)
 
             yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)
@@ -102,7 +102,8 @@ class CustomAgentExecutor:
             raise GitHubActivationInfoError()
         
         stat = await tool.assess_with_data(user, activity_info)
-        user_repository.update_user_stat(db, user, stat)
+        user.stat = stat
+        user_repository.update_user_stat(db, user)
 
         print("--------------------------------------------")
         print("Competency assessment completed.")
