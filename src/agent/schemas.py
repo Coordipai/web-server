@@ -20,7 +20,7 @@ class GenerateIssueRes(BaseModel):
             title=issue["title"],
             labels=issue["labels"],
             sprint=issue["sprint"],
-            priority="must have",
+            priority="M",
             body=issue["body"]
         )
 

@@ -28,6 +28,7 @@ from src.response.error_definitions import (
     InvalidFileType,
     IssueGenerateError,
     ParseJsonFromResponseError,
+    RecommendAssigneeError,
     RepositoryNotFoundInGitHub,
 )
 from src.stat import service as stat_service
@@ -292,6 +293,11 @@ async def recommend_assignees_for_issues(project_info: Project, user_stat_list: 
         ))
 
         response = extract_json_dict_from_response(response)
+
+        if not all(key in response for key in ["issue", "assignee", "description"]):
+            print("------------Invalid issue assignment format------------")
+            print(response)
+            raise RecommendAssigneeError()
         
         assigned_issues.extend(response)
     return assigned_issues

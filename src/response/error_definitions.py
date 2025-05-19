@@ -318,3 +318,10 @@ class ParseJsonFromResponseError(InternalServerErrorException):
             title="JSON 파싱 오류",
             detail="서버에서 응답을 JSON 형식으로 파싱하는 중 문제가 발생했습니다. 서버 로그를 확인해 주세요.",
         )
+
+class RecommendAssigneeError(InternalServerErrorException):
+    def __init__(self):
+        super().__init__(
+            title="추천 Assignee 오류",
+            detail="추천 Assignee를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
+        )
