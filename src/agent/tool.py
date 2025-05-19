@@ -103,12 +103,13 @@ async def communicate_with_llm_tool(prompt: str) -> str:
     return response.generations[0][0].text
 
 
-async def define_features(design_documents: str) -> dict:
+async def define_features(project_info: dict, design_documents: str) -> dict:
     """
     Define features based on design documents and feature example.
     """
 
     llm_response = await communicate_with_llm_tool(prompts.define_feature_template.format(
+        project_info=project_info,
         documents= design_documents,
         example= prompts.feature_example
     ))
@@ -127,10 +128,11 @@ async def define_features(design_documents: str) -> dict:
     return features
 
 
-async def make_issues(design_documents: str, features : dict):
+async def make_issues(project_info: dict, design_documents: str, features: dict):
     """
     Make issues based on features.
     """
+    
     if(len(features) >= 5):
         interval = 5
     else:
@@ -138,6 +140,7 @@ async def make_issues(design_documents: str, features : dict):
 
     for i in range(0, len(features), interval):
         issues = await communicate_with_llm_tool(prompts.make_issue_template.format(
+            project_info=project_info,
             documents=design_documents,
             issue_template=prompts.issue_template,
             features=list(features.values())[i:i+interval]
@@ -148,8 +151,8 @@ async def make_issues(design_documents: str, features : dict):
         issues = extract_json_dict_from_response(issues)
 
         for issue in issues:
-            # check if issue contains "type", "name", "description", "title", "labels", "body"
-            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "body"]):
+            # check if issue contains "type", "name", "description", "title", "labels", "sprint", "body"
+            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "sprint", "body"]):
                 print("------------Invalid issue format------------")
                 print(issue)
                 raise IssueGenerateError()

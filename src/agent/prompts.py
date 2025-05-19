@@ -227,15 +227,20 @@ define_stat_output_example = (
 # -------------------------------------------------------------------------------
 
 define_feature_template = PromptTemplate(
-    input_variables=["example", "documents"],
+    input_variables=["project_info", "example", "documents"],
     template=(
         "Analyze the planning/design documents.\n"
         "Break down and define the development tasks needed to complete the project.\n"
         "Divide the tasks such that each task can be completed within one hour.\n"
+        "You must define the tasks in order of development sequence.\n"
+        "You must define the tasks in a way that they can be completed within one sprint.\n"
+        "The sprint unit is defined in the project information.\n"
         "List the divided tasks in order of development sequence.\n"
         "Each task should be written in task name\n"
         "Define necessary tasks for the project.\n"
         "The output should be a list of task names in json.\n\n"
+
+        "Project information: {project_info}\n\n"
 
         "Output example: {example}"
 
@@ -245,12 +250,18 @@ define_feature_template = PromptTemplate(
 )
 
 make_issue_template = PromptTemplate(
-    input_variables=["documents", "issue_template", "features"],
+    input_variables=["project_info", "documents", "issue_template", "features"],
     template=(
         "Analyze the planning/design documents.\n"
         "Write the implementation steps for each feature.\n"
         "Write any additional information and reference materials required to implement each feature.\n"
         "Write the criteria for the personnel required for each feature in terms of scores, based on the score table.\n"
+        "Write sprint number for each feature considering the project schedule and dependency of each feature.\n"
+        "Sprint unit(days) is defined in the project information.\n"
+        "If sprint unit is 7, it means 7 days.\n"
+        "If sprint unit is 14, it means 14 days.\n" 
+        "If sprint of issue is 1, it means the issue should be completed in the first sprint.\n"
+        "If sprint of issue is 2, it means the issue should be completed in the second sprint.\n"
         "Each task should be written according to the issue template.(Must include contents of type, name, description, title, labels, body)\n"
         "All contents in the issue template should be written in Korean.\n"
         "Name(right of ':'), description on the top in the issue template should be written in Korean.\n"
@@ -258,6 +269,7 @@ make_issue_template = PromptTemplate(
         "Make only one issue per each issue name.\n"
         "The output should be a list of complete tasks in json.\n\n"
 
+        "Project information: {project_info}\n\n"
         "Planning/Design Documents: {documents}\n\n"
         "Issue template with Example Value: {issue_template}\n\n"
         "Issue names: {features}"
@@ -274,6 +286,7 @@ issue_template = PromptTemplate(
             "description": "Please propose a new feature, UI improvement, or documentation enhancement.",
             "title": "[Feature]: ",
             "labels": ["✨ Feature"],
+            "sprint": "refer to sprint unit in project information",
             "body": [
                 {
                     "id": "description",
@@ -308,11 +321,15 @@ issue_template = PromptTemplate(
 )
 
 feature_example = (
-    "Web UI: Implement Login Button\n",
-    "Web Server: Implement Login Request Endpoint\n",
-    "Vector DB: Store User Information\n",
-    "Embedding Model: Embed User Information\n",
-    "Gemini: Generate Issue Template\n"
+    "[Feat]: Implement Login Button\n",
+    "[Feat]: Implement Login Request Endpoint\n",
+    "[Feat]: Store User Information\n",
+    "[Feat]: Embed User Information\n",
+    "[Feat]: Generate Issue Template\n",
+    "[Refactor]: Refactor User Information Storage\n",
+    "[Refactor]: Refactor User Information Embedding\n",
+    "[Test]: Test Login Button\n",
+    "[Test]: Test Login Request Endpoint\n",
 )
 
 # -------------------------------------------------------------------------------
