@@ -187,7 +187,7 @@ async def login(db: Session, access_token: Optional[str] = Cookie(None)):
     await save_token_to_redis(REFRESH_TOKEN_REDIS, existing_user.id, refresh_token)
 
     user_res = UserRes.model_validate(existing_user)
-
+    
     return AuthRes(
         user=user_res, access_token=access_token, refresh_token=refresh_token
     )

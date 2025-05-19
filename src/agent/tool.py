@@ -207,6 +207,10 @@ def extract_json_dict_from_response(response_text: str) -> dict:
     """
     pattern = r'```json(.*?)```'
     match = re.search(pattern, response_text, re.DOTALL)
+    if not match:
+        print("------------Invalid Output format------------")
+        print(response_text)
+        return {}
     json_str = match.group(1)
     try:
         return json.loads(json_str)
