@@ -73,8 +73,8 @@ class CustomAgentExecutor:
                 extracted_texts += text
                 extracted_texts += "\n\n"
                 
-        features = await tool.define_features(extracted_texts)
-        async for issue in tool.make_issues(extracted_texts, features):
+        features = await tool.define_features(project_info, extracted_texts)
+        async for issue in tool.make_issues(project_info, extracted_texts, features):
             issueRes = GenerateIssueRes.from_issue(issue)
 
             yield json.dumps(dict(issueRes), ensure_ascii=False, indent=4)
