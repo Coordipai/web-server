@@ -152,11 +152,13 @@ def update_project(
             existing_project.name, files, project_req.design_docs
         )
 
-        updated_design_doc_paths = update_file(
-            existing_project.name, files, project_req.design_docs
-        )
+        if existing_project.name != project_req.name:
+            existing_project.name = project_req.name
+            # Update the directory name to match the new project name
+            new_project_dir = os.path.join("design_docs", project_req.name)
+            old_project_dir = os.path.join("design_docs", existing_project.name)
+            os.rename(old_project_dir, new_project_dir)
 
-        existing_project.name = (project_req.name,)
         existing_project.repo_fullname = (project_req.repo_fullname,)
         existing_project.start_date = (project_req.start_date,)
         existing_project.end_date = (project_req.end_date,)
