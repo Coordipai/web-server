@@ -32,6 +32,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             "/auth/login",
             "/auth/register",
             "/auth/refresh",
+            "/agent/*",
         ]
         api_docs_allow_paths = ["/docs", "/openapi.json"]
 

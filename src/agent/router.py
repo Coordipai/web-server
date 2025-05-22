@@ -90,3 +90,16 @@ async def get_feedback(feedbackReq: FeedbackReq, db: Session = Depends(get_db)):
     result = await executor.get_feedback(feedbackReq.project_id, feedbackReq.issue_rescheduling_id, db)
 
     return feedback_success(result)
+
+from src.agent import agent
+
+
+@router.post(
+    "/agent_test",
+)
+async def agent_test():
+    """
+    Test the agent functionality.
+    """
+    agent = agent.agent
+    result = await agent.run("3과 7을 곱한 뒤, 제 이름 '홍길동'에게 인사해 주세요.")
