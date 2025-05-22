@@ -233,6 +233,14 @@ class IssueReschedulingAlreadyExist(ConflictException):
         )
 
 
+class ProjectUserExist(ConflictException):
+    def __init__(self):
+        super().__init__(
+            title="프로젝트 참여 중",
+            detail="탈퇴하기 전에 참여 중인 모든 프로젝트에서 나가야 합니다. 프로젝트 목록에서 나가기를 완료해주세요.",
+        )
+
+
 """
 415 UNSUPPORTED_MEDIA_TYPE
 """
@@ -318,6 +326,7 @@ class ParseJsonFromResponseError(InternalServerErrorException):
             title="JSON 파싱 오류",
             detail="서버에서 응답을 JSON 형식으로 파싱하는 중 문제가 발생했습니다. 서버 로그를 확인해 주세요.",
         )
+
 
 class RecommendAssigneeError(InternalServerErrorException):
     def __init__(self):

@@ -13,11 +13,13 @@ from auth.util.redis import (
     save_token_to_redis,
 )
 from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL, IS_LOCAL
+from src.project_user.repository import find_all_projects_by_user_id
 from src.response.error_definitions import (
     AccessTokenNotFound,
     GitHubAccessTokenError,
     GitHubCredentialCodeNotFound,
     InvalidRefreshToken,
+    ProjectUserExist,
     UserAlreadyExist,
     UserNotFound,
 )
@@ -28,6 +30,7 @@ from src.user.repository import (
 )
 from src.user.schemas import UserReq, UserRes
 from src.user.service import create_user, update_user
+from src.user_repository.repository import delete_all_repositories_by_user_id
 
 GITHUB_OAUTH_REDIS = "github_oauth"
 REFRESH_TOKEN_REDIS = "refresh_token"
@@ -187,7 +190,7 @@ async def login(db: Session, access_token: Optional[str] = Cookie(None)):
     await save_token_to_redis(REFRESH_TOKEN_REDIS, existing_user.id, refresh_token)
 
     user_res = UserRes.model_validate(existing_user)
-    
+
     return AuthRes(
         user=user_res, access_token=access_token, refresh_token=refresh_token
     )
@@ -263,6 +266,14 @@ async def unregister(user_id: int, db: Session):
     """
     Unregister user
     """
+    # Check if user has project
+    project_list = find_all_projects_by_user_id(db, user_id)
+    if project_list:
+        raise ProjectUserExist()
+
+    # Delete user repo
+    delete_all_repositories_by_user_id(db, user_id)
+
     # Delete existing refresh token stored in redis
     redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
     await delete_token_from_redis(redis_refresh_token)
