@@ -49,3 +49,18 @@ def find_all_repositories_by_user_id(db: Session, user_id: int) -> UserRepositor
         logger.error(f"Database error: {e}")
         db.rollback()
         raise SQLError()
+
+
+def delete_all_repositories_by_user_id(db: Session, user_id: int) -> None:
+    try:
+        repos = db.query(UserRepository).filter(UserRepository.user_id == user_id).all()
+
+        if repos:
+            for repo in repos:
+                db.delete(repo)
+            db.commit()
+
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
