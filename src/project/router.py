@@ -83,13 +83,15 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
     response_model=SuccessResponse[ProjectRes],
 )
 def update_project(
+    request: Request,
     project_id: int,
     project_req: str = Form(...),
     files: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
+    user_id = request.state.user_id
     data = service.update_project(
-        project_id, parse_project_req_str(project_req), files, db
+        user_id, project_id, parse_project_req_str(project_req), files, db
     )
     return project_update_success(data)
 
