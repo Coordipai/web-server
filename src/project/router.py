@@ -72,8 +72,9 @@ def get_all_project(request: Request, db: Session = Depends(get_db)):
     summary="Get existing project",
     response_model=SuccessResponse[ProjectRes],
 )
-def get_project(project_id: int, db: Session = Depends(get_db)):
-    data = service.get_project(project_id, db)
+def get_project(request: Request, project_id: int, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    data = service.get_project(user_id, project_id, db)
     return project_read_success(data)
 
 
