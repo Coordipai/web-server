@@ -74,7 +74,7 @@ def issue_generate_success(data: T):
 
 def assess_success(data: T):
     return success_handler(200, "역량 평가 성공", data)
- 
+
 
 def issue_assign_success(data: T):
     return success_handler(200, "이슈 할당 성공", data)
@@ -122,8 +122,8 @@ def issue_rescheduling_update_success(data: T):
     return success_handler(200, "이슈 변경 요청서 수정 성공", data)
 
 
-def issue_rescheduling_delete_success():
-    return success_handler(200, "이슈 변경 요청서 삭제 성공")
+def issue_rescheduling_delete_success(type: str):
+    return success_handler(200, f"이슈 변경 요청서 {type} 성공")
 
 
 """

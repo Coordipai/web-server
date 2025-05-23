@@ -1,11 +1,15 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.issue_rescheduling import service
-from src.issue_rescheduling.schemas import IssueReschedulingReq, IssueReschedulingRes
+from src.issue_rescheduling.schemas import (
+    IssueReschedulingReq,
+    IssueReschedulingRes,
+    IssueReschedulingType,
+)
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_rescheduling_create_success,
@@ -62,9 +66,14 @@ def update_issue_rescheduling(
     response_model=SuccessResponse,
 )
 def delete_issue_rescheduling(
+    request: Request,
     id: int,
-    type: str,
+    type: IssueReschedulingType,
     db: Session = Depends(get_db),
 ):
-    service.delete_issue_rescheduling(id, type, db)
-    return issue_rescheduling_delete_success()
+    user_id = request.state.user_id
+    service.delete_issue_rescheduling(user_id, id, type, db)
+    if type == IssueReschedulingType.APPROVED:
+        return issue_rescheduling_delete_success("승인")
+    elif type == IssueReschedulingType.REJECTED:
+        return issue_rescheduling_delete_success("반려")

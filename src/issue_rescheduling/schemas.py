@@ -1,7 +1,12 @@
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel
 
+
+class IssueReschedulingType(str, Enum):
+    APPROVED = ("APPROVED",)
+    REJECTED = ("REJECTED",)
 
 
 class IssueReschedulingReq(BaseModel):
