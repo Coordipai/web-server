@@ -1,8 +1,14 @@
 from sqlalchemy.orm import Session
 
+from src.issue.repository import find_issue_by_issue_number
+from src.issue.schemas import IssueUpdateReq
 from src.issue_rescheduling import repository
 from src.issue_rescheduling.models import IssueRescheduling
-from src.issue_rescheduling.schemas import IssueReschedulingReq, IssueReschedulingRes
+from src.issue_rescheduling.schemas import (
+    IssueReschedulingReq,
+    IssueReschedulingRes,
+    IssueReschedulingType,
+)
 from src.response.error_definitions import (
     InvalidReschedulingType,
     IssueReschedulingAlreadyExist,
@@ -83,12 +89,32 @@ def update_issue_rescheduling(
     return issue_rescheduling_res
 
 
-def delete_issue_rescheduling(id: int, type: str, db: Session):
-    # TODO Connect with discord bot
-    if type == "Approve":
+def delete_issue_rescheduling(
+    user_id: int, id: int, type: IssueReschedulingType, db: Session
+):
+    if type == IssueReschedulingType.APPROVED:
         existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
-        repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
-    elif type == "disapprove":
+
+        issue = find_issue_by_issue_number(
+            user_id,
+            existing_issue_rescheduling.project.repo_fullname,
+            existing_issue_rescheduling.issue_number,
+            db,
+        )
+        issue_update_req = IssueUpdateReq(
+            project_id=existing_issue_rescheduling.project_id,
+            issue_number=issue.issue_number,
+            title=issue.title,
+            body=issue.body,
+            assignees=existing_issue_rescheduling.new_assignees,
+            priority=issue.priority,
+            iteration=existing_issue_rescheduling.new_iteration,
+            labels=issue.labels,
+        )
+
+        repository.delete_issue_rescheduling(db, user_id, existing_issue_rescheduling, issue_update_req)
+
+    elif type == IssueReschedulingType.REJECTED:
         existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
         repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
     else:
