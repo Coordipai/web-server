@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from project import repository
 from project.schemas import ProjectListRes, ProjectReq, ProjectRes, ProjectUserRes
+from src.common.util.github import check_github_repo_exists
 from src.models import Project, ProjectUser
 from src.project_user.repository import (
     create_project_user,
@@ -17,6 +18,7 @@ from src.response.error_definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,
+    RepositoryNotFoundInGitHub,
     SQLError,
     UserNotFound,
 )
@@ -41,6 +43,10 @@ def create_project(
             raise ProjectAlreadyExist()
 
         design_doc_paths = upload_file(project_req.name, files)
+
+        is_repo = check_github_repo_exists(user_id, project_req.repo_fullname, db)
+        if not is_repo:
+            raise RepositoryNotFoundInGitHub(project_req.repo_fullname)
 
         project = Project(
             name=project_req.name,
@@ -83,7 +89,7 @@ def create_project(
         raise e
 
 
-def get_project(project_id: int, db: Session):
+def get_project(user_id: int, project_id: int, db: Session):
     """
     Get the existing project by project id
 
@@ -92,6 +98,10 @@ def get_project(project_id: int, db: Session):
     existing_project = repository.find_project_by_id(db, project_id)
     if not existing_project:
         raise ProjectNotFound()
+
+    is_repo = check_github_repo_exists(user_id, existing_project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(existing_project.repo_fullname)
 
     owner_user = find_user_by_user_id(db, existing_project.owner)
 
@@ -122,12 +132,21 @@ def get_all_projects(user_id: int, db: Session):
     added_project_ids = set()
 
     for project in owned_projects:
+        is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+        if not is_repo:
+            raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
         if project.id not in added_project_ids:
             project_list.append(ProjectListRes.model_validate(project))
             added_project_ids.add(project.id)
 
     for project_user in participated_projects:
         project = repository.find_project_by_id(db, project_user.project_id)
+
+        is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+        if not is_repo:
+            raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
         if project.id not in added_project_ids:
             project_list.append(ProjectListRes.model_validate(project))
             added_project_ids.add(project.id)
@@ -136,7 +155,11 @@ def get_all_projects(user_id: int, db: Session):
 
 
 def update_project(
-    project_id: int, project_req: ProjectReq, files: List[UploadFile], db: Session
+    user_id: int,
+    project_id: int,
+    project_req: ProjectReq,
+    files: List[UploadFile],
+    db: Session,
 ):
     """
     Update the existing project by project id
@@ -147,6 +170,10 @@ def update_project(
         existing_project = repository.find_project_by_id(db, project_id)
         if not existing_project:
             raise ProjectNotFound()
+
+        is_repo = check_github_repo_exists(user_id, existing_project.repo_fullname, db)
+        if not is_repo:
+            raise RepositoryNotFoundInGitHub(existing_project.repo_fullname)
 
         updated_design_doc_paths = update_file(
             existing_project.name, files, project_req.design_docs

@@ -4,24 +4,15 @@ from typing import Optional, Tuple
 import requests
 from sqlalchemy.orm import Session
 
+from src.common.util.github import get_github_headers
 from src.issue.schemas import IssueCloseReq, IssueCreateReq, IssueRes, IssueUpdateReq
 from src.response.error_definitions import (
     GitHubApiError,
     InvalidPriority,
     IssueNotFound,
 )
-from src.user.repository import find_all_users_by_github_names, find_user_by_user_id
+from src.user.repository import find_all_users_by_github_names
 from src.user.schemas import UserRes
-
-
-def get_github_headers(user_id: int, db: Session):
-    user = find_user_by_user_id(db, user_id)
-    token = user.github_access_token
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-    }
-    return headers
 
 
 def retrieve_hidden_metadata(body: str) -> Optional[Tuple[str, int]]:
