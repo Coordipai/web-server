@@ -27,7 +27,7 @@ class UserRes(BaseModel):
     discord_id: str
     github_id: int
     github_name: str
-    category: str
+    category: UserCategory
     career: str
     created_at: datetime
     profile_img: str

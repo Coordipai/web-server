@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.project.models import Project
 from src.user.models import User
-from src.user.schemas import UserRes
+from src.user.schemas import UserCategory, UserRes
 
 
 class ProjectUserReq(BaseModel):
@@ -18,7 +18,7 @@ class ProjectUserRes(BaseModel):
     name: str
     github_id: int
     github_name: str
-    category: str
+    category: UserCategory
     role: str
     profile_img: str
 
