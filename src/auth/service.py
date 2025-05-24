@@ -29,7 +29,7 @@ from src.user.repository import (
     find_user_by_user_id,
 )
 from src.user.schemas import UserReq, UserRes
-from src.user.service import create_user, update_user
+from src.user.service import create_user, update_github_user, update_user
 from src.user_repository.repository import delete_all_repositories_by_user_id
 
 GITHUB_OAUTH_REDIS = "github_oauth"
@@ -179,6 +179,9 @@ async def login(db: Session, access_token: Optional[str] = Cookie(None)):
 
     if not existing_user:
         raise UserNotFound()
+
+    # Update github info
+    update_github_user(db, github_id)
 
     # Delete github access token stored in redis
     await delete_token_from_redis(github_access_token)
