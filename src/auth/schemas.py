@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
-from src.user.schemas import UserRes
+from src.user.schemas import UserCategory, UserRes
 
 
 class AuthReq(BaseModel):
     name: str
     discord_id: str
-    category: str
+    category: UserCategory
     career: str
 
 
