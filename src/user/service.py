@@ -51,6 +51,18 @@ async def update_user(db: Session, user_req: UserReq):
     return updated_user
 
 
+async def update_github_user(db: Session, github_id: str):
+    """
+    Update existing user info with GitHub info
+    """
+    existing_user = repository.find_user_by_github_id(db, github_id)
+    if not existing_user:
+        raise UserNotFound()
+
+    github_access_token = await get_token_from_redis("github_oauth", github_id)
+    existing_user.github_access_token = github_access_token
+
+
 def search_users_by_name(user_name: str, db: Session):
     users = db.query(User).filter(User.name.ilike(f"%{user_name}%")).all()
     user_res_list = []
