@@ -46,6 +46,22 @@ feedback_output_example = (
 # Prompts for Developer Assignment
 # -------------------------------------------------------------------------------
 
+recommend_assignee_template = PromptTemplate(
+    input_variables=["project_id", "issues"],
+    template=(
+        "Project Id: {project_id}\n"
+        "What you have to do is recommend assignees for the issues.\n"
+        "You must recommend assignees for each issue in the project.\n"
+        "This is order to recommend assignees that you must follow:\n"
+        "0. Get project information from the project ID.\n"
+        "1. Get user stats from database.\n"
+        "2. Recommend assignees for each issue based on the user stats and issues.\n"
+        "3. Format of each issue must match with assign_input_template and assign_output_example\n"
+        "4. Each values of the template for each issue must be written in Korean.\n"
+        "5. Your output must be contains only the issues in a list of json.\n"
+    )
+)
+
 assign_issue_template = PromptTemplate(
     input_variables=["input_file", "output_example"],
     template=(
@@ -125,6 +141,31 @@ assign_output_example = (
 # -------------------------------------------------------------------------------
 # Prompts for Competency Assessment
 # -------------------------------------------------------------------------------
+
+assess_stat_template = PromptTemplate(
+    input_variables=["user_id"],
+    template=(
+        "User ID: {user_id}\n"
+        "What you have to do is assess the competency of a user based on their GitHub activity.\n"
+        "You must analyze the user's GitHub activity and generate a JSON file with the following fields:\n"
+        "This is the order to do your task:\n"
+        "0. Get selected repositories of the user from database.\n"
+        "1. Get GitHub activation data of the user from selected repositories.\n"
+        "2. Assess the user's competency based on the GitHub activation data.\n"
+        "   - If github activation data is empty, you can give 0 point.\n"
+        "3. Store the assessment result in a JSON file with the following fields:\n"
+        "4. Result must include the following fields:\n"
+        "- **Name**: User's name\n"
+        "- **Field**: User's field (Backend, Frontend, AI, etc.)\n"
+        "- **Experience**: User's experience level (Junior, Middle, Senior, etc.)\n"
+        "- **Evaluation Scores**: A dictionary containing the following fields:\n"
+            "- **Project Contribution Scoring**: A dictionary containing the score and justification for project contribution.\n"
+            "- **Troubleshooting Scoring Criteria**: A dictionary containing the score and justification for troubleshooting.\n"
+        "- **Implemented Features**: A list of features that the user has implemented based on their GitHub activity.\n"
+        "5. The output must be a valid JSON file and do not include your additional analysis.\n"
+
+    )
+)
 
 define_stat_prompt = PromptTemplate(
     input_variables=["user_name", "criteria_table", "github_activation_data" , "info_file", "output_example"],
@@ -239,28 +280,11 @@ generate_issue_template = PromptTemplate(
         "This is order to generate issues that you must follow:\n"
         "0. Get project information from the project ID.\n"
         "1. Get and Analyze documents of the project.\n"
-        "2. Define only 3 features(tasks) as a list needed to complete the project without any descriiptions like this example {feature_example}.\n"
+        "2. Define 2 features(tasks) as a list needed to complete the project without any descriiptions like this example {feature_example}.\n"
         "3. Generate a issue for each task.\n"
         "4. Format of each issue must match with issue_template (get issue_template) and fill values of the template\n"
         "5. Each values of the template for each issue must be written in Korean.\n"
         "6. Your output must be contains only the issues in a list of json.\n"
-    )
-)
-
-define_feature_template = PromptTemplate(
-    input_variables=["project_id", "example"],
-    template=(
-        "Project ID: {project_id}\n"
-        "Analyze the planning/design documents.\n"
-        "Break down and define the development tasks needed to complete the project.\n"
-        "You must define the tasks in order of development sequence.\n"
-        "You must define the tasks in a way that they can be completed within one sprint.\n"
-        "The sprint unit is defined in the project information.\n"
-        "List the divided tasks in order of development sequence.\n"
-        "Define only 3 tasks for the project.\n"
-
-        "Output example: {example}"
-
     )
 )
 
@@ -347,26 +371,87 @@ feature_example = (
     "[Test]: Test Login Request Endpoint\n",
 )
 
-# -------------------------------------------------------------------------------
-# Prompts for RAG
-# -------------------------------------------------------------------------------
-
-decomposition_prompt_template = PromptTemplate(
-    input_variables=["documents"],
-    template=(
-        "You are an expert project manager AI. Given the development project document below, "
-        "decompose the project into actionable steps.\n\n"
-        "Documents:\n{documents}\n\n"
-        "Steps:"
-    )
-)
-
-rag_prompt_template = PromptTemplate(
-    input_variables=["original_prompt", "context"],
-    template=(
-        "Answer the question based on the context below.\n\n"
-        "Context: {context}\n\n"
-        "Question: {original_prompt}\n\n"
-        "Answer:"
-    )
+made_issue_example = (
+    """
+        [
+            {
+                "type": "✨ Feature",
+                "name": "AI 에이전트 구현",
+                "description": "AI Agent가 설계 내용 및 개발 진행 상황을 바탕으로 필요한 이슈들을 제안하고, LLM 생성된 레포지토리 정보와 기획 및 설계 내용, 개발 진행 상황 등을 에게 전달하여 이슈를 제안합니다. 제안된 이슈는 일관된 템플릿으로 작성되며 사용자의 동의를 얻어 생성합니다. 스프린트 단위로 이슈를 지속적으로 제안하며, AI Agent는 전체 프로젝트 로드맵을 인지하고 있으며 사용자의 선택에 따라 현재 스프린트에 대한 이슈만을 보여주거나 전체 이슈를 확인할 수 있도록 합니다.",
+                "title": "[Feature]: AI 에이전트 구현",
+                "labels": [
+                    "✨ Feature"
+                ],
+                "sprint": 1,
+                "priority": "M",
+                "body": [
+                    {
+                        "id": "description",
+                        "attributes": {
+                            "label": "기능 설명",
+                            "description": "기능을 자세히 설명해주세요. 어떤 문제를 해결하고 프로젝트에 어떻게 기여할 수 있나요?",
+                            "placeholder": "기능을 명확하게 설명해주세요.",
+                            "value": "- 핵심 키워드: AI 에이전트, 이슈 제안, LLM\n- 설명 1: AI 에이전트가 프로젝트 정보를 기반으로 이슈를 제안합니다.\n- 설명 2: 제안된 이슈는 템플릿에 따라 작성됩니다.\n- 설명 3: 사용자는 제안된 이슈를 확인하고 생성 여부를 결정할 수 있습니다."
+                        }
+                    },
+                    {
+                        "id": "todos",
+                        "attributes": {
+                            "label": "구현 단계 (TODO)",
+                            "description": "이 기능을 구현하는 데 필요한 단계를 간략하게 설명해주세요.",
+                            "value": "- [ ] TODO 1: LLM 연동 및 API 연동\n- [ ] TODO 2: 이슈 템플릿 정의 및 적용\n- [ ] TODO 3: 사용자 인터페이스 개발 (이슈 제안 확인 및 생성)\n- [ ] TODO 4: 스프린트 단위 이슈 제안 기능 구현\n- [ ] TODO 5: 전체 로드맵 인지 및 이슈 필터링 기능 구현"
+                        }
+                    },
+                    {
+                        "id": "wish-assignee-info",
+                        "attributes": {
+                            "label": "희망 담당자 정보",
+                            "description": "이 이슈에 적합한 담당자의 기준을 설명해주세요.",
+                            "placeholder": "다음 항목을 작성해주세요.",
+                            "value": "- 문제 해결 능력 점수: 80점 이상\n- 프로젝트 기여도 점수: 70점 이상\n- LLM 이해도: 80점 이상\n- API 연동 경험: 필수"
+                        }
+                    }
+                ]
+            },
+            {
+                "type": "✨ Feature",
+                "name": "실시간 프로젝트 모니터링 대시보드 구현",
+                "description": "이슈들을 추적하고 반복적으로 알림을 제공하며, 각 팀원마다 완료한 이슈 개수, 예정된 이슈 개수, 현재 무엇을 하고 있는지 보여줍니다. 프로젝트 전체 진행률 및 프로젝트 활성화 정도를 제공합니다.",
+                "title": "[Feature]: 실시간 프로젝트 모니터링 대시보드 구현",
+                "labels": [
+                    "✨ Feature"
+                ],
+                "sprint": 2,
+                "priority": "M",
+                "body": [
+                    {
+                        "id": "description",
+                        "attributes": {
+                            "label": "기능 설명",
+                            "description": "기능을 자세히 설명해주세요. 어떤 문제를 해결하고 프로젝트에 어떻게 기여할 수 있나요?",
+                            "placeholder": "기능을 명확하게 설명해주세요.",
+                            "value": "- 핵심 키워드: 대시보드, 실시간 모니터링, 프로젝트 진행률\n- 설명 1: 프로젝트 진행 상황을 실시간으로 모니터링할 수 있는 대시보드를 제공합니다.\n- 설명 2: 팀원별 이슈 진행 상황을 시각적으로 보여줍니다.\n- 설명 3: 프로젝트 전체 진행률 및 활성화 정도를 제공합니다."
+                        }
+                    },
+                    {
+                        "id": "todos",
+                        "attributes": {
+                            "label": "구현 단계 (TODO)",
+                            "description": "이 기능을 구현하는 데 필요한 단계를 간략하게 설명해주세요.",
+                            "value": "- [ ] TODO 1: 데이터 수집 및 API 연동 (이슈, 팀원 정보 등)\n- [ ] TODO 2: 대시보드 UI 디자인 및 개발\n- [ ] TODO 3: 실시간 데이터 업데이트 기능 구현\n- [ ] TODO 4: 팀원별 이슈 진행 상황 시각화\n- [ ] TODO 5: 프로젝트 진행률 및 활성화 정도 계산 및 표시"
+                        }
+                    },
+                    {
+                        "id": "wish-assignee-info",
+                        "attributes": {
+                            "label": "희망 담당자 정보",
+                            "description": "이 이슈에 적합한 담당자의 기준을 설명해주세요.",
+                            "placeholder": "다음 항목을 작성해주세요.",
+                            "value": "- UI/UX 디자인 점수: 85점 이상\n- 프론트엔드 개발 능력 점수: 90점 이상\n- 데이터 시각화 능력: 80점 이상\n- API 연동 경험: 필수"
+                        }
+                    }
+                ]
+            }
+        ]
+    """
 )

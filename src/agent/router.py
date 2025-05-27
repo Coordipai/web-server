@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -21,7 +23,9 @@ from src.response.success_definitions import (
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 
-
+# ───────────────────────────────────────────────────────────────────────────────────────
+#                                ## Generate Issues ##
+# ───────────────────────────────────────────────────────────────────────────────────────
 @router.get(
     "/generate_issues/{project_id}",
     summary="Generate issues",
@@ -39,6 +43,27 @@ async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     )
 
 
+@router.post(
+    "/generate_issues_test",
+)
+async def generate_issues_test(project_id: int):
+    """
+    Test the agent functionality.
+    """
+    print("Agent test started")
+    agent_generating_issues = agent.agent
+    print("Agent initialized")
+    result = await agent_generating_issues.ainvoke(aprompt.generate_issue_template.format(
+        project_id=project_id,
+        feature_example=aprompt.feature_example
+    ))
+    print("Agent invoked")
+    return json.loads(result.get("output"))
+
+
+# ───────────────────────────────────────────────────────────────────────────────────
+#                                  ## Assess Stat ##
+# ───────────────────────────────────────────────────────────────────────────────────
 @router.post(
     "/assess_stat", 
     summary="Assess Stat", 
@@ -59,6 +84,27 @@ async def assess_stat(
 
 
 @router.post(
+    "/assess_stat_test",
+)
+async def assess_stat_test():
+    """
+    Test the assess stat functionality.
+    """
+    print("Assess stat test started")
+    agent_assessing_stat = agent.agent
+    print("Agent initialized")
+    result = await agent_assessing_stat.ainvoke(aprompt.assess_stat_template.format(
+        user_id=1,
+    ))
+
+    print("Agent invoked")
+    return json.loads(result.get("output"))
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────
+#                              ## Recommend Assignees ##
+# ───────────────────────────────────────────────────────────────────────────────────────────
+@router.post(
     "/recommend_assignees/{project_id}",
     summary="Recommend assignees for issues",
     response_model=SuccessResponse[RecommendAssigneeListRes],
@@ -77,6 +123,27 @@ async def recommend_assignees(
     return issue_assign_success(result)
 
 
+@router.post(
+    "/recommend_assignees_test",
+)
+async def recommend_assignees_test(project_id: int):
+    """
+    Test the issue assignment functionality.
+    """
+    print("Issue assignment test started")
+    agent_assigning_issues = agent.agent
+    print("Agent initialized")
+    result = await agent_assigning_issues.ainvoke(aprompt.recommend_assignee_template.format(
+        project_id=project_id,
+        issues=aprompt.made_issue_example
+    ))
+    print("Agent invoked")
+    return json.loads(result.get("output"))
+
+
+# ────────────────────────────────────────────────────────────────────────────────────
+#                                  ## Get Feedback ##
+# ────────────────────────────────────────────────────────────────────────────────────
 @router.get(
     "/feedback",
     summary="Get feedback for issue rescheduling",
@@ -91,22 +158,21 @@ async def get_feedback(feedbackReq: FeedbackReq, db: Session = Depends(get_db)):
 
     return feedback_success(result)
 
-from src.agent import agent
-
 
 @router.post(
-    "/agent_test",
+    "/get_feedback_test",
 )
-async def agent_test():
+async def get_feedback_test(feedbackReq: FeedbackReq):
     """
-    Test the agent functionality.
+    Test the issue rescheduling functionality.
     """
-    print("Agent test started")
-    new_agent = agent.agent
+    print("Issue rescheduling test started")
+    agent_rescheduling_issues = agent.agent
     print("Agent initialized")
-    result = await new_agent.ainvoke(aprompt.generate_issue_template.format(
+    result = await agent_rescheduling_issues.ainvoke(aprompt.issue_rescheduling_template.format(
         project_id=1,
-        feature_example=aprompt.feature_example
+        issue_rescheduling_id=feedbackReq.issue_rescheduling_id,  
     ))
     print("Agent invoked")
-    return result.get("output")
+    return json.loads(result.get("output"))
+
