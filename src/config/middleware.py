@@ -34,20 +34,29 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             "/auth/refresh",
         ]
         api_docs_allow_paths = ["/docs", "/openapi.json"]
+        discord_bot_allow_paths = ["/bot"]
 
         if any(request.url.path.startswith(path) for path in auth_allow_paths):
             response = await call_next(request)
-            response.headers["X-Trace-ID"] = trace_id
+            response.headers["Trace-ID"] = trace_id
             return response
 
         if any(request.url.path.startswith(path) for path in api_docs_allow_paths):
             response = await call_next(request)
-            response.headers["X-Trace-ID"] = trace_id
+            response.headers["Trace-ID"] = trace_id
             return response
 
         if request.method == "OPTIONS":
             response = await call_next(request)
-            response.headers["X-Trace-ID"] = trace_id
+            response.headers["Trace-ID"] = trace_id
+            return response
+
+        is_discord_bot = request.headers.get("Discord-Bot") == "true"
+        if is_discord_bot and any(
+            request.url.path.startswith(path) for path in discord_bot_allow_paths
+        ):
+            response = await call_next(request)
+            response.headers["Trace-ID"] = trace_id
             return response
 
         try:
@@ -65,7 +74,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 raise InvalidJwtToken(reason=str(e))
 
             response = await call_next(request)
-            response.headers["X-Trace-ID"] = trace_id
+            response.headers["Trace-ID"] = trace_id
             return response
         except BaseAppException as exc:
             type = exc.type
@@ -101,5 +110,5 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                     detail=detail,
                 ).model_dump(),
             )
-            response.headers["X-Trace-ID"] = trace_id
+            response.headers["Trace-ID"] = trace_id
             return response
