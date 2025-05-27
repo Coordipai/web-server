@@ -1,20 +1,18 @@
 import json
 import os
-import re
 import tempfile
 from pathlib import Path
 
 import pdfplumber
 from docx import Document
 from fastapi import File, UploadFile
-from langchain.schema import HumanMessage, SystemMessage
 from langchain.tools import tool
 from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_vertexai import VertexAIEmbeddings
+from sqlalchemy.orm import Session
 
 from src.agent import prompts
-from src.agent.schemas import GenerateIssueListRes
 from src.auth import service as auth_service
 from src.config.config import (
     GEMINI_API_KEY,
@@ -23,15 +21,18 @@ from src.config.config import (
     VERTEX_EMBEDDING_MODEL,
     VERTEX_PROJECT_ID,
 )
-from src.issue.schemas import IssueRes
-from src.models import IssueRescheduling, Project, User
+from src.config.database import get_db
+from src.project import repository as project_repository
 from src.response.error_definitions import (
+    DesignDocNotFound,
     InvalidFileType,
-    IssueGenerateError,
-    ParseJsonFromResponseError,
+    ProjectNotFound,
     RepositoryNotFoundInGitHub,
+    UserNotFound,
 )
 from src.stat import service as stat_service
+from src.user import repository as user_repository
+from src.user_repository import service as user_repository_service
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
@@ -42,130 +43,6 @@ llm = ChatGoogleGenerativeAI(
     temperature=0,
     google_api_key=GEMINI_API_KEY
 )
-
-decomposition_chain = llm | prompts.decomposition_prompt_template
-
-
-
-
-
-
-
-def add_text_data_tool(texts: list, metadatas: list):
-    """
-    Add data to the vector database.
-    """
-    vector_db.add_texts(texts, metadatas=metadatas)
-
-
-def add_image_data_tool(images: list, metadatas: list):
-    """
-    Add image data to the vector database.
-    """
-    vector_db.add_images(images, metadatas=metadatas)
-
-
-def search_data_tool(query: str, k: int = 2) -> list:
-    """
-    Search for similar data in the vector database.
-    """
-    results = vector_db.similarity_search(query, k=k)
-    return results
-
-
-async def decompose_task_tool(prompt: str) -> list:
-    """
-    Decomposes the input prompt into actionable steps.
-    """
-    steps_str = str(decomposition_chain.invoke(prompt))
-
-    steps_list = [line.strip() for line in steps_str.split("\n") if line.strip()]
-    return steps_list
-
-
-async def create_rag_prompt_tool(original_prompt: str, context: str) -> str:
-    """
-    Create a RAG (Retrieval-Augmented Generation) prompt using the original prompt and context.
-    """
-    rag_prompt = prompts.rag_prompt_template.format(
-        original_prompt=original_prompt,
-        context=context
-    )
-    
-    return rag_prompt
-
-
-async def communicate_with_llm_tool(prompt: str) -> str:
-    """
-    Communicates with the LLM using the provided prompt.
-    """
-
-    message = [
-        SystemMessage(content="You are a professional project manager"),
-        HumanMessage(content=prompt)
-    ]
-    response = await llm.agenerate([message])
-    
-    return response.generations[0][0].text
-
-
-
-async def define_features(project_info: dict, design_documents: str) -> dict:
-    """
-    Define features based on design documents and feature example.
-    """
-
-    llm_response = await communicate_with_llm_tool(prompts.define_feature_template.format(
-        project_info=project_info,
-        documents= design_documents,
-        example= prompts.feature_example
-    ))
-
-    features = dict()
-    llm_response = llm_response.replace("```json", "")
-    llm_response = llm_response.replace("```", "")
-    llm_response = llm_response.replace("\n", "")
-    llm_response = llm_response.replace('"  ', '"')
-    llm_response = llm_response.replace("[", "")
-    llm_response = llm_response.replace("]", "")
-    llm_response = llm_response.split(",")
-    for i in range(len(llm_response)):
-        llm_response[i] = llm_response[i].replace('"', "")
-        features[i] = llm_response[i][1:]
-    return features
-
-
-async def make_issues(project_info: dict, design_documents: str, features: dict):
-    """
-    Make issues based on features.
-    """
-    
-    if(len(features) >= 5):
-        interval = 5
-    else:
-        interval = len(features)
-
-    for i in range(0, len(features), interval):
-        issues = await communicate_with_llm_tool(prompts.make_issue_template.format(
-            project_info=project_info,
-            documents=design_documents,
-            issue_template=prompts.issue_template,
-            features=list(features.values())[i:i+interval]
-        ))
-        if not issues:
-            raise IssueGenerateError()
-        
-        issues = extract_json_dict_from_response(issues)
-
-        for issue in issues:
-            # check if issue contains "type", "name", "description", "title", "labels", "sprint", "body"
-            if not all(key in issue for key in ["type", "name", "description", "title", "labels", "sprint", "body"]):
-                print("------------Invalid issue format------------")
-                print(issue)
-                raise IssueGenerateError()
-
-            yield issue
-
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
     text = ""
@@ -208,27 +85,81 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
 
     return text
 
-def extract_json_dict_from_response(response_text: str) -> dict:
-    """
-    Extracts a JSON dictionary from the response text.
-    """
-    pattern = r'```json(.*?)```'
-    match = re.search(pattern, response_text, re.DOTALL)
-    if not match:
-        print("------------Invalid Output format------------")
-        print(response_text)
-        return {}
-    json_str = match.group(1)
-    try:
-        return json.loads(json_str)
-    except json.JSONDecodeError:
-        raise ParseJsonFromResponseError()
 
 
-async def get_github_activation_info(selected_repo_names: list[str],token: str):
+from fastapi.datastructures import UploadFile as FastUploadFile
+
+# ── 1) 필수 import ─────────────────────────────────────────────
+from langchain.agents import AgentType, initialize_agent
+
+# ────────────────────────────────────────────────────────────────
+
+
+# ── 2) Agent 가 사용할 Tool 정의 ────────────────────────────────
+
+@tool("get_project_info")
+async def get_project_info(project_id: int) -> dict:
+    """프로젝트 ID를 받아 프로젝트 정보를 반환합니다."""
+
+    db: Session = next(get_db())  # 데이터베이스 세션을 가져옵니다
+    project = project_repository.find_project_by_id(db, project_id)
+    if not project:
+        raise ProjectNotFound
+    
+    return {
+        "name": project.name,
+        "repo_fullname": project.repo_fullname,
+        "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
+        "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
+        "sprint_unit": project.sprint_unit
+    }
+
+
+@tool("get_document_info")
+async def get_document_info(project_name: str) -> list:
+    """프로젝트 이름을 받아 해당 프로젝트의 문서 정보를 반환합니다."""
+
+    project_dir = os.path.join("design_docs", project_name)
+    file_names = os.listdir(project_dir)
+    if not file_names:
+        raise DesignDocNotFound()
+    
+    files = [os.path.join(project_dir, file_name) for file_name in file_names]
+
+    extracted_texts = ""
+    for file in files:
+        # Load documents with file path (pdf, docx)
+        file_path = Path(file)
+        with open(file_path, "rb") as f:
+            upload_file = FastUploadFile(filename=file_path.name, file=f)
+            text = await extract_text_from_documents(upload_file)
+            extracted_texts += file_path.name
+            extracted_texts += "\n"
+            extracted_texts += text
+            extracted_texts += "\n\n"
+        
+    return extracted_texts
+
+
+@tool("get_issue_template")
+async def get_issue_template() -> str:
+    """이슈 템플릿을 반환합니다."""
+    return str(prompts.issue_template)
+
+
+@tool("get_github_activation_info")
+async def get_github_activation_info(user_id: int):
     """
     Get GitHub information using the agent executor.
     """
+
+    db: Session = next(get_db())
+    user = user_repository.find_user_by_user_id(db, user_id)
+    if not user:
+        raise UserNotFound()
+    
+    token = user.github_access_token
+    selected_repo_names = user_repository_service.get_all_selected_repositories(user_id, db)
     repo_list = stat_service.get_repositories(token)
 
     # get user name from token
@@ -251,96 +182,8 @@ async def get_github_activation_info(selected_repo_names: list[str],token: str):
     return selected_repo_list
 
 
-async def assess_with_data(user: User, github_activation_data: list):
-    """
-    Assess the competency of a user based on their GitHub activity.
-    """
-    competency = await communicate_with_llm_tool(prompts.define_stat_prompt.format(
-        user_name=user.github_name,
-        criteria_table=prompts.score_table,
-        github_activation_data=github_activation_data,
-        info_file=prompts.info_file,
-        output_example=prompts.define_stat_output_example
-    ))
-
-    competency = extract_json_dict_from_response(competency)
-    
-    competency_data = {
-        "Name": competency["Name"],
-        "Field": competency["Field"],
-        "Experience" : competency["Experience"],
-        "evaluation_scores": competency["evaluation_scores"],
-        "implemented_features": competency["implemented_features"]
-    }
-
-    return competency_data
-
-
-async def recommend_assignees_for_issues(project_info: Project, user_stat_list: list[str], issues: GenerateIssueListRes):
-    """
-    Recommend assignees for issues based on their competency.
-    """
-
-    assigned_issues = list()
-    if(len(issues.issues) >= 10):
-        interval = 10
-    else:
-        interval = len(issues.issues)
-
-    for i in range(0, len(issues.issues), interval):
-        response = await communicate_with_llm_tool(prompts.assign_issue_template.format(
-            input_file=prompts.assign_input_template.format(
-                project_name=project_info.name,
-                project_overview="project overview",
-                issues=issues.issues[i:i+interval],
-                stats=user_stat_list
-            ),
-            output_example=prompts.assign_output_example
-        ))
-
-        response = extract_json_dict_from_response(response)
-        
-        assigned_issues.extend(response)
-    return assigned_issues
-
-async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
-    """
-    Get feedback for issue rescheduling.
-    """
-    feedback = await communicate_with_llm_tool(prompts.feedback_template.format(
-        project_info=json.dumps(project, ensure_ascii=False),
-        reason=issue_rescheduling.reason,
-        issue=json.dumps(issue, ensure_ascii=False),
-        stats=user_stat_list,
-        output_example=prompts.feedback_output_example
-    ))
-
-    feedback = extract_json_dict_from_response(feedback)
-
-    return feedback
-
-
-
-# ── 1) 필수 import ─────────────────────────────────────────────
-from langchain.agents import AgentType, initialize_agent
-
-# ────────────────────────────────────────────────────────────────
-
-
-# ── 2) Agent 가 사용할 Tool 정의 ────────────────────────────────
-@tool
-def multiply(a: int, b: int) -> int:
-    """두 정수를 곱한 값을 돌려줍니다."""
-    return a * b
-
-
-@tool("greet")                        # 이름을 직접 지정해도 됩니다
-def say_hello(name: str) -> str:
-    """사용자의 이름을 받아 인삿말을 반환합니다."""
-    return f"안녕하세요, {name}님!"
-
-
-TOOLS = [multiply, say_hello]         # Agent 가 접근할 수 있는 도구 목록
+# ── 3) Agent 가 접근할 수 있는 도구 목록 정의 ────────────────
+TOOLS = [get_project_info, get_document_info, get_issue_template, get_github_activation_info]         # Agent 가 접근할 수 있는 도구 목록
 # ────────────────────────────────────────────────────────────────
 
 
@@ -348,14 +191,11 @@ TOOLS = [multiply, say_hello]         # Agent 가 접근할 수 있는 도구 �
 agent = initialize_agent(
     tools=TOOLS,                     # ① 사용할 Tool 리스트
     llm=llm,                         # ② 기반 LLM
-    agent=AgentType.OPENAI_FUNCTIONS,# ③ 함수형 Tool 호출 에이전트
+    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,  # ③ Agent 유형
+    agent_kwargs={"prefix": "안녕하세요, 저는 당신의 개인 비서입니다."},  # Agent 의 추가 설정
     verbose=True                     # ④ 디버깅용 출력
 )
 # ────────────────────────────────────────────────────────────────
 
 
-# ── 5) Agent 호출 (Run) ────────────────────────────────────────
-if __name__ == "__main__":
-    # 자연어로 지시하면 Agent 가 적절한 Tool 을 골라 실행합니다.
-    print(agent.run("3과 7을 곱한 뒤, 제 이름 '홍길동'에게 인사해 주세요."))
 

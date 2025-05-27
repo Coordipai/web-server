@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from src.agent import chain
+from src.agent import agent, aprompt, chain
 from src.agent.schemas import (
     AssessStatRes,
     FeedbackReq,
@@ -101,5 +101,12 @@ async def agent_test():
     """
     Test the agent functionality.
     """
-    agent = agent.agent
-    result = await agent.run("3과 7을 곱한 뒤, 제 이름 '홍길동'에게 인사해 주세요.")
+    print("Agent test started")
+    new_agent = agent.agent
+    print("Agent initialized")
+    result = await new_agent.ainvoke(aprompt.generate_issue_template.format(
+        project_id=1,
+        feature_example=aprompt.feature_example
+    ))
+    print("Agent invoked")
+    return result.get("output")
