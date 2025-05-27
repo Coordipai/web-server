@@ -17,6 +17,7 @@ from src.response.error_definitions import (
 
 
 def create_issue_rescheduling(
+    project_id: int,
     issue_rescheduling_req: IssueReschedulingReq,
     db: Session,
 ):
@@ -25,7 +26,7 @@ def create_issue_rescheduling(
     """
     existing_issue_rescheduling = (
         repository.find_issue_scheduling_by_project_id_and_issue_number(
-            db, issue_rescheduling_req.project_id, issue_rescheduling_req.issue_number
+            db, project_id, issue_rescheduling_req.issue_number
         )
     )
 
@@ -37,7 +38,7 @@ def create_issue_rescheduling(
         reason=issue_rescheduling_req.reason,
         new_iteration=issue_rescheduling_req.new_iteration,
         new_assignees=issue_rescheduling_req.new_assignees,
-        project_id=issue_rescheduling_req.project_id,
+        project_id=project_id,
     )
 
     saved_issue_rescheduling = repository.create_issue_rescheduling(
@@ -62,14 +63,14 @@ def get_all_issue_reschedulings(project_id: int, db: Session):
 
 
 def update_issue_rescheduling(
-    issue_rescheduling_req: IssueReschedulingReq, db: Session
+    project_id: int, issue_rescheduling_req: IssueReschedulingReq, db: Session
 ):
     """
     Update the existing issue rescheduling by project id and issue number
     """
     existing_issue_rescheduling = (
         repository.find_issue_scheduling_by_project_id_and_issue_number(
-            db, issue_rescheduling_req.project_id, issue_rescheduling_req.issue_number
+            db, project_id, issue_rescheduling_req.issue_number
         )
     )
 
@@ -112,7 +113,9 @@ def delete_issue_rescheduling(
             labels=issue.labels,
         )
 
-        repository.delete_issue_rescheduling(db, user_id, existing_issue_rescheduling, issue_update_req)
+        repository.delete_issue_rescheduling(
+            db, user_id, existing_issue_rescheduling, issue_update_req
+        )
 
     elif type == IssueReschedulingType.REJECTED:
         existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
