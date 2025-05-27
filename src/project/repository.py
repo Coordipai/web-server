@@ -45,6 +45,22 @@ def find_project_by_name(db: Session, project_name: str) -> Project | None:
         raise SQLError()
 
 
+def find_project_by_discord_channel_id(
+    db: Session, discord_channel_id: str
+) -> Project | None:
+    try:
+        result = db.execute(
+            select(Project).filter(Project.discord_channel_id == discord_channel_id)
+        )
+        return result.scalars().first()
+    except NoResultFound:
+        return None
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
 def find_project_by_owner(db: Session, owner: str) -> list[Project]:
     try:
         result = db.execute(select(Project).filter(Project.owner == owner))
