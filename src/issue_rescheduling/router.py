@@ -27,10 +27,11 @@ router = APIRouter(prefix="/issue-reschedule", tags=["Issue Rescheduling"])
     response_model=SuccessResponse[IssueReschedulingRes],
 )
 def create_issue_rescheduling(
+    project_id: int,
     issue_rescheduling_req: IssueReschedulingReq,
     db: Session = Depends(get_db),
 ):
-    data = service.create_issue_rescheduling(issue_rescheduling_req, db)
+    data = service.create_issue_rescheduling(project_id, issue_rescheduling_req, db)
     return issue_rescheduling_create_success(data)
 
 
@@ -53,10 +54,11 @@ def get_all_issue_reschedulings(
     response_model=SuccessResponse[IssueReschedulingRes],
 )
 def update_issue_rescheduling(
+    project_id: int,
     issue_rescheduling_req: IssueReschedulingReq,
     db: Session = Depends(get_db),
 ):
-    data = service.update_issue_rescheduling(issue_rescheduling_req, db)
+    data = service.update_issue_rescheduling(project_id, issue_rescheduling_req, db)
     return issue_rescheduling_update_success(data)
 
 

@@ -10,7 +10,6 @@ class IssueReschedulingType(str, Enum):
 
 
 class IssueReschedulingReq(BaseModel):
-    project_id: int
     issue_number: int
     reason: str
     new_iteration: int
