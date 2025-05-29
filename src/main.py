@@ -10,6 +10,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import src.models  # noqa: F401
 from agent.router import router as agent_router
 from auth.router import router as auth_router
+from bot.router import router as bot_router
 from issue.router import router as issue_router
 from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
@@ -124,3 +125,4 @@ app.include_router(agent_router)
 app.include_router(issue_router)
 app.include_router(user_repository_router)
 app.include_router(issue_rescheduling_router)
+app.include_router(bot_router)
