@@ -34,9 +34,10 @@ def find_issue_scheduling_by_id(db: Session, issue_rescheduling_id: int):
                 IssueRescheduling.id == issue_rescheduling_id
             )
         )
-        return result.scalars().first()
-    except NoResultFound:
-        raise IssueReschedulingNotFound()
+        issue_rescheduling = result.scalars().first()
+        if not issue_rescheduling:
+            raise IssueReschedulingNotFound()
+        return issue_rescheduling
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
@@ -91,14 +92,15 @@ def update_issue_rescheduling(
         raise SQLError()
 
 
-def delete_issue_rescheduling(db: Session, user_id: int, issue_rescheduling: IssueRescheduling, issue_update_req: IssueUpdateReq):
+def delete_issue_rescheduling(db: Session, user_id: int, issue_rescheduling: IssueRescheduling, issue_update_req: IssueUpdateReq | None):
     try:
-        update_issue(
-            user_id,
-            issue_rescheduling.project.repo_fullname,
-            issue_update_req,
-            db,
-        )
+        if issue_update_req:
+            update_issue(
+                user_id,
+                issue_rescheduling.project.repo_fullname,
+                issue_update_req,
+                db,
+            )
         db.delete(issue_rescheduling)
         db.commit()
     except SQLAlchemyError as e:

@@ -9,14 +9,18 @@ from src.issue_rescheduling.schemas import (
     IssueReschedulingRes,
     IssueReschedulingType,
 )
+from src.project.repository import find_project_by_id
 from src.response.error_definitions import (
     InvalidReschedulingType,
+    IssueNotFound,
     IssueReschedulingAlreadyExist,
     IssueReschedulingNotFound,
+    ProjectNotFound,
 )
 
 
 def create_issue_rescheduling(
+    user_id: int,
     project_id: int,
     issue_rescheduling_req: IssueReschedulingReq,
     db: Session,
@@ -33,6 +37,16 @@ def create_issue_rescheduling(
     if existing_issue_rescheduling:
         raise IssueReschedulingAlreadyExist()
 
+    project = find_project_by_id(db, project_id)
+    if not project:
+        raise ProjectNotFound()
+
+    issue = find_issue_by_issue_number(
+        user_id, project.repo_fullname, issue_rescheduling_req.issue_number, db
+    )
+    if not issue:
+        raise IssueNotFound()
+
     issue_rescheduling = IssueRescheduling(
         issue_number=issue_rescheduling_req.issue_number,
         reason=issue_rescheduling_req.reason,
@@ -44,26 +58,42 @@ def create_issue_rescheduling(
     saved_issue_rescheduling = repository.create_issue_rescheduling(
         db, issue_rescheduling
     )
-    issue_rescheduling_res = IssueReschedulingRes.model_validate(
-        saved_issue_rescheduling
+    issue_rescheduling_res = IssueReschedulingRes.from_issue(
+        saved_issue_rescheduling, issue
     )
     return issue_rescheduling_res
 
 
-def get_all_issue_reschedulings(project_id: int, db: Session):
+def get_all_issue_reschedulings(user_id: int, project_id: int, db: Session):
     all_existing_issue_reschedulings = (
         repository.find_all_issue_rescheduling_by_project_id(db, project_id)
     )
+
+    project = find_project_by_id(db, project_id)
+    if not project:
+        raise ProjectNotFound()
+
     issue_rescheduling_res_list = []
     for issue_rescheduling in all_existing_issue_reschedulings:
-        issue_rescheduling_res = IssueReschedulingRes.model_validate(issue_rescheduling)
+        issue = find_issue_by_issue_number(
+            user_id, project.repo_fullname, issue_rescheduling.issue_number, db
+        )
+        if not issue:
+            raise IssueNotFound()
+
+        issue_rescheduling_res = IssueReschedulingRes.from_issue(
+            issue_rescheduling, issue
+        )
         issue_rescheduling_res_list.append(issue_rescheduling_res)
 
     return issue_rescheduling_res_list
 
 
 def update_issue_rescheduling(
-    project_id: int, issue_rescheduling_req: IssueReschedulingReq, db: Session
+    user_id: int,
+    project_id: int,
+    issue_rescheduling_req: IssueReschedulingReq,
+    db: Session,
 ):
     """
     Update the existing issue rescheduling by project id and issue number
@@ -77,6 +107,16 @@ def update_issue_rescheduling(
     if not existing_issue_rescheduling:
         raise IssueReschedulingNotFound()
 
+    project = find_project_by_id(db, project_id)
+    if not project:
+        raise ProjectNotFound()
+
+    issue = find_issue_by_issue_number(
+        user_id, project.repo_fullname, issue_rescheduling_req.issue_number, db
+    )
+    if not issue:
+        raise IssueNotFound()
+
     existing_issue_rescheduling.reason = issue_rescheduling_req.reason
     existing_issue_rescheduling.new_iteration = issue_rescheduling_req.new_iteration
     existing_issue_rescheduling.new_assignees = issue_rescheduling_req.new_assignees
@@ -84,8 +124,8 @@ def update_issue_rescheduling(
     saved_issue_rescheduling = repository.update_issue_rescheduling(
         db, existing_issue_rescheduling
     )
-    issue_rescheduling_res = IssueReschedulingRes.model_validate(
-        saved_issue_rescheduling
+    issue_rescheduling_res = IssueReschedulingRes.from_issue(
+        saved_issue_rescheduling, issue
     )
     return issue_rescheduling_res
 
@@ -102,6 +142,7 @@ def delete_issue_rescheduling(
             existing_issue_rescheduling.issue_number,
             db,
         )
+        
         issue_update_req = IssueUpdateReq(
             project_id=existing_issue_rescheduling.project_id,
             issue_number=issue.issue_number,
@@ -119,6 +160,6 @@ def delete_issue_rescheduling(
 
     elif type == IssueReschedulingType.REJECTED:
         existing_issue_rescheduling = repository.find_issue_scheduling_by_id(db, id)
-        repository.delete_issue_rescheduling(db, existing_issue_rescheduling)
+        repository.delete_issue_rescheduling(db, user_id, existing_issue_rescheduling, None)
     else:
         raise InvalidReschedulingType(type)

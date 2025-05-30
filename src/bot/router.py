@@ -86,12 +86,14 @@ def get_issue(
 def create_issue_rescheduling(
     issue_rescheduling_req: IssueReschedulingReq,
     discord_channel_id: str = Header(..., description="Discord Channel ID"),
+    discord_user_id: str = Header(..., description="Discord User ID"),
     db: Session = Depends(get_db),
 ):
+    user = user_repository.find_user_by_discord_id(db, discord_user_id)
     project = project_repository.find_project_by_discord_channel_id(
         db, discord_channel_id
     )
     data = issue_rescheduling_service.create_issue_rescheduling(
-        project.id, issue_rescheduling_req, db
+        user.id, project.id, issue_rescheduling_req, db
     )
     return issue_rescheduling_create_success(data)
