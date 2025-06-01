@@ -42,7 +42,7 @@ def get_project(
 
 
 @router.get(
-    "",
+    "/issues",
     summary="Get all existing issues",
     response_model=SuccessResponse[List[IssueRes]],
 )
@@ -60,7 +60,7 @@ def get_all_issues(
 
 
 @router.get(
-    "/detail",
+    "/issue/detail",
     summary="Get existing issue",
     response_model=SuccessResponse[IssueRes],
 )
@@ -79,7 +79,7 @@ def get_issue(
 
 
 @router.post(
-    "",
+    "/issue-reschedule",
     summary="Create a new issue rescheduling",
     response_model=SuccessResponse[IssueReschedulingRes],
 )
