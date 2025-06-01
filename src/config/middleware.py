@@ -32,6 +32,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             "/auth/login",
             "/auth/register",
             "/auth/refresh",
+            "/bot/test-scheduler",
         ]
         api_docs_allow_paths = ["/docs", "/openapi.json"]
         discord_bot_allow_paths = ["/bot"]
