@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 
+from src.bot.util import send_daily_request
 from src.config.database import get_db
 from src.issue import service as issue_service
 from src.issue.schemas import IssueRes
@@ -97,3 +98,12 @@ def create_issue_rescheduling(
         user.id, project.id, issue_rescheduling_req, db
     )
     return issue_rescheduling_create_success(data)
+
+
+@router.post(
+    "/test-scheduler",
+    summary="Test scheduler function",
+)
+async def test_scheduler():
+    await send_daily_request()
+    return

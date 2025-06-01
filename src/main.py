@@ -14,6 +14,7 @@ from bot.router import router as bot_router
 from issue.router import router as issue_router
 from issue_rescheduling.router import router as issue_rescheduling_router
 from project.router import router as project_router
+from src.bot.util import shutdown_scheduler, start_scheduler
 from src.config import volume_config
 from src.config.config import (
     DISCORD_CHANNEL_ID,
@@ -67,11 +68,13 @@ async def lifespan(app: FastAPI):
         initialize_database()
         volume_config.clear_design_docs()
     await send_server_info("start")
+    start_scheduler()
 
     yield
 
     # When server stopped
     await send_server_info("stop")
+    shutdown_scheduler()
 
 
 app = FastAPI(

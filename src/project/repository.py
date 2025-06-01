@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -67,6 +69,21 @@ def find_project_by_owner(db: Session, owner: str) -> list[Project]:
         return result.scalars().all()
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
+def find_all_active_projects(db: Session) -> list[Project]: 
+    try:
+        current_time = datetime.now(timezone.utc)
+        result = db.execute(
+            select(Project)
+            .filter(Project.end_date > current_time)
+            .order_by(Project.end_date.asc())
+        )
+        return result.scalars().all()
+    except SQLAlchemyError as e:
+        logger.error(f"Database error during active projects retrieval: {e}")
         db.rollback()
         raise SQLError()
 
