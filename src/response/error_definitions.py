@@ -334,3 +334,11 @@ class RecommendAssigneeError(InternalServerErrorException):
             title="추천 Assignee 오류",
             detail="추천 Assignee를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
         )
+
+
+class DailyIssueReportError(InternalServerErrorException):
+    def __init__(self, status_code):
+        super().__init__(
+            title="데일리 이슈 알림 요청 실패",
+            detail=f"데일리 이슈 알림 요청에 실패하였습니다. (응답 상태 코드: {status_code})",
+        )

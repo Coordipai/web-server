@@ -47,3 +47,6 @@ SWAGGER_PASSWORD = os.getenv("SWAGGER_PASSWORD")
 
 # Errorping
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
+
+# Coordipai Bot
+COORDIPAI_BOT_URL = os.getenv("COORDIPAI_BOT_URL")
