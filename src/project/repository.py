@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from src.config.logger_config import add_daily_file_handler, setup_logger
-from src.models import Project
+from src.models import Project, ProjectUser
 from src.response.error_definitions import SQLError
 
 logger = setup_logger(__name__)
@@ -105,5 +105,19 @@ def delete_project(db: Session, project: Project):
         db.commit()
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
+def find_projects_by_member(db: Session, user_id: int) -> list[Project]:
+    try:
+        result = db.execute(
+            select(Project)
+            .join(Project.members)
+            .filter(ProjectUser.user_id == user_id)
+        )
+        return result.scalars().all()
+    except SQLAlchemyError as e:
+        logger.error(f"Database error during member projects retrieval: {e}")
         db.rollback()
         raise SQLError()
