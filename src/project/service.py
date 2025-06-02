@@ -52,10 +52,14 @@ def create_project(
         design_doc_paths=design_doc_paths,
     )
 
-    members = [
-        ProjectUser(user_id=member_req.id, role=member_req.role)
-        for member_req in project_req.members
-    ]
+    members = []
+    for member_req in project_req.members:
+        found_user = find_user_by_user_id(db, member_req.id)
+        if not found_user:
+            raise UserNotFound()
+
+        project_user = ProjectUser(user_id=found_user.id, role=member_req.role)
+        members.append(project_user)
 
     saved_project = project_repository.create_project(db, project, members)
 
@@ -170,7 +174,7 @@ def update_project(
         if not found_user:
             raise UserNotFound()
 
-        project_user = ProjectUser(user=found_user, role=member_req.role)
+        project_user = ProjectUser(user_id=found_user.id, role=member_req.role)
         members.append(project_user)
 
     saved_project = project_repository.update_project(db, existing_project, members)

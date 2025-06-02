@@ -96,13 +96,16 @@ def update_project(
     db: Session, project: Project, members: List[ProjectUser]
 ) -> Project:
     try:
-        # Remove old project members
-        db.query(ProjectUser).filter(ProjectUser.project_id == project.id).delete()
-
         # Update project
         db.add(project)
         db.flush()
 
+        # Remove old project members
+        db.query(ProjectUser).filter(
+            ProjectUser.project_id == project.id
+        ).delete(synchronize_session=False)
+        db.flush()
+        
         # Create new project members
         for member in members:
             member.project_id = project.id
