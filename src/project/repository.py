@@ -116,6 +116,21 @@ def update_project(
         raise SQLError()
 
 
+def is_project_member(db: Session, project_id: int, user_id: int) -> bool:
+    try:
+        result = (
+            db.query(ProjectUser)
+            .filter(
+                ProjectUser.project_id == project_id, ProjectUser.user_id == user_id
+            )
+            .first()
+        )
+        return result is not None
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        raise SQLError()
+
+
 def delete_project(db: Session, project: Project):
     try:
         db.delete(project)

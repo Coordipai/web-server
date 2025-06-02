@@ -15,6 +15,7 @@ from src.response.error_definitions import (
     ProjectAlreadyExist,
     ProjectNotFound,
     ProjectOwnerMismatched,
+    ProjectPermissionDenied,
     RepositoryNotFoundInGitHub,
     UserNotFound,
 )
@@ -134,6 +135,12 @@ def update_project(
     existing_project = project_repository.find_project_by_id(db, project_id)
     if not existing_project:
         raise ProjectNotFound()
+
+    is_owner = existing_project.owner == user_id
+    is_member = project_repository.is_project_member(db, project_id, user_id)
+
+    if not (is_owner or is_member):
+        raise ProjectPermissionDenied()
 
     is_repo = check_github_repo_exists(user_id, existing_project.repo_fullname, db)
     if not is_repo:
