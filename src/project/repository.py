@@ -17,9 +17,11 @@ def create_project(
     db: Session, project: Project, members: List[ProjectUser]
 ) -> Project:
     try:
+        # Create project
         db.add(project)
         db.flush()
 
+        # Create project user
         for member in members:
             member.project_id = project.id
             db.add(member)
@@ -90,10 +92,23 @@ def find_all_active_projects(db: Session) -> List[Project]:
         raise SQLError()
 
 
-def update_project(db: Session, project: Project) -> Project:
+def update_project(
+    db: Session, project: Project, members: List[ProjectUser]
+) -> Project:
     try:
+        # Remove old project members
+        db.query(ProjectUser).filter(ProjectUser.project_id == project.id).delete()
+
+        # Update project
+        db.add(project)
+        db.flush()
+
+        # Create new project members
+        for member in members:
+            member.project_id = project.id
+            db.add(member)
+
         db.commit()
-        db.refresh(project)
         return project
     except SQLAlchemyError as e:
         logger.error(f"Database error during project creation: {e}")
