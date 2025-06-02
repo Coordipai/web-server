@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
+from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.exc import NoResultFound
 
 from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.models import Project, ProjectUser
@@ -13,10 +13,18 @@ logger = setup_logger(__name__)
 add_daily_file_handler(logger)
 
 
-def create_project(db: Session, project: Project) -> Project:
+def create_project(
+    db: Session, project: Project, members: List[ProjectUser]
+) -> Project:
     try:
         db.add(project)
         db.flush()
+
+        for member in members:
+            member.project_id = project.id
+            db.add(member)
+
+        db.commit()
         return project
     except SQLAlchemyError as e:
         logger.error(f"Database error during project creation: {e}")
@@ -27,8 +35,6 @@ def find_project_by_id(db: Session, project_id: int) -> Project | None:
     try:
         result = db.execute(select(Project).filter(Project.id == project_id))
         return result.scalars().first()
-    except NoResultFound:
-        return None
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
@@ -39,8 +45,6 @@ def find_project_by_name(db: Session, project_name: str) -> Project | None:
     try:
         result = db.execute(select(Project).filter(Project.name == project_name))
         return result.scalars().first()
-    except NoResultFound:
-        return None
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
@@ -55,8 +59,6 @@ def find_project_by_discord_channel_id(
             select(Project).filter(Project.discord_channel_id == discord_channel_id)
         )
         return result.scalars().first()
-    except NoResultFound:
-        return None
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
@@ -73,7 +75,7 @@ def find_project_by_owner(db: Session, owner: str) -> list[Project]:
         raise SQLError()
 
 
-def find_all_active_projects(db: Session) -> list[Project]: 
+def find_all_active_projects(db: Session) -> List[Project]:
     try:
         current_time = datetime.now(timezone.utc)
         result = db.execute(
@@ -112,9 +114,7 @@ def delete_project(db: Session, project: Project):
 def find_projects_by_member(db: Session, user_id: int) -> list[Project]:
     try:
         result = db.execute(
-            select(Project)
-            .join(Project.members)
-            .filter(ProjectUser.user_id == user_id)
+            select(Project).join(Project.members).filter(ProjectUser.user_id == user_id)
         )
         return result.scalars().all()
     except SQLAlchemyError as e:
