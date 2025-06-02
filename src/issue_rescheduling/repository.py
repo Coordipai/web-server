@@ -50,8 +50,8 @@ def find_issue_scheduling_by_project_id_and_issue_number(
     try:
         result = db.execute(
             select(IssueRescheduling).filter(
-                IssueRescheduling.project_id == project_id
-                and IssueRescheduling.issue_number == issue_number
+                (IssueRescheduling.project_id == project_id)
+                & (IssueRescheduling.issue_number == issue_number)
             )
         )
         return result.scalars().first()
@@ -92,7 +92,12 @@ def update_issue_rescheduling(
         raise SQLError()
 
 
-def delete_issue_rescheduling(db: Session, user_id: int, issue_rescheduling: IssueRescheduling, issue_update_req: IssueUpdateReq | None):
+def delete_issue_rescheduling(
+    db: Session,
+    user_id: int,
+    issue_rescheduling: IssueRescheduling,
+    issue_update_req: IssueUpdateReq | None,
+):
     try:
         if issue_update_req:
             update_issue(
