@@ -43,8 +43,8 @@ def get_project(
 
 
 @router.get(
-    "/issues",
-    summary="Get all existing issues",
+    "/project/issues",
+    summary="Get all existing issues in project",
     response_model=SuccessResponse[List[IssueRes]],
 )
 def get_all_issues(
@@ -57,6 +57,27 @@ def get_all_issues(
         db, discord_channel_id
     )
     data = issue_service.get_all_issues(user.id, project.id, db)
+    return issue_read_success(data)
+
+
+@router.get(
+    "/issues",
+    summary="Get all existing issues for user",
+    response_model=SuccessResponse[List[IssueRes]],
+)
+def get_all_issues(
+    discord_user_id: str = Header(..., description="Discord User ID"),
+    db: Session = Depends(get_db),
+):
+    user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    project_list = project_repository.find_projects_by_member(db, discord_user_id)
+
+    data = []
+    
+    for project in project_list:
+        issue_data = issue_service.get_all_issues(user.id, project.id, db)
+        data.extend(issue_data)
+
     return issue_read_success(data)
 
 
