@@ -13,24 +13,17 @@ from auth.util.redis import (
     save_token_to_redis,
 )
 from src.config.config import ACCESS_TOKEN_EXPIRE_MINUTES, FRONTEND_URL, IS_LOCAL
-from src.project_user.repository import find_all_projects_by_user_id
 from src.response.error_definitions import (
     AccessTokenNotFound,
     GitHubAccessTokenError,
     GitHubCredentialCodeNotFound,
     InvalidRefreshToken,
-    ProjectUserExist,
     UserAlreadyExist,
     UserNotFound,
 )
-from src.user.repository import (
-    delete_user,
-    find_user_by_github_id,
-    find_user_by_user_id,
-)
+from src.user import repository as user_repository
+from src.user import service as user_service
 from src.user.schemas import UserReq, UserRes
-from src.user.service import create_user, update_github_user, update_user
-from src.user_repository.repository import delete_all_repositories_by_user_id
 
 GITHUB_OAUTH_REDIS = "github_oauth"
 REFRESH_TOKEN_REDIS = "refresh_token"
@@ -58,7 +51,7 @@ async def github_callback(
     github_name = github_user["login"]
 
     # Check if there is user data in db
-    existing_user = find_user_by_github_id(db, github_id)
+    existing_user = user_repository.find_user_by_github_id(db, github_id)
 
     if existing_user:
         """
@@ -133,8 +126,7 @@ async def register(
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
 
-    existing_user = find_user_by_github_id(db, github_id)
-
+    existing_user = user_repository.find_user_by_github_id(db, github_id)
     if existing_user:
         raise UserAlreadyExist()
 
@@ -146,7 +138,7 @@ async def register(
         github_name=github_user["login"],
         profile_img=github_user["avatar_url"],
     )
-    saved_user = await create_user(db, new_user)
+    saved_user = await user_service.create_user(db, new_user)
     user_res = UserRes.model_validate(saved_user)
 
     # Delete github access token stored in redis
@@ -175,13 +167,12 @@ async def login(db: Session, access_token: Optional[str] = Cookie(None)):
     github_id = parse_token(access_token)
     github_access_token = await get_token_from_redis(GITHUB_OAUTH_REDIS, github_id)
 
-    existing_user = find_user_by_github_id(db, github_id)
-
+    existing_user = user_repository.find_user_by_github_id(db, github_id)
     if not existing_user:
         raise UserNotFound()
 
     # Update github info
-    update_github_user(db, github_id)
+    user_service.update_github_user(db, github_id)
 
     # Delete github access token stored in redis
     await delete_token_from_redis(github_access_token)
@@ -212,8 +203,7 @@ async def refresh(db: Session, refresh_token: str):
     if refresh_token != redis_refresh_token:
         raise InvalidRefreshToken()
 
-    user = find_user_by_user_id(db, user_id)
-
+    user = user_repository.find_user_by_user_id(db, user_id)
     if not user:
         raise UserNotFound()
 
@@ -235,7 +225,7 @@ async def update(user_id: int, auth_req: AuthReq, db: Session):
 
     Returns updated user data
     """
-    user = find_user_by_user_id(db, user_id)
+    user = user_repository.find_user_by_user_id(db, user_id)
 
     if not user:
         raise UserNotFound()
@@ -248,7 +238,7 @@ async def update(user_id: int, auth_req: AuthReq, db: Session):
         github_name=github_user["login"],
         profile_img=github_user["avatar_url"],
     )
-    updated_user = await update_user(db, updating_user)
+    updated_user = await user_service.update_user(db, updating_user)
     data = UserRes.model_validate(updated_user)
 
     return data
@@ -263,24 +253,3 @@ async def logout(user_id: int):
     # Delete existing refresh token stored in redis
     redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
     await delete_token_from_redis(redis_refresh_token)
-
-
-async def unregister(user_id: int, db: Session):
-    """
-    Unregister user
-    """
-    # Check if user has project
-    project_list = find_all_projects_by_user_id(db, user_id)
-    if project_list:
-        raise ProjectUserExist()
-
-    # Delete user repo
-    delete_all_repositories_by_user_id(db, user_id)
-
-    # Delete existing refresh token stored in redis
-    redis_refresh_token = await get_token_from_redis(REFRESH_TOKEN_REDIS, user_id)
-    await delete_token_from_redis(redis_refresh_token)
-
-    # Delete existing user from db
-    user = find_user_by_user_id(db, user_id)
-    delete_user(db, user)
