@@ -5,6 +5,7 @@ from src.project import repository as project_repository
 from src.response.error_definitions import (
     IssueReschedulingPermissionDenied,
     ProjectNotFound,
+    ProjectOwnerMismatched,
     ProjectPermissionDenied,
 )
 
@@ -30,7 +31,7 @@ def has_permission_to_modify_project(user_id: int, project_id: int, db: Session)
     is_owner = existing_project.owner == user_id
 
     if not is_owner:
-        raise ProjectPermissionDenied()
+        raise ProjectOwnerMismatched()
     return True
 
 

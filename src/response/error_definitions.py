@@ -122,7 +122,7 @@ class ProjectOwnerMismatched(UnauthorizedException):
     def __init__(self):
         super().__init__(
             title="프로젝트 소유권 불일치",
-            detail="프로젝트 삭제는 소유자만 할 수 있습니다. 현재 사용자는 프로젝트 소유자가 아닙니다.",
+            detail="프로젝트 수정/삭제는 소유자만 할 수 있습니다. 현재 사용자는 프로젝트 소유자가 아닙니다.",
         )
 
 
