@@ -201,6 +201,7 @@ async def extract_text_from_documents(file: UploadFile = File(...)):
 
     return text
 
+
 def extract_json_dict_from_response(response_text: str) -> dict:
     """
     Extracts a JSON dictionary from the response text.
@@ -218,7 +219,7 @@ def extract_json_dict_from_response(response_text: str) -> dict:
         raise ParseJsonFromResponseError()
 
 
-async def get_github_activation_info(selected_repo_names: list[str],token: str):
+async def get_github_activation_info(selected_repo_names: list[str], token: str):
     """
     Get GitHub information using the agent executor.
     """
@@ -295,6 +296,7 @@ async def recommend_assignees_for_issues(project_info: Project, user_stat_list: 
         
         assigned_issues.extend(response)
     return assigned_issues
+
 
 async def get_feedback(project: Project, user_stat_list: list[str], issue_rescheduling: IssueRescheduling, issue: IssueRes):
     """
