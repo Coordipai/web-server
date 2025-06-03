@@ -7,6 +7,10 @@ from sqlalchemy.orm import Session
 
 from project.schemas import ProjectListRes, ProjectReq, ProjectRes
 from src.common.util.github import check_github_repo_exists
+from src.common.util.permissions import (
+    has_permission_to_access_project,
+    has_permission_to_modify_project,
+)
 from src.models import Project, ProjectUser
 from src.project import repository as project_repository
 from src.project_user import repository as project_user_repository
@@ -14,8 +18,6 @@ from src.response.error_definitions import (
     FileDeleteError,
     ProjectAlreadyExist,
     ProjectNotFound,
-    ProjectOwnerMismatched,
-    ProjectPermissionDenied,
     RepositoryNotFoundInGitHub,
     UserNotFound,
 )
@@ -109,6 +111,8 @@ def get_project(user_id: int, project_id: int, db: Session) -> ProjectRes:
     """
     Get the existing project by project id
     """
+    has_permission_to_access_project(user_id, project_id, db)
+
     existing_project = project_repository.find_project_by_id(db, project_id)
     if not existing_project:
         raise ProjectNotFound()
@@ -136,15 +140,9 @@ def update_project(
     """
     Update the existing project by project id
     """
+    has_permission_to_modify_project(user_id, project_id, db)
+
     existing_project = project_repository.find_project_by_id(db, project_id)
-    if not existing_project:
-        raise ProjectNotFound()
-
-    is_owner = existing_project.owner == user_id
-    is_member = project_repository.is_project_member(db, project_id, user_id)
-
-    if not (is_owner or is_member):
-        raise ProjectPermissionDenied()
 
     is_repo = check_github_repo_exists(user_id, existing_project.repo_fullname, db)
     if not is_repo:
@@ -190,16 +188,12 @@ def delete_project(user_id: int, project_id: int, db: Session):
     """
     Delete the existing project by project id
     """
+    has_permission_to_modify_project(user_id, project_id, db)
+
     existing_project = project_repository.find_project_by_id(db, project_id)
 
-    if not existing_project:
-        raise ProjectNotFound()
-
-    if existing_project.owner == int(user_id):
-        delete_file(os.path.join("design_docs", existing_project.name))
-        project_repository.delete_project(db, existing_project)
-    else:
-        raise ProjectOwnerMismatched()
+    delete_file(os.path.join("design_docs", existing_project.name))
+    project_repository.delete_project(db, existing_project)
 
 
 def upload_file(project_name: str, files: List[UploadFile]):
