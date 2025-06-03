@@ -134,6 +134,14 @@ class ProjectPermissionDenied(UnauthorizedException):
         )
 
 
+class IssueReschedulingPermissionDenied(UnauthorizedException):
+    def __init__(self):
+        super().__init__(
+            title="이슈 변경서 권한 없음",
+            detail="요청하신 이슈 변경서에 접근 권한이 없습니다.",
+        )
+
+
 """
 404 NOT_FOUND
 """
