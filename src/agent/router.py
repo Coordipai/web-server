@@ -77,7 +77,7 @@ async def recommend_assignees(
     return issue_assign_success(result)
 
 
-@router.get(
+@router.post(
     "/feedback",
     summary="Get feedback for issue rescheduling",
     response_model=SuccessResponse[FeedbackRes],
