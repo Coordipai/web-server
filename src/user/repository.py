@@ -35,24 +35,30 @@ def find_user_by_github_id(db: Session, github_id: str) -> User | None:
         raise SQLError()
 
 
-def find_all_users_by_github_names(db: Session, github_names: list[str]) -> User | None:
+def find_user_by_user_id(db: Session, user_id: str) -> User | None:
     try:
-        result = db.query(User).filter(User.github_name.in_(github_names)).all()
-        return result
-    except NoResultFound:
-        return None
+        result = db.execute(select(User).filter(User.id == user_id))
+        return result.scalars().first()
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()
         raise SQLError()
 
 
-def find_user_by_user_id(db: Session, user_id: str) -> User | None:
+def find_user_by_discord_id(db: Session, discord_id: str) -> User | None:
     try:
-        result = db.execute(select(User).filter(User.id == user_id))
+        result = db.execute(select(User).filter(User.discord_id == discord_id))
         return result.scalars().first()
-    except NoResultFound:
-        return None
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        db.rollback()
+        raise SQLError()
+
+
+def find_all_users_by_github_names(db: Session, github_names: list[str]) -> User | None:
+    try:
+        result = db.query(User).filter(User.github_name.in_(github_names)).all()
+        return result
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
         db.rollback()

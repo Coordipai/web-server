@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from src.common.util.github import check_github_repo_exists
 from src.issue import repository
 from src.issue.schemas import (
     IssueCloseReq,
@@ -8,6 +9,7 @@ from src.issue.schemas import (
     ProjectIssueSummary,
 )
 from src.project.repository import find_project_by_id
+from src.response.error_definitions import RepositoryNotFoundInGitHub
 
 
 def create_issue(user_id: int, issue_req: IssueCreateReq, db: Session):
@@ -17,6 +19,11 @@ def create_issue(user_id: int, issue_req: IssueCreateReq, db: Session):
     Returns issue data
     """
     project = find_project_by_id(db, issue_req.project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     return repository.create_issue(user_id, project.repo_fullname, issue_req, db)
 
 
@@ -27,6 +34,11 @@ def get_issue(user_id: int, project_id: int, issue_number: int, db: Session):
     Returns issue data
     """
     project = find_project_by_id(db, project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     return repository.find_issue_by_issue_number(
         user_id, project.repo_fullname, issue_number, db
     )
@@ -39,6 +51,11 @@ def get_project_issue_summary(
     Get summary of project issues (number of opend/closed/all issues)
     """
     project = find_project_by_id(db, project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     all_issues = repository.find_all_issues_by_project_id(
         user_id, project.repo_fullname, db
     )
@@ -67,6 +84,11 @@ def get_all_issues(user_id: int, project_id: int, db: Session):
     Returns list of issue data
     """
     project = find_project_by_id(db, project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     return repository.find_all_issues_by_project_id(user_id, project.repo_fullname, db)
 
 
@@ -77,6 +99,11 @@ def update_issue(user_id: int, issue_req: IssueUpdateReq, db: Session):
     Returns issue data
     """
     project = find_project_by_id(db, issue_req.project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     return repository.update_issue(user_id, project.repo_fullname, issue_req, db)
 
 
@@ -87,4 +114,9 @@ def close_issue(user_id: int, issue_req: IssueCloseReq, db: Session):
     Returns issue data
     """
     project = find_project_by_id(db, issue_req.project_id)
+
+    is_repo = check_github_repo_exists(user_id, project.repo_fullname, db)
+    if not is_repo:
+        raise RepositoryNotFoundInGitHub(project.repo_fullname)
+
     repository.close_issue(user_id, project.repo_fullname, issue_req, db)

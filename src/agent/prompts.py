@@ -240,7 +240,7 @@ define_feature_template = PromptTemplate(
         "The sprint unit is defined in the project information.\n"
         "List the divided tasks in order of development sequence.\n"
         "Each task should be written in task name\n"
-        "Define only 10 tasks for the project.\n"
+        "Define necessary tasks for the project.\n"
         "The output should be a list of task names in json.\n\n"
 
         "Project information: {project_info}\n\n"

@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.project.models import Project
 from src.user.models import User
-from src.user.schemas import UserRes
+from src.user.schemas import UserCategory, UserRes
 
 
 class ProjectUserReq(BaseModel):
@@ -18,7 +18,7 @@ class ProjectUserRes(BaseModel):
     name: str
     github_id: int
     github_name: str
-    category: str
+    category: UserCategory
     role: str
     profile_img: str
 
@@ -65,7 +65,6 @@ class ProjectRes(BaseModel):
         cls,
         project: Project,
         owner: User,
-        project_members: list[ProjectUserRes],
         design_docs: List[str] = [],
     ) -> "ProjectRes":
         return cls(
@@ -77,7 +76,10 @@ class ProjectRes(BaseModel):
             end_date=project.end_date,
             sprint_unit=project.sprint_unit,
             discord_channel_id=project.discord_channel_id,
-            members=project_members,
+            members=[
+                ProjectUserRes.from_user(member.user, member.role)
+                for member in project.members
+            ],
             design_docs=design_docs,
         )
 

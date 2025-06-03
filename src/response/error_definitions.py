@@ -122,7 +122,23 @@ class ProjectOwnerMismatched(UnauthorizedException):
     def __init__(self):
         super().__init__(
             title="프로젝트 소유권 불일치",
-            detail="프로젝트 삭제는 소유자만 할 수 있습니다. 현재 사용자는 프로젝트 소유자가 아닙니다.",
+            detail="프로젝트 수정/삭제는 소유자만 할 수 있습니다. 현재 사용자는 프로젝트 소유자가 아닙니다.",
+        )
+
+
+class ProjectPermissionDenied(UnauthorizedException):
+    def __init__(self):
+        super().__init__(
+            title="프로젝트 권한 없음",
+            detail="요청하신 프로젝트에 접근 권한이 없습니다.",
+        )
+
+
+class IssueReschedulingPermissionDenied(UnauthorizedException):
+    def __init__(self):
+        super().__init__(
+            title="이슈 변경서 권한 없음",
+            detail="요청하신 이슈 변경서에 접근 권한이 없습니다.",
         )
 
 
@@ -233,6 +249,14 @@ class IssueReschedulingAlreadyExist(ConflictException):
         )
 
 
+class ProjectUserExist(ConflictException):
+    def __init__(self):
+        super().__init__(
+            title="프로젝트 참여 중",
+            detail="탈퇴하기 전에 참여 중인 모든 프로젝트에서 나가야 합니다. 프로젝트 목록에서 나가기를 완료해주세요.",
+        )
+
+
 """
 415 UNSUPPORTED_MEDIA_TYPE
 """
@@ -319,9 +343,18 @@ class ParseJsonFromResponseError(InternalServerErrorException):
             detail="서버에서 응답을 JSON 형식으로 파싱하는 중 문제가 발생했습니다. 서버 로그를 확인해 주세요.",
         )
 
+
 class RecommendAssigneeError(InternalServerErrorException):
     def __init__(self):
         super().__init__(
             title="추천 Assignee 오류",
             detail="추천 Assignee를 생성하는 중 문제가 발생했습니다. 관리자에게 문의해 주세요.",
+        )
+
+
+class DailyIssueReportError(InternalServerErrorException):
+    def __init__(self, status_code):
+        super().__init__(
+            title="데일리 이슈 알림 요청 실패",
+            detail=f"데일리 이슈 알림 요청에 실패하였습니다. (응답 상태 코드: {status_code})",
         )

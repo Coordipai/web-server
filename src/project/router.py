@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from project import service
+from project import service as project_service
 from src.config.database import get_db
 from src.project.schemas import ProjectListRes, ProjectReq, ProjectRes
 from src.response.error_definitions import InvalidJsonDataFormat, InvalidJsonFormat
@@ -50,7 +50,7 @@ async def create_project(
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    data = service.create_project(
+    data = project_service.create_project(
         user_id, parse_project_req_str(project_req), db, files
     )
     return project_create_success(data)
@@ -63,7 +63,7 @@ async def create_project(
 )
 def get_all_project(request: Request, db: Session = Depends(get_db)):
     user_id = request.state.user_id
-    data = service.get_all_projects(user_id, db)
+    data = project_service.get_all_projects(user_id, db)
     return project_read_success(data)
 
 
@@ -72,8 +72,9 @@ def get_all_project(request: Request, db: Session = Depends(get_db)):
     summary="Get existing project",
     response_model=SuccessResponse[ProjectRes],
 )
-def get_project(project_id: int, db: Session = Depends(get_db)):
-    data = service.get_project(project_id, db)
+def get_project(request: Request, project_id: int, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    data = project_service.get_project(user_id, project_id, db)
     return project_read_success(data)
 
 
@@ -83,13 +84,15 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
     response_model=SuccessResponse[ProjectRes],
 )
 def update_project(
+    request: Request,
     project_id: int,
     project_req: str = Form(...),
     files: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
-    data = service.update_project(
-        project_id, parse_project_req_str(project_req), files, db
+    user_id = request.state.user_id
+    data = project_service.update_project(
+        user_id, project_id, parse_project_req_str(project_req), files, db
     )
     return project_update_success(data)
 
@@ -105,7 +108,7 @@ def delete_project(
     db: Session = Depends(get_db),
 ):
     user_id = request.state.user_id
-    service.delete_project(user_id, project_id, db)
+    project_service.delete_project(user_id, project_id, db)
     return project_delete_success()
 
 
