@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from src.issue.schemas import IssueRes
 from src.issue_rescheduling.models import IssueRescheduling
+from src.user.models import User
 
 
 class IssueReschedulingType(str, Enum):
@@ -21,7 +22,9 @@ class IssueReschedulingReq(BaseModel):
 
 class IssueReschedulingRes(BaseModel):
     id: int
+    issue_title: str
     issue_number: int
+    requester: str
     reason: str
     old_iteration: int
     new_iteration: int
@@ -32,11 +35,14 @@ class IssueReschedulingRes(BaseModel):
     def from_issue(
         cls,
         issue_rescheduling: IssueRescheduling,
+        request: User,
         issue: IssueRes,
     ) -> "IssueReschedulingRes":
         return cls(
             id=issue_rescheduling.id,
+            issue_title=issue.title,
             issue_number=issue_rescheduling.issue_number,
+            requester=request.github_name,
             reason=issue_rescheduling.reason,
             old_iteration=issue.iteration,
             new_iteration=issue_rescheduling.new_iteration,

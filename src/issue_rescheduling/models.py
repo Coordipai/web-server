@@ -1,4 +1,3 @@
-
 from sqlalchemy import JSON, Column, ForeignKey, Identity, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -10,6 +9,7 @@ class IssueRescheduling(Base):
 
     id = Column(Integer, Identity(), primary_key=True, index=True)
     issue_number = Column(Integer)
+    requester = Column(Integer)
     reason = Column(String(501))
     new_iteration = Column(Integer)
     new_assignees = Column(JSON)

@@ -70,7 +70,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
 
             try:
                 user_id = parse_token(access_token)
-                request.state.user_id = user_id
+                request.state.user_id = int(user_id)
             except ValueError as e:
                 raise InvalidJwtToken(reason=str(e))
 
