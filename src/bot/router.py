@@ -12,6 +12,7 @@ from src.issue_rescheduling.schemas import IssueReschedulingReq, IssueRescheduli
 from src.project import repository as project_repository
 from src.project import service as project_service
 from src.project.schemas import ProjectRes
+from src.response.error_definitions import ProjectNotFound, UserNotFound
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     issue_read_success,
@@ -34,9 +35,13 @@ def get_project(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    if not user:
+        raise UserNotFound()
     project = project_repository.find_project_by_discord_channel_id(
         db, discord_channel_id
     )
+    if not project:
+        raise ProjectNotFound()
 
     data = project_service.get_project(user.id, project.id, db)
     return project_read_success(data)
@@ -53,9 +58,14 @@ def get_all_issues(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    if not user:
+        raise UserNotFound()
     project = project_repository.find_project_by_discord_channel_id(
         db, discord_channel_id
     )
+    if not project:
+        raise ProjectNotFound()
+
     data = issue_service.get_all_issues(user.id, project.id, db)
     return issue_read_success(data)
 
@@ -70,6 +80,9 @@ def get_all_issues(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    if not user:
+        raise UserNotFound()
+
     project_list = project_repository.find_projects_by_member(db, user.id)
 
     data = []
@@ -93,9 +106,14 @@ def get_issue(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    if not user:
+        raise UserNotFound()
     project = project_repository.find_project_by_discord_channel_id(
         db, discord_channel_id
     )
+    if not project:
+        raise ProjectNotFound()
+
     data = issue_service.get_issue(user.id, project.id, issue_number, db)
     return issue_read_success(data)
 
@@ -112,9 +130,14 @@ def create_issue_rescheduling(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
+    if not user:
+        raise UserNotFound()
     project = project_repository.find_project_by_discord_channel_id(
         db, discord_channel_id
     )
+    if not project:
+        raise ProjectNotFound()
+
     data = issue_rescheduling_service.create_issue_rescheduling(
         user.id, project.id, issue_rescheduling_req, db
     )
