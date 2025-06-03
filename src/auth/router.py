@@ -14,7 +14,6 @@ from src.response.success_definitions import (
     logout_success,
     refresh_token_success,
     register_success,
-    unregister_success,
     user_update_success,
 )
 from src.user.schemas import UserRes
@@ -98,14 +97,3 @@ async def logout(request: Request):
     user_id = request.state.user_id
     await service.logout(user_id)
     return logout_success()
-
-
-@router.delete(
-    "/unregister",
-    summary="Unregister from the server",
-    response_model=SuccessResponse,
-)
-async def unregister(request: Request, db: Session = Depends(get_db)):
-    user_id = request.state.user_id
-    await service.unregister(user_id, db)
-    return unregister_success()
