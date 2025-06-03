@@ -22,6 +22,7 @@ class IssueReschedulingReq(BaseModel):
 class IssueReschedulingRes(BaseModel):
     id: int
     issue_number: int
+    requester: str
     reason: str
     old_iteration: int
     new_iteration: int
@@ -37,6 +38,7 @@ class IssueReschedulingRes(BaseModel):
         return cls(
             id=issue_rescheduling.id,
             issue_number=issue_rescheduling.issue_number,
+            requester=issue_rescheduling.requester,
             reason=issue_rescheduling.reason,
             old_iteration=issue.iteration,
             new_iteration=issue_rescheduling.new_iteration,
