@@ -126,6 +126,14 @@ class ProjectOwnerMismatched(UnauthorizedException):
         )
 
 
+class ProjectPermissionDenied(UnauthorizedException):
+    def __init__(self):
+        super().__init__(
+            title="프로젝트 권한 없음",
+            detail="요청하신 프로젝트에 접근 권한이 없습니다.",
+        )
+
+
 """
 404 NOT_FOUND
 """

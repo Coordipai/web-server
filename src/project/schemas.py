@@ -65,7 +65,6 @@ class ProjectRes(BaseModel):
         cls,
         project: Project,
         owner: User,
-        project_members: list[ProjectUserRes],
         design_docs: List[str] = [],
     ) -> "ProjectRes":
         return cls(
@@ -77,7 +76,10 @@ class ProjectRes(BaseModel):
             end_date=project.end_date,
             sprint_unit=project.sprint_unit,
             discord_channel_id=project.discord_channel_id,
-            members=project_members,
+            members=[
+                ProjectUserRes.from_user(member.user, member.role)
+                for member in project.members
+            ],
             design_docs=design_docs,
         )
 
