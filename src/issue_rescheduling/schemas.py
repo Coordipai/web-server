@@ -22,6 +22,7 @@ class IssueReschedulingReq(BaseModel):
 
 class IssueReschedulingRes(BaseModel):
     id: int
+    issue_title: str
     issue_number: int
     requester: str
     reason: str
@@ -39,6 +40,7 @@ class IssueReschedulingRes(BaseModel):
     ) -> "IssueReschedulingRes":
         return cls(
             id=issue_rescheduling.id,
+            issue_title=issue.title,
             issue_number=issue_rescheduling.issue_number,
             requester=request.github_name,
             reason=issue_rescheduling.reason,
