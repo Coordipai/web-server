@@ -70,10 +70,10 @@ def get_all_issues(
     db: Session = Depends(get_db),
 ):
     user = user_repository.find_user_by_discord_id(db, discord_user_id)
-    project_list = project_repository.find_projects_by_member(db, discord_user_id)
+    project_list = project_repository.find_projects_by_member(db, user.id)
 
     data = []
-    
+
     for project in project_list:
         issue_data = issue_service.get_all_issues(user.id, project.id, db)
         data.extend(issue_data)
