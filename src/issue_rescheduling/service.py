@@ -94,7 +94,7 @@ def get_all_issue_reschedulings(user_id: int, project_id: int, db: Session):
             db, issue_rescheduling.requester
         )
         if not requester:
-            raise UserNotFound()
+            continue
 
         issue_rescheduling_res = IssueReschedulingRes.from_issue(
             issue_rescheduling, requester, issue
