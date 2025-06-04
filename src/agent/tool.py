@@ -300,10 +300,26 @@ async def get_feedback(project: Project, user_stat_list: list[str], issue_resche
     """
     Get feedback for issue rescheduling.
     """
+
+    project_info = {
+        "name": project.name,
+        "repo_fullname": project.repo_fullname,
+        "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
+        "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
+        "sprint_unit": project.sprint_unit
+    }
+
+    issue_info = {
+        "title": issue.title,
+        "iteration": issue.iteration,
+        "assignees": [assignee.github_name for assignee in issue.assignees],
+        "body": issue.body
+    }
+
     feedback = await communicate_with_llm_tool(prompts.feedback_template.format(
-        project_info=json.dumps(project, ensure_ascii=False),
+        project_info=project_info,
         reason=issue_rescheduling.reason,
-        issue=json.dumps(issue, ensure_ascii=False),
+        issue=issue_info,
         stats=user_stat_list,
         output_example=prompts.feedback_output_example
     ))
