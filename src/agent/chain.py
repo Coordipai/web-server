@@ -49,8 +49,8 @@ class CustomAgentExecutor:
         project_info = {
             "name": project.name,
             "repo_fullname": project.repo_fullname,
-            "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S") if project.start_date else None,
-            "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S") if project.end_date else None,
+            "start_date": project.start_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "end_date": project.end_date.strftime("%Y-%m-%d %H:%M:%S"),
             "sprint_unit": project.sprint_unit
         }
         
