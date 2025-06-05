@@ -47,12 +47,6 @@ def has_permission_to_modify_issue_rescheduling(
     if user_id == existing_project.owner:
         return True
 
-    print(user_id)
-    print(type(user_id))
-    print(issue_rescheduling.requester)
-    print(type(issue_rescheduling.requester))
-    print(user_id == issue_rescheduling.requester)
-
     if user_id != issue_rescheduling.requester:
         raise IssueReschedulingPermissionDenied()
 
