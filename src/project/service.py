@@ -152,9 +152,7 @@ def update_project(
         existing_project.name, files, project_req.design_docs
     )
 
-    print(f"Old: {existing_project.name}, New: {project_req.name}")
     if existing_project.name != project_req.name:
-        print("Nooo")
         # Update the directory name to match the new project name
         new_project_dir = os.path.join("design_docs", project_req.name)
         old_project_dir = os.path.join("design_docs", existing_project.name)
@@ -179,8 +177,6 @@ def update_project(
         members.append(project_user)
 
     saved_project = project_repository.update_project(db, existing_project, members)
-
-    print(f"Changed Project: {saved_project.name}")
 
     owner_user = find_user_by_user_id(db, saved_project.owner)
     if not owner_user:
