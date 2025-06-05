@@ -72,13 +72,13 @@ class FeedbackRes(BaseModel):
     suggested_assignees: str
     suggested_iteration: int
     reason_for_assignees: str
-    reason_for_iterations: str
+    reason_for_iteration: str
 
     @classmethod
     def from_feedback(cls, feedback: dict) -> "FeedbackRes":
         return cls(
-            suggested_assignees=feedback['suggestions']["new_assignee"]["name"],
-            suggested_iterations=feedback['suggestions']["new_sprint"]["sprint"],
-            reason_for_assignees=feedback['suggestions']["new_assignee"]["reason"],
-            reason_for_iterations=feedback['suggestions']["new_sprint"]["reason"]
+            suggested_assignees=feedback["suggestions"]["new_assignee"]["name"],
+            suggested_iteration=feedback["suggestions"]["new_sprint"]["sprint"],
+            reason_for_assignees=feedback["suggestions"]["new_assignee"]["reason"],
+            reason_for_iteration=feedback["suggestions"]["new_sprint"]["reason"]
         )
