@@ -7,8 +7,10 @@ from starlette.requests import Request
 
 from src.auth.util.jwt import parse_token
 from src.config.config import DISCORD_CHANNEL_ID
+from src.config.database import get_db
 from src.config.logger_config import add_daily_file_handler, setup_logger
 from src.config.trace_config import set_trace_id
+from src.models import User
 from src.response.error_definitions import (
     BaseAppException,
     InvalidJwtToken,
@@ -70,6 +72,14 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
 
             try:
                 user_id = parse_token(access_token)
+                
+                # Check user exists
+                for db in get_db():
+                    user = db.query(User).filter(User.id == int(user_id)).first()
+                    if not user:
+                        raise InvalidJwtToken()
+                    break
+                
                 request.state.user_id = int(user_id)
             except ValueError as e:
                 raise InvalidJwtToken(reason=str(e))
