@@ -7,11 +7,11 @@ from src.agent.schemas import (
     AssessStatRes,
     FeedbackReq,
     FeedbackRes,
-    GenerateIssueListRes,
     RecommendAssigneeListRes,
     RecommendAssigneeReq,
 )
 from src.config.database import get_db
+from src.response.error_definitions import IssueGenerateError
 from src.response.schemas import SuccessResponse
 from src.response.success_definitions import (
     assess_success,
@@ -25,19 +25,19 @@ router = APIRouter(prefix="/agent", tags=["Agent"])
 @router.get(
     "/generate_issues/{project_id}",
     summary="Generate issues",
-    response_model=GenerateIssueListRes,
 )
 async def generate_issues(project_id: int, db: Session = Depends(get_db)):
     """
     Generate issues using the agent executor.
     """
-
-    executor = chain.CustomAgentExecutor()
-    return StreamingResponse(
-        executor.generate_issues(project_id, db),
-        media_type="application/json",
-    )
-
+    try:
+        executor = chain.CustomAgentExecutor()
+        return StreamingResponse(
+            executor.generate_issues(project_id, db),
+            media_type="application/json",
+        )
+    except Exception:
+        raise IssueGenerateError()
 
 @router.post(
     "/assess_stat", 
