@@ -45,7 +45,7 @@ class AssessStatRes(BaseModel):
         )
 
 class RecommendAssigneeRes(BaseModel):
-    issue: list[str]
+    issue: str
     assignee: str
     description: list[str]
 
