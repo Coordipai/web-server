@@ -20,6 +20,7 @@ feedback_template = PromptTemplate(
         "Output must be in the following format:\n"
         "{output_example}\n"
         "You must not include your analysis beside the output.\n"
+        "Values in the output must be in Korean.\n"
     )
 )
 
