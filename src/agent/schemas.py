@@ -46,11 +46,13 @@ class AssessStatRes(BaseModel):
 
 class RecommendAssigneeRes(BaseModel):
     issue: str
-    assignee: str
+    assignee: list[str]
     description: list[str]
 
     @classmethod
     def from_recommendation(cls, recommendation: dict) -> "RecommendAssigneeRes":
+        if type(recommendation["assignee"]) is not list:
+            recommendation["assignee"] = [recommendation["assignee"]]
         return cls(
             issue=recommendation["issue"],
             assignee=recommendation["assignee"],
