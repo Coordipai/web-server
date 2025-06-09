@@ -75,7 +75,7 @@ async def github_callback(
                 value=access_token,
                 httponly=True,
                 secure=True,
-                samesite="none",
+                samesite="lax",
                 max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
                 path="/",
             )
@@ -104,7 +104,7 @@ async def github_callback(
                 value=access_token,
                 httponly=True,
                 secure=True,
-                samesite="none",
+                samesite="lax",
                 max_age=ACCESS_TOKEN_EXPIRE_MINUTES,
                 path="/",
             )
